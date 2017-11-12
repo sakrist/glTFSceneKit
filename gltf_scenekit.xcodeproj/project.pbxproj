@@ -1,0 +1,575 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		"gltf_scenekit::gltf_scenekitPackageTests::ProductTarget" /* gltf_scenekitPackageTests */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = OBJ_100 /* Build configuration list for PBXAggregateTarget "gltf_scenekitPackageTests" */;
+			buildPhases = (
+			);
+			dependencies = (
+				OBJ_103 /* PBXTargetDependency */,
+			);
+			name = gltf_scenekitPackageTests;
+			productName = gltf_scenekitPackageTests;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		OBJ_52 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
+		OBJ_58 /* gltf_scenekitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_43 /* gltf_scenekitTests.swift */; };
+		OBJ_60 /* gltf_scenekit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "gltf_scenekit::gltf_scenekit::Product" /* gltf_scenekit.framework */; };
+		OBJ_67 /* GLTF+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* GLTF+Extension.swift */; };
+		OBJ_68 /* GLTF.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* GLTF.swift */; };
+		OBJ_69 /* GLTFAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* GLTFAccessor.swift */; };
+		OBJ_70 /* GLTFAccessorSparse.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* GLTFAccessorSparse.swift */; };
+		OBJ_71 /* GLTFAccessorSparseIndices.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_14 /* GLTFAccessorSparseIndices.swift */; };
+		OBJ_72 /* GLTFAccessorSparseValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* GLTFAccessorSparseValues.swift */; };
+		OBJ_73 /* GLTFAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_16 /* GLTFAnimation.swift */; };
+		OBJ_74 /* GLTFAnimationChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_17 /* GLTFAnimationChannel.swift */; };
+		OBJ_75 /* GLTFAnimationChannelTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* GLTFAnimationChannelTarget.swift */; };
+		OBJ_76 /* GLTFAnimationSampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_19 /* GLTFAnimationSampler.swift */; };
+		OBJ_77 /* GLTFAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* GLTFAsset.swift */; };
+		OBJ_79 /* GLTFBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_22 /* GLTFBuffer.swift */; };
+		OBJ_80 /* GLTFBufferView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* GLTFBufferView.swift */; };
+		OBJ_81 /* GLTFCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* GLTFCamera.swift */; };
+		OBJ_82 /* GLTFCameraOrthographic.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* GLTFCameraOrthographic.swift */; };
+		OBJ_83 /* GLTFCameraPerspective.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_26 /* GLTFCameraPerspective.swift */; };
+		OBJ_84 /* GLTFImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_27 /* GLTFImage.swift */; };
+		OBJ_85 /* GLTFMaterial.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* GLTFMaterial.swift */; };
+		OBJ_86 /* GLTFMaterialNormalTextureInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_29 /* GLTFMaterialNormalTextureInfo.swift */; };
+		OBJ_87 /* GLTFMaterialOcclusionTextureInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* GLTFMaterialOcclusionTextureInfo.swift */; };
+		OBJ_88 /* GLTFMaterialPBRMetallicRoughness.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_31 /* GLTFMaterialPBRMetallicRoughness.swift */; };
+		OBJ_89 /* GLTFMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_32 /* GLTFMesh.swift */; };
+		OBJ_90 /* GLTFMeshPrimitive.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_33 /* GLTFMeshPrimitive.swift */; };
+		OBJ_91 /* GLTFNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_34 /* GLTFNode.swift */; };
+		OBJ_92 /* GLTFSampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_35 /* GLTFSampler.swift */; };
+		OBJ_93 /* GLTFScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_36 /* GLTFScene.swift */; };
+		OBJ_94 /* GLTFSkin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_37 /* GLTFSkin.swift */; };
+		OBJ_95 /* GLTFTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* GLTFTexture.swift */; };
+		OBJ_96 /* GLTFTextureInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_39 /* GLTFTextureInfo.swift */; };
+		OBJ_97 /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_40 /* Helper.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D2577FF91FB8D9A200440648 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = OBJ_1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "gltf_scenekit::gltf_scenekit";
+			remoteInfo = gltf_scenekit;
+		};
+		D2577FFA1FB8D9A200440648 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = OBJ_1 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = "gltf_scenekit::gltf_scenekitTests";
+			remoteInfo = gltf_scenekitTests;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		OBJ_11 /* GLTF.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTF.swift; sourceTree = "<group>"; };
+		OBJ_12 /* GLTFAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFAccessor.swift; sourceTree = "<group>"; };
+		OBJ_13 /* GLTFAccessorSparse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFAccessorSparse.swift; sourceTree = "<group>"; };
+		OBJ_14 /* GLTFAccessorSparseIndices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFAccessorSparseIndices.swift; sourceTree = "<group>"; };
+		OBJ_15 /* GLTFAccessorSparseValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFAccessorSparseValues.swift; sourceTree = "<group>"; };
+		OBJ_16 /* GLTFAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFAnimation.swift; sourceTree = "<group>"; };
+		OBJ_17 /* GLTFAnimationChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFAnimationChannel.swift; sourceTree = "<group>"; };
+		OBJ_18 /* GLTFAnimationChannelTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFAnimationChannelTarget.swift; sourceTree = "<group>"; };
+		OBJ_19 /* GLTFAnimationSampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFAnimationSampler.swift; sourceTree = "<group>"; };
+		OBJ_20 /* GLTFAsset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFAsset.swift; sourceTree = "<group>"; };
+		OBJ_22 /* GLTFBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFBuffer.swift; sourceTree = "<group>"; };
+		OBJ_23 /* GLTFBufferView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFBufferView.swift; sourceTree = "<group>"; };
+		OBJ_24 /* GLTFCamera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFCamera.swift; sourceTree = "<group>"; };
+		OBJ_25 /* GLTFCameraOrthographic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFCameraOrthographic.swift; sourceTree = "<group>"; };
+		OBJ_26 /* GLTFCameraPerspective.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFCameraPerspective.swift; sourceTree = "<group>"; };
+		OBJ_27 /* GLTFImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFImage.swift; sourceTree = "<group>"; };
+		OBJ_28 /* GLTFMaterial.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFMaterial.swift; sourceTree = "<group>"; };
+		OBJ_29 /* GLTFMaterialNormalTextureInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFMaterialNormalTextureInfo.swift; sourceTree = "<group>"; };
+		OBJ_30 /* GLTFMaterialOcclusionTextureInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFMaterialOcclusionTextureInfo.swift; sourceTree = "<group>"; };
+		OBJ_31 /* GLTFMaterialPBRMetallicRoughness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFMaterialPBRMetallicRoughness.swift; sourceTree = "<group>"; };
+		OBJ_32 /* GLTFMesh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFMesh.swift; sourceTree = "<group>"; };
+		OBJ_33 /* GLTFMeshPrimitive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFMeshPrimitive.swift; sourceTree = "<group>"; };
+		OBJ_34 /* GLTFNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFNode.swift; sourceTree = "<group>"; };
+		OBJ_35 /* GLTFSampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFSampler.swift; sourceTree = "<group>"; };
+		OBJ_36 /* GLTFScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFScene.swift; sourceTree = "<group>"; };
+		OBJ_37 /* GLTFSkin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFSkin.swift; sourceTree = "<group>"; };
+		OBJ_38 /* GLTFTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFTexture.swift; sourceTree = "<group>"; };
+		OBJ_39 /* GLTFTextureInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFTextureInfo.swift; sourceTree = "<group>"; };
+		OBJ_40 /* Helper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helper.swift; sourceTree = "<group>"; };
+		OBJ_43 /* gltf_scenekitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = gltf_scenekitTests.swift; sourceTree = "<group>"; };
+		OBJ_6 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
+		OBJ_9 /* GLTF+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GLTF+Extension.swift"; sourceTree = "<group>"; };
+		"gltf_scenekit::gltf_scenekit::Product" /* gltf_scenekit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = gltf_scenekit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		"gltf_scenekit::gltf_scenekitTests::Product" /* gltf_scenekitTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = gltf_scenekitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		OBJ_59 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+				OBJ_60 /* gltf_scenekit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		OBJ_98 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		OBJ_10 /* GLTF */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_11 /* GLTF.swift */,
+				OBJ_12 /* GLTFAccessor.swift */,
+				OBJ_13 /* GLTFAccessorSparse.swift */,
+				OBJ_14 /* GLTFAccessorSparseIndices.swift */,
+				OBJ_15 /* GLTFAccessorSparseValues.swift */,
+				OBJ_16 /* GLTFAnimation.swift */,
+				OBJ_17 /* GLTFAnimationChannel.swift */,
+				OBJ_18 /* GLTFAnimationChannelTarget.swift */,
+				OBJ_19 /* GLTFAnimationSampler.swift */,
+				OBJ_20 /* GLTFAsset.swift */,
+				OBJ_22 /* GLTFBuffer.swift */,
+				OBJ_23 /* GLTFBufferView.swift */,
+				OBJ_24 /* GLTFCamera.swift */,
+				OBJ_25 /* GLTFCameraOrthographic.swift */,
+				OBJ_26 /* GLTFCameraPerspective.swift */,
+				OBJ_27 /* GLTFImage.swift */,
+				OBJ_28 /* GLTFMaterial.swift */,
+				OBJ_29 /* GLTFMaterialNormalTextureInfo.swift */,
+				OBJ_30 /* GLTFMaterialOcclusionTextureInfo.swift */,
+				OBJ_31 /* GLTFMaterialPBRMetallicRoughness.swift */,
+				OBJ_32 /* GLTFMesh.swift */,
+				OBJ_33 /* GLTFMeshPrimitive.swift */,
+				OBJ_34 /* GLTFNode.swift */,
+				OBJ_35 /* GLTFSampler.swift */,
+				OBJ_36 /* GLTFScene.swift */,
+				OBJ_37 /* GLTFSkin.swift */,
+				OBJ_38 /* GLTFTexture.swift */,
+				OBJ_39 /* GLTFTextureInfo.swift */,
+			);
+			path = GLTF;
+			sourceTree = "<group>";
+		};
+		OBJ_41 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_42 /* gltf_scenekitTests */,
+			);
+			name = Tests;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_42 /* gltf_scenekitTests */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_43 /* gltf_scenekitTests.swift */,
+			);
+			name = gltf_scenekitTests;
+			path = Tests/gltf_scenekitTests;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_44 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				"gltf_scenekit::gltf_scenekitTests::Product" /* gltf_scenekitTests.xctest */,
+				"gltf_scenekit::gltf_scenekit::Product" /* gltf_scenekit.framework */,
+			);
+			name = Products;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		OBJ_5 = {
+			isa = PBXGroup;
+			children = (
+				OBJ_6 /* Package.swift */,
+				OBJ_7 /* Sources */,
+				OBJ_41 /* Tests */,
+				OBJ_44 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		OBJ_7 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_8 /* gltf_scenekit */,
+			);
+			name = Sources;
+			sourceTree = SOURCE_ROOT;
+		};
+		OBJ_8 /* gltf_scenekit */ = {
+			isa = PBXGroup;
+			children = (
+				OBJ_9 /* GLTF+Extension.swift */,
+				OBJ_10 /* GLTF */,
+				OBJ_40 /* Helper.swift */,
+			);
+			name = gltf_scenekit;
+			path = Sources/gltf_scenekit;
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		"gltf_scenekit::SwiftPMPackageDescription" /* gltf_scenekitPackageDescription */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = OBJ_48 /* Build configuration list for PBXNativeTarget "gltf_scenekitPackageDescription" */;
+			buildPhases = (
+				OBJ_51 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = gltf_scenekitPackageDescription;
+			productName = gltf_scenekitPackageDescription;
+			productType = "com.apple.product-type.framework";
+		};
+		"gltf_scenekit::gltf_scenekit" /* gltf_scenekit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = OBJ_63 /* Build configuration list for PBXNativeTarget "gltf_scenekit" */;
+			buildPhases = (
+				OBJ_66 /* Sources */,
+				OBJ_98 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = gltf_scenekit;
+			productName = gltf_scenekit;
+			productReference = "gltf_scenekit::gltf_scenekit::Product" /* gltf_scenekit.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		"gltf_scenekit::gltf_scenekitTests" /* gltf_scenekitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = OBJ_54 /* Build configuration list for PBXNativeTarget "gltf_scenekitTests" */;
+			buildPhases = (
+				OBJ_57 /* Sources */,
+				OBJ_59 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				OBJ_61 /* PBXTargetDependency */,
+			);
+			name = gltf_scenekitTests;
+			productName = gltf_scenekitTests;
+			productReference = "gltf_scenekit::gltf_scenekitTests::Product" /* gltf_scenekitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		OBJ_1 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 9999;
+			};
+			buildConfigurationList = OBJ_2 /* Build configuration list for PBXProject "gltf_scenekit" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = OBJ_5;
+			productRefGroup = OBJ_44 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				"gltf_scenekit::SwiftPMPackageDescription" /* gltf_scenekitPackageDescription */,
+				"gltf_scenekit::gltf_scenekitTests" /* gltf_scenekitTests */,
+				"gltf_scenekit::gltf_scenekit" /* gltf_scenekit */,
+				"gltf_scenekit::gltf_scenekitPackageTests::ProductTarget" /* gltf_scenekitPackageTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		OBJ_51 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				OBJ_52 /* Package.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		OBJ_57 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				OBJ_58 /* gltf_scenekitTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		OBJ_66 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 0;
+			files = (
+				OBJ_67 /* GLTF+Extension.swift in Sources */,
+				OBJ_68 /* GLTF.swift in Sources */,
+				OBJ_69 /* GLTFAccessor.swift in Sources */,
+				OBJ_70 /* GLTFAccessorSparse.swift in Sources */,
+				OBJ_71 /* GLTFAccessorSparseIndices.swift in Sources */,
+				OBJ_72 /* GLTFAccessorSparseValues.swift in Sources */,
+				OBJ_73 /* GLTFAnimation.swift in Sources */,
+				OBJ_74 /* GLTFAnimationChannel.swift in Sources */,
+				OBJ_75 /* GLTFAnimationChannelTarget.swift in Sources */,
+				OBJ_76 /* GLTFAnimationSampler.swift in Sources */,
+				OBJ_77 /* GLTFAsset.swift in Sources */,
+				OBJ_79 /* GLTFBuffer.swift in Sources */,
+				OBJ_80 /* GLTFBufferView.swift in Sources */,
+				OBJ_81 /* GLTFCamera.swift in Sources */,
+				OBJ_82 /* GLTFCameraOrthographic.swift in Sources */,
+				OBJ_83 /* GLTFCameraPerspective.swift in Sources */,
+				OBJ_84 /* GLTFImage.swift in Sources */,
+				OBJ_85 /* GLTFMaterial.swift in Sources */,
+				OBJ_86 /* GLTFMaterialNormalTextureInfo.swift in Sources */,
+				OBJ_87 /* GLTFMaterialOcclusionTextureInfo.swift in Sources */,
+				OBJ_88 /* GLTFMaterialPBRMetallicRoughness.swift in Sources */,
+				OBJ_89 /* GLTFMesh.swift in Sources */,
+				OBJ_90 /* GLTFMeshPrimitive.swift in Sources */,
+				OBJ_91 /* GLTFNode.swift in Sources */,
+				OBJ_92 /* GLTFSampler.swift in Sources */,
+				OBJ_93 /* GLTFScene.swift in Sources */,
+				OBJ_94 /* GLTFSkin.swift in Sources */,
+				OBJ_95 /* GLTFTexture.swift in Sources */,
+				OBJ_96 /* GLTFTextureInfo.swift in Sources */,
+				OBJ_97 /* Helper.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		OBJ_103 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "gltf_scenekit::gltf_scenekitTests" /* gltf_scenekitTests */;
+			targetProxy = D2577FFA1FB8D9A200440648 /* PBXContainerItemProxy */;
+		};
+		OBJ_61 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = "gltf_scenekit::gltf_scenekit" /* gltf_scenekit */;
+			targetProxy = D2577FF91FB8D9A200440648 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		OBJ_101 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		OBJ_102 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		OBJ_3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				ENABLE_NS_ASSERTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_SWIFT_FLAGS = "-DXcode";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator appletvos appletvsimulator watchos watchsimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = SWIFT_PACKAGE;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				USE_HEADERMAP = NO;
+			};
+			name = Debug;
+		};
+		OBJ_4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GCC_OPTIMIZATION_LEVEL = s;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				OTHER_SWIFT_FLAGS = "-DXcode";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "macosx iphoneos iphonesimulator appletvos appletvsimulator watchos watchsimulator";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = SWIFT_PACKAGE;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				USE_HEADERMAP = NO;
+			};
+			name = Release;
+		};
+		OBJ_49 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LD = /usr/bin/true;
+				OTHER_SWIFT_FLAGS = "-swift-version 4 -I /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/pm/4 -target x86_64-apple-macosx10.10 -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk";
+				SWIFT_VERSION = 4.0;
+			};
+			name = Debug;
+		};
+		OBJ_50 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				LD = /usr/bin/true;
+				OTHER_SWIFT_FLAGS = "-swift-version 4 -I /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/pm/4 -target x86_64-apple-macosx10.10 -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.13.sdk";
+				SWIFT_VERSION = 4.0;
+			};
+			name = Release;
+		};
+		OBJ_55 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = gltf_scenekit.xcodeproj/gltf_scenekitTests_Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @loader_path/Frameworks";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				SWIFT_VERSION = 4.0;
+				TARGET_NAME = gltf_scenekitTests;
+			};
+			name = Debug;
+		};
+		OBJ_56 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = gltf_scenekit.xcodeproj/gltf_scenekitTests_Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @loader_path/Frameworks";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				SWIFT_VERSION = 4.0;
+				TARGET_NAME = gltf_scenekitTests;
+			};
+			name = Release;
+		};
+		OBJ_64 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = gltf_scenekit.xcodeproj/gltf_scenekit_Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = "gltf-scenekit";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+				TARGET_NAME = gltf_scenekit;
+				VALID_ARCHS = "x86_64 arm64";
+			};
+			name = Debug;
+		};
+		OBJ_65 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
+				INFOPLIST_FILE = gltf_scenekit.xcodeproj/gltf_scenekit_Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
+				OTHER_LDFLAGS = "$(inherited)";
+				OTHER_SWIFT_FLAGS = "$(inherited)";
+				PRODUCT_BUNDLE_IDENTIFIER = "gltf-scenekit";
+				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+				TARGET_NAME = gltf_scenekit;
+				VALID_ARCHS = "x86_64 arm64";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		OBJ_100 /* Build configuration list for PBXAggregateTarget "gltf_scenekitPackageTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_101 /* Debug */,
+				OBJ_102 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		OBJ_2 /* Build configuration list for PBXProject "gltf_scenekit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_3 /* Debug */,
+				OBJ_4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		OBJ_48 /* Build configuration list for PBXNativeTarget "gltf_scenekitPackageDescription" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_49 /* Debug */,
+				OBJ_50 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		OBJ_54 /* Build configuration list for PBXNativeTarget "gltf_scenekitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_55 /* Debug */,
+				OBJ_56 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		OBJ_63 /* Build configuration list for PBXNativeTarget "gltf_scenekit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				OBJ_64 /* Debug */,
+				OBJ_65 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = OBJ_1 /* Project object */;
+}

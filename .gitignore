@@ -1,4 +1,5 @@
 .DS_Store
 /.build
 /Packages
-/*.xcodeproj
+gltf_scenekit.xcodeproj/project.xcworkspace/xcuserdata
+gltf_scenekit.xcodeproj/xcuserdata
