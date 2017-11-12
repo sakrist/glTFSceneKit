@@ -29,7 +29,7 @@ extension GLTF {
         set { GLTF.associationMap[Keys.animation_duration] = newValue }
     }
     
-    public var directory:String? {
+    private var directory:String? {
         get { return GLTF.associationMap[Keys._directory] as? String }
         set { GLTF.associationMap[Keys._directory] = newValue }
     }
@@ -43,8 +43,9 @@ extension GLTF {
     ///
     /// - Parameter directory: location of other related resources to gltf
     /// - Returns: instance of Scene
-    open func convertToSCNScene(directory:String) -> SCNScene {
-        self.directory = directory
+    @objc
+    open func convertToSCNScene(directoryPath:String) -> SCNScene {
+        self.directory = directoryPath
         let scene:SCNScene = SCNScene.init()
         if self.scenes != nil && self.scene != nil {
             let sceneGlTF = self.scenes![(self.scene)!]
