@@ -3,9 +3,13 @@
 
  - [X] Compilable for macOS and iOS
  - [X] Objective-C support
+ - [X] swift package
  - [X] Morph animation
  - [ ] Skin and joint animation
  - [ ] Optimise buffer unpacking
+ - [ ] Support \*.glb
+ - [ ] GLTF swift extension with wrapper for JSONDecoder
+ - [ ] Tests
  
 
 
