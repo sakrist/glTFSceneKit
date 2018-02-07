@@ -301,44 +301,52 @@ extension GLTF {
             if self.accessors != nil && self.bufferViews != nil {
                 let accessor = self.accessors![indicesIndex]
  
-                let indicesData = loadData(accessor)
+                if let (indicesData, _, _) = loadData(accessor) {
                     
-                var count = (accessor.count == nil) ? 0 : accessor.count!
-                
-                let primitiveType = primitive.mode.scn()
-                switch primitiveType {
-                case .triangles:
-                    count = count/3
-                    break
-                case .triangleStrip:
-                    count = count-2
-                    break
-                case .line:
-                    count = count/2
-                default:
-                    break
+                    var count = (accessor.count == nil) ? 0 : accessor.count!
+                    
+                    let primitiveType = primitive.mode.scn()
+                    switch primitiveType {
+                    case .triangles:
+                        count = count/3
+                        break
+                    case .triangleStrip:
+                        count = count-2
+                        break
+                    case .line:
+                        count = count/2
+                    default:
+                        break
+                    }
+                    
+                    return SCNGeometryElement.init(data: indicesData,
+                                                   primitiveType: primitiveType,
+                                                   primitiveCount: count,
+                                                   bytesPerIndex: accessor.bytesPerElement())
+                } else {
+                    // here is should be errors handling
+                    print("Error load geometryElement")
                 }
-                
-                return SCNGeometryElement.init(data: indicesData,
-                                               primitiveType: primitiveType,
-                                               primitiveCount: count,
-                                               bytesPerIndex: accessor.bytesPerElement())
             }
         }
         return SCNGeometryElement.init()
     }
 
+    /// Convert mesh/animation attributes into SCNGeometrySource
+    ///
+    /// - Parameter attributes: dictionary of accessors
+    /// - Returns: array of SCNGeometrySource objects
     fileprivate func loadSources(_ attributes:[String:Int]) -> [SCNGeometrySource]  {
         var geometrySources = [SCNGeometrySource]()
         for (key, accessorIndex) in attributes {
             if self.accessors != nil && self.bufferViews != nil {
                 let accessor = self.accessors![accessorIndex]
-                if let data = loadData(accessor) {
+                if let (data, byteStride, byteOffset) = loadData(accessor) {
                     
                     let count = (accessor.count == nil) ? 0 : accessor.count!
-                    let byteStride = accessor.components()*accessor.bytesPerElement()  
                     
-                    let semantic = sourceSemantic(name:key)
+                    // convert string semantic to SceneKit enum type 
+                    let semantic = self.sourceSemantic(name:key)
                     
                     let geometrySource = SCNGeometrySource.init(data: data, 
                                                                 semantic: semantic, 
@@ -346,7 +354,7 @@ extension GLTF {
                                                                 usesFloatComponents: true, 
                                                                 componentsPerVector: accessor.components(), 
                                                                 bytesPerComponent: accessor.bytesPerElement(), 
-                                                                dataOffset: 0, 
+                                                                dataOffset: byteOffset, 
                                                                 dataStride: byteStride)
                     geometrySources.append(geometrySource)
                 }
@@ -356,24 +364,38 @@ extension GLTF {
     }
     
     // get data by accessor
-    fileprivate func loadData(_ accessor:GLTFAccessor) -> Data? {
+    fileprivate func loadData(_ accessor:GLTFAccessor) -> (Data, Int, Int)? {
         let bufferView = self.bufferViews![accessor.bufferView!] 
         if self.buffers != nil && bufferView.buffer! < self.buffers!.count { 
             let buffer = self.buffers![bufferView.buffer!]
             
+            var addAccessorOffset = false
+            if (bufferView.byteStride == nil || accessor.components()*accessor.bytesPerElement() == bufferView.byteStride) {
+                addAccessorOffset = true
+            }
+            
+            
             let count = (accessor.count == nil) ? 0 : accessor.count!
             let byteStride = (bufferView.byteStride == nil) ? accessor.components()*accessor.bytesPerElement() : bufferView.byteStride!
             let bytesLength = byteStride*count            
-            let start = bufferView.byteOffset+accessor.byteOffset
-            let end = start+bytesLength
-            return buffer.data(inDirectory:self.directory)?.subdata(in: start..<end)
+            
+            if var data = buffer.data(inDirectory:self.directory) {
+                
+                let start = bufferView.byteOffset+((addAccessorOffset) ? accessor.byteOffset : 0)
+                let end = start+bytesLength
+                
+                data = data.subdata(in: start..<end)
+                    
+                let byteOffset = ((!addAccessorOffset) ? accessor.byteOffset : 0)
+                return (data, byteStride, byteOffset)
+            }
         }
         return nil
     }
     
     fileprivate func loadAccessorAsArray(_ accessor:GLTFAccessor) -> [Any] {
         var values = [Any]()
-        if let data = loadData(accessor) {
+        if let (data, _, _) = loadData(accessor) {
             switch accessor.componentType! {
             case .BYTE:
                 values = data.int8Array
