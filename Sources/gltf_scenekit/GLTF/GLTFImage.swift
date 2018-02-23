@@ -1,8 +1,8 @@
 //
 //  GLTFImage.swift
 //
-//  Created by Volodymyr Boichentsov on 09/11/2017.
-//  Copyright © 2017 3D4Medical, LLC. All rights reserved.
+//  Created by Volodymyr Boichentsov on 23/02/2018.
+//  Copyright © 2018 3D4Medical, LLC. All rights reserved.
 //
 //  Code generated with SchemeCompiler tool, developed by 3D4Medical.
 //
@@ -43,10 +43,10 @@ open class GLTFImage : NSObject, Codable {
     public var bufferView:Int?
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: [String: Codable]]?
+    public var extensions:[String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Codable]?
+    public var extras:[String: Any]?
 
     /// The image's MIME type.
     public var mimeType:GLTFImageMimeType?
@@ -69,8 +69,8 @@ open class GLTFImage : NSObject, Codable {
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         bufferView = try? container.decode(Int.self, forKey: .bufferView)
-        extensions = try? container.decode([String: [String: Codable]].self, forKey: .extensions)
-        extras = try? container.decode([String: Codable].self, forKey: .extras)
+        extensions = try? container.decode([String: Any].self, forKey: .extensions)
+        extras = try? container.decode([String: Any].self, forKey: .extras)
         mimeType = try? container.decode(GLTFImageMimeType.self, forKey: .mimeType)
         name = try? container.decode(String.self, forKey: .name)
         uri = try? container.decode(String.self, forKey: .uri)

@@ -1,7 +1,15 @@
 {
   "object": {
     "pins": [
-
+      {
+        "package": "Draco",
+        "repositoryURL": "https://github.com/sakrist/DracoSwiftPackage.git",
+        "state": {
+          "branch": null,
+          "revision": "a0e8d4aaedb39b47d992eb08f8e026d73ff1cdb9",
+          "version": "0.0.1"
+        }
+      }
     ]
   },
   "version": 1

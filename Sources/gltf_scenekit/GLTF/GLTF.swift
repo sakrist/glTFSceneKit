@@ -1,8 +1,8 @@
 //
 //  GLTF.swift
 //
-//  Created by Volodymyr Boichentsov on 09/11/2017.
-//  Copyright © 2017 3D4Medical, LLC. All rights reserved.
+//  Created by Volodymyr Boichentsov on 23/02/2018.
+//  Copyright © 2018 3D4Medical, LLC. All rights reserved.
 //
 //  Code generated with SchemeCompiler tool, developed by 3D4Medical.
 //
@@ -20,7 +20,7 @@ open class GLTF : NSObject, Codable {
     public var animations:[GLTFAnimation]?
 
     /// Metadata about the glTF asset.
-    public var asset:GLTFAsset?
+    public var asset:GLTFAsset
 
     /// An array of bufferViews.
     public var bufferViews:[GLTFBufferView]?
@@ -32,7 +32,7 @@ open class GLTF : NSObject, Codable {
     public var cameras:[GLTFCamera]?
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: [String: Codable]]?
+    public var extensions:[String: Any]?
 
     /// Names of glTF extensions required to properly load this asset.
     public var extensionsRequired:[String]?
@@ -41,7 +41,7 @@ open class GLTF : NSObject, Codable {
     public var extensionsUsed:[String]?
 
     /// Application-specific data.
-    public var extras:[String: Codable]?
+    public var extras:[String: Any]?
 
     /// An array of images.
     public var images:[GLTFImage]?
@@ -96,14 +96,14 @@ open class GLTF : NSObject, Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         accessors = try? container.decode([GLTFAccessor].self, forKey: .accessors)
         animations = try? container.decode([GLTFAnimation].self, forKey: .animations)
-        asset = try? container.decode(GLTFAsset.self, forKey: .asset)
+        asset = try container.decode(GLTFAsset.self, forKey: .asset)
         bufferViews = try? container.decode([GLTFBufferView].self, forKey: .bufferViews)
         buffers = try? container.decode([GLTFBuffer].self, forKey: .buffers)
         cameras = try? container.decode([GLTFCamera].self, forKey: .cameras)
-        extensions = try? container.decode([String: [String: Codable]].self, forKey: .extensions)
+        extensions = try? container.decode([String: Any].self, forKey: .extensions)
         extensionsRequired = try? container.decode([String].self, forKey: .extensionsRequired)
         extensionsUsed = try? container.decode([String].self, forKey: .extensionsUsed)
-        extras = try? container.decode([String: Codable].self, forKey: .extras)
+        extras = try? container.decode([String: Any].self, forKey: .extras)
         images = try? container.decode([GLTFImage].self, forKey: .images)
         materials = try? container.decode([GLTFMaterial].self, forKey: .materials)
         meshes = try? container.decode([GLTFMesh].self, forKey: .meshes)

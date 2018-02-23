@@ -1,8 +1,8 @@
 //
 //  GLTFAccessor.swift
 //
-//  Created by Volodymyr Boichentsov on 09/11/2017.
-//  Copyright © 2017 3D4Medical, LLC. All rights reserved.
+//  Created by Volodymyr Boichentsov on 23/02/2018.
+//  Copyright © 2018 3D4Medical, LLC. All rights reserved.
 //
 //  Code generated with SchemeCompiler tool, developed by 3D4Medical.
 //
@@ -14,7 +14,6 @@ import Foundation
     case UNSIGNED_BYTE = 5121
     case SHORT = 5122
     case UNSIGNED_SHORT = 5123
-    case INT = 5124
     case UNSIGNED_INT = 5125
     case FLOAT = 5126
 
@@ -28,8 +27,6 @@ import Foundation
             return 5122
         case .UNSIGNED_SHORT:
             return 5123
-        case .INT:
-            return 5124
         case .UNSIGNED_INT:
             return 5125
         case .FLOAT:
@@ -47,8 +44,6 @@ import Foundation
             self = .SHORT
         case 5123:
             self = .UNSIGNED_SHORT
-        case 5124:
-            self = .INT
         case 5125:
             self = .UNSIGNED_INT
         case 5126:
@@ -122,16 +117,16 @@ open class GLTFAccessor : NSObject, Codable {
     public var byteOffset:Int
 
     /// The datatype of components in the attribute.
-    public var componentType:GLTFAccessorComponentType?
+    public var componentType:GLTFAccessorComponentType
 
     /// The number of attributes referenced by this accessor.
-    public var count:Int?
+    public var count:Int
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: [String: Codable]]?
+    public var extensions:[String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Codable]?
+    public var extras:[String: Any]?
 
     /// Maximum value of each component in this attribute.
     public var max:[Double]?
@@ -149,7 +144,7 @@ open class GLTFAccessor : NSObject, Codable {
     public var sparse:GLTFAccessorSparse?
 
     /// Specifies if the attribute is a scalar, vector, or matrix.
-    public var type:GLTFAccessorType?
+    public var type:GLTFAccessorType
 
     private enum CodingKeys: String, CodingKey {
         case bufferView
@@ -174,10 +169,10 @@ open class GLTFAccessor : NSObject, Codable {
         } catch {
             byteOffset = 0
         }
-        componentType = try? container.decode(GLTFAccessorComponentType.self, forKey: .componentType)
-        count = try? container.decode(Int.self, forKey: .count)
-        extensions = try? container.decode([String: [String: Codable]].self, forKey: .extensions)
-        extras = try? container.decode([String: Codable].self, forKey: .extras)
+        componentType = try container.decode(GLTFAccessorComponentType.self, forKey: .componentType)
+        count = try container.decode(Int.self, forKey: .count)
+        extensions = try? container.decode([String: Any].self, forKey: .extensions)
+        extras = try? container.decode([String: Any].self, forKey: .extras)
         max = try? container.decode([Double].self, forKey: .max)
         min = try? container.decode([Double].self, forKey: .min)
         name = try? container.decode(String.self, forKey: .name)
@@ -187,7 +182,7 @@ open class GLTFAccessor : NSObject, Codable {
             normalized = false
         }
         sparse = try? container.decode(GLTFAccessorSparse.self, forKey: .sparse)
-        type = try? container.decode(GLTFAccessorType.self, forKey: .type)
+        type = try container.decode(GLTFAccessorType.self, forKey: .type)
     }
 
     public func encode(to encoder: Encoder) throws {

@@ -1,8 +1,8 @@
 //
 //  GLTFNode.swift
 //
-//  Created by Volodymyr Boichentsov on 09/11/2017.
-//  Copyright © 2017 3D4Medical, LLC. All rights reserved.
+//  Created by Volodymyr Boichentsov on 23/02/2018.
+//  Copyright © 2018 3D4Medical, LLC. All rights reserved.
 //
 //  Code generated with SchemeCompiler tool, developed by 3D4Medical.
 //
@@ -20,10 +20,10 @@ open class GLTFNode : NSObject, Codable {
     public var children:[Int]?
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: [String: Codable]]?
+    public var extensions:[String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Codable]?
+    public var extras:[String: Any]?
 
     /// A floating-point 4x4 transformation matrix stored in column-major order.
     public var matrix:[Double]
@@ -37,13 +37,13 @@ open class GLTFNode : NSObject, Codable {
     /// The node's unit quaternion rotation in the order (x, y, z, w), where w is the scalar.
     public var rotation:[Double]
 
-    /// The node's non-uniform scale.
+    /// The node's non-uniform scale, given as the scaling factors along the x, y, and z axes.
     public var scale:[Double]
 
     /// The index of the skin referenced by this node.
     public var skin:Int?
 
-    /// The node's translation.
+    /// The node's translation along the x, y, and z axes.
     public var translation:[Double]
 
     /// The weights of the instantiated Morph Target. Number of elements must match number of Morph Targets of used mesh.
@@ -68,8 +68,8 @@ open class GLTFNode : NSObject, Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         camera = try? container.decode(Int.self, forKey: .camera)
         children = try? container.decode([Int].self, forKey: .children)
-        extensions = try? container.decode([String: [String: Codable]].self, forKey: .extensions)
-        extras = try? container.decode([String: Codable].self, forKey: .extras)
+        extensions = try? container.decode([String: Any].self, forKey: .extensions)
+        extras = try? container.decode([String: Any].self, forKey: .extras)
         do {
             matrix = try container.decode([Double].self, forKey: .matrix)
         } catch {

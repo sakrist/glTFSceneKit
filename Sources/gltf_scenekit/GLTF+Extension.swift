@@ -8,6 +8,9 @@
 
 import Foundation
 import SceneKit
+import Draco
+
+let dracoExtensionKey = "KHR_draco_mesh_compression"
 
 extension GLTF {
 
@@ -44,7 +47,29 @@ extension GLTF {
     /// - Parameter directory: location of other related resources to gltf
     /// - Returns: instance of Scene
     @objc
-    open func convertToSCNScene(directoryPath:String) -> SCNScene {
+    open func convertToSCNScene(directoryPath:String) -> SCNScene? {
+        
+        if (self.extensionsUsed != nil) {
+            for key in self.extensionsUsed! {
+                if key == dracoExtensionKey {
+                    
+                } else {
+                    print("Used `\(key)` extension is not supported!")
+                }
+            }
+        }
+        
+        if (self.extensionsRequired != nil) {
+            for key in self.extensionsRequired! {
+                if key == dracoExtensionKey {
+                    
+                } else {
+                    print("Required `\(key)` extension is not supported!")
+                    return nil
+                }
+            }
+        }
+        
         self.directory = directoryPath
         let scene:SCNScene = SCNScene.init()
         if self.scenes != nil && self.scene != nil {
@@ -52,10 +77,10 @@ extension GLTF {
             if let sceneName = sceneGlTF.name {
                 scene.setAttribute(sceneName, forKey: "name")
             }
-
+            
             self.cache_nodes = [SCNNode?](repeating: nil, count: (self.nodes?.count)!)
             
-            // parse modes
+            // parse nodes
             for nodeIndex in sceneGlTF.nodes! {
                 let node = buildNode(index:nodeIndex)
                 scene.rootNode.addChildNode(node)
@@ -65,8 +90,10 @@ extension GLTF {
             
             parseAnimations()
             
+            // TODO: replace with other internal objects
             cleanExtras()
             
+            // remove cache information
             GLTF.associationMap = [String: Any]()
         }
         
@@ -76,14 +103,12 @@ extension GLTF {
     fileprivate func parseAnimations() {
         if self.animations != nil {
             for animation in self.animations! {
-                for channel in animation.channels! {
-                    if channel.sampler != nil && channel.target != nil {
-                        let sampler = animation.samplers![channel.sampler!]
-                        do {
-                            try constructAnimation(sampler: sampler, target:channel.target!)
-                        } catch {
-                            print(error)
-                        }
+                for channel in animation.channels {
+                    let sampler = animation.samplers[channel.sampler]
+                    do {
+                        try constructAnimation(sampler: sampler, target:channel.target)
+                    } catch {
+                        print(error)
                     }
                 }
             }
@@ -101,8 +126,8 @@ extension GLTF {
         
         let node:SCNNode = self.cache_nodes![target.node!]!
         
-        let accessorInput = self.accessors![sampler.input!]
-        let accessorOutput = self.accessors![sampler.output!]
+        let accessorInput = self.accessors![sampler.input]
+        let accessorOutput = self.accessors![sampler.output]
         
         let keyTimesFloat = loadAccessorAsArray(accessorInput) as! [Float]
         let duration = Double(keyTimesFloat.last!)
@@ -114,7 +139,7 @@ extension GLTF {
         var groupDuration:Double = 0
         
         var caanimations:[CAAnimation] = [CAAnimation]() 
-        if target.path! == .weights {
+        if target.path == .weights {
             let weightPaths = node.value(forUndefinedKey: "weightPaths") as? [String]
                         
             groupDuration = duration
@@ -152,7 +177,7 @@ extension GLTF {
             
             self.animationDuration = max(self.animationDuration, duration)
             
-            keyFrameAnimation.keyPath = target.path?.scn()
+            keyFrameAnimation.keyPath = target.path.scn()
             keyFrameAnimation.keyTimes = keyTimes
             keyFrameAnimation.values = values_
             keyFrameAnimation.repeatCount = .infinity
@@ -170,7 +195,7 @@ extension GLTF {
         group.animations = animations 
         group.duration = groupDuration
         group.repeatCount = .infinity
-        node.addAnimation(group, forKey: target.path?.rawValue)
+        node.addAnimation(group, forKey: target.path.rawValue)
     }
     
     // MARK: - Nodes
@@ -181,12 +206,13 @@ extension GLTF {
             let node = self.nodes![index]
             scnNode.name = node.name
             
-            // Get camera.
+            // Get camera, if it has reference on any. 
             constructCamera(node, scnNode)
             
-            // Mesh
+            // convert meshes if any exists in gltf node
             geometryNode(node, scnNode)
             
+            // construct animation paths
             var weightPaths = [String]()
             for i in 0..<scnNode.childNodes.count {
                 let primitive = scnNode.childNodes[i]
@@ -199,7 +225,7 @@ extension GLTF {
             }
             scnNode.setValue(weightPaths, forUndefinedKey: "weightPaths")
             
-            // load skin
+            // load skin if any reference exists
             if let skin = node.skin {
                 loadSkin(skin, scnNode)
             }
@@ -235,7 +261,7 @@ extension GLTF {
                 let camera = self.cameras![cameraIndex]
                 scnNode.camera?.name = camera.name
                 switch camera.type {
-                case .perspective?:
+                case .perspective:
                     scnNode.camera?.zNear = (camera.perspective?.znear)!
                     scnNode.camera?.zFar = (camera.perspective?.zfar)!
                     if #available(OSX 10.13, *) {
@@ -244,32 +270,151 @@ extension GLTF {
                         scnNode.camera?.motionBlurIntensity = 0.3
                     }
                     break
-                case .orthographic?:
+                case .orthographic:
                     scnNode.camera?.usesOrthographicProjection = true
                     scnNode.camera?.zNear = (camera.orthographic?.znear)!
                     scnNode.camera?.zFar = (camera.orthographic?.zfar)!
-                    break
-                case .none:
                     break
                 }
             }
         }
     }  
     
-    // convert glTF mesh into SCNGeometry
+    
+    /// Decompress draco data
+    ///
+    /// - Parameter data: draco compressed data
+    /// - Returns: Indices data for triangles primitives, Vertices data and stride for vertices data
+    fileprivate func uncompressDracoData(_ data:Data) -> (Data, Data, Int) {
+        
+        var indicies:Data = Data()
+        var verticies:Data = Data()
+        var stride:Int = 0
+        data.withUnsafeBytes {(uint8Ptr: UnsafePointer<Int8>) in
+            let result = draco_decode(uint8Ptr, UInt(data.count))
+            let rawindicies = UnsafeRawPointer(result.indicesData)!
+            indicies = Data.init(bytes: rawindicies, count: Int(result.indicesDataSize))
+            let rawverticies = UnsafeRawPointer(result.interleavedVertexData)!
+            verticies = Data.init(bytes: rawverticies, count: Int(result.vertexDataSize))            
+            stride = Int(result.stride)
+            free_draco(result)
+        }
+        
+        return (indicies, verticies, stride)
+    }
+    
+    fileprivate func convertDracoMesh(_ dracoMesh:GLTFKHRDracoMeshCompressionExtension) -> (SCNGeometryElement?, [SCNGeometrySource]?) {
+        let bufferViewIndex = dracoMesh.bufferView
+        
+        if (self.bufferViews?.count)! <= bufferViewIndex {
+            return (nil, nil)
+        }
+        
+        let bufferView = self.bufferViews![bufferViewIndex]
+        if self.buffers != nil && bufferView.buffer < self.buffers!.count { 
+            let buffer = self.buffers![bufferView.buffer]
+            if let data = buffer.data(inDirectory:self.directory) {
+                                    
+//                    let start = bufferView.byteOffset
+//                    let end = (bufferView.byteLength != nil) ? bufferView.byteLength! : data.count 
+//                    
+//                    if start != 0 && end != data.count {
+//                        data = data.subdata(in: start..<end)
+//                    }
+                
+                let (indicesData, verticies, stride) = self.uncompressDracoData(data)
+        
+                let primitiveCount = (indicesData.count / 12)
+                
+                let element = SCNGeometryElement.init(data: indicesData,
+                                               primitiveType: .triangles,
+                                               primitiveCount: primitiveCount,
+                                               bytesPerIndex: 4)
+                
+                
+                let byteStride = (bufferView.byteStride != nil) ? bufferView.byteStride! : (stride * 4)
+                let count = verticies.count / byteStride
+                var byteOffset = 0
+                
+                var geometrySources = [SCNGeometrySource]()
+                                        
+                // sort attributes
+                var sortedAttributes:[String] = [String](repeating: "", count: dracoMesh.attributes.count)
+                for pair in dracoMesh.attributes {
+                    sortedAttributes[pair.value] = pair.key
+                }
+                
+                for key in sortedAttributes {
+                    // convert string semantic to SceneKit enum type 
+                    let semantic = self.sourceSemantic(name:key)
+                    
+                    let geometrySource = SCNGeometrySource.init(data: verticies, 
+                                                                semantic: semantic, 
+                                                                vectorCount: count, 
+                                                                usesFloatComponents: true, 
+                                                                componentsPerVector: ((semantic == .texcoord) ? 2 : 3) , 
+                                                                bytesPerComponent: 4, 
+                                                                dataOffset: byteOffset, 
+                                                                dataStride: byteStride)
+                    geometrySources.append(geometrySource)
+                    
+                    byteOffset = byteOffset + ((semantic == .texcoord) ? 8 : 12)
+                }
+                
+                return (element, geometrySources)
+            } 
+        }
+        
+        return (nil, nil)
+    }
+    
+    /// convert glTF mesh into SCNGeometry
+    ///
+    /// - Parameters:
+    ///   - node: gltf node
+    ///   - scnNode: SceneKit node, which is going to be parent node 
     fileprivate func geometryNode(_ node:GLTFNode, _ scnNode:SCNNode) {
         if let meshIndex = node.mesh {
             if self.meshes != nil {
                 let mesh = self.meshes![meshIndex]
                 scnNode.name = mesh.name
-                for primitive in mesh.primitives! {
-                    // get indices data
-                    let element = self.geometryElement(primitive)
+                for primitive in mesh.primitives {
                     
-                    // get vertices data
-                    let sources = self.loadSources(primitive.attributes!)
+                    var sources:[SCNGeometrySource] = [SCNGeometrySource]()
+                    var elements:[SCNGeometryElement] = [SCNGeometryElement]()
                     
-                    let geometry = SCNGeometry.init(sources: sources, elements: [element])
+                    // get indices 
+                    if let element = self.geometryElement(primitive) {
+                        elements.append(element)   
+                    }
+                    
+                    // get sources from attributes information
+                    sources.append(contentsOf: self.loadSources(primitive.attributes))
+                    
+                    // check on draco extension
+                    if let primitiveExtensions = primitive.extensions {
+                        if let draco = primitiveExtensions[dracoExtensionKey] {
+//                            let value = draco as [String : Any]
+                            
+                            if let json = try? JSONSerialization.data(withJSONObject: draco) {
+                                if let dracoMesh = try? JSONDecoder().decode(GLTFKHRDracoMeshCompressionExtension.self, from: json) {
+                                    let (dElement, dSources) = convertDracoMesh(dracoMesh)
+                                    
+                                    if (dElement != nil) {
+                                        elements.append(dElement!)
+                                    }
+                                    
+                                    if (dSources != nil) {
+                                        sources.append(contentsOf: dSources!)
+                                    }
+                                    
+                                }
+                            }
+                        }
+                    }
+                    
+                    // create geometry
+                    let geometry = SCNGeometry.init(sources: sources, elements: elements)
                     
                     if let materialIndex = primitive.material {
                         let scnMaterial = self.material(index:materialIndex)
@@ -296,14 +441,14 @@ extension GLTF {
         }
     }
     
-    fileprivate func geometryElement(_ primitive: GLTFMeshPrimitive) -> SCNGeometryElement {
+    fileprivate func geometryElement(_ primitive: GLTFMeshPrimitive) -> SCNGeometryElement? {
         if let indicesIndex = primitive.indices {
             if self.accessors != nil && self.bufferViews != nil {
                 let accessor = self.accessors![indicesIndex]
  
                 if let (indicesData, _, _) = loadData(accessor) {
                     
-                    var count = (accessor.count == nil) ? 0 : accessor.count!
+                    var count = accessor.count
                     
                     let primitiveType = primitive.mode.scn()
                     switch primitiveType {
@@ -329,7 +474,7 @@ extension GLTF {
                 }
             }
         }
-        return SCNGeometryElement.init()
+        return nil
     }
 
     /// Convert mesh/animation attributes into SCNGeometrySource
@@ -343,7 +488,7 @@ extension GLTF {
                 let accessor = self.accessors![accessorIndex]
                 if let (data, byteStride, byteOffset) = loadData(accessor) {
                     
-                    let count = (accessor.count == nil) ? 0 : accessor.count!
+                    let count = accessor.count
                     
                     // convert string semantic to SceneKit enum type 
                     let semantic = self.sourceSemantic(name:key)
@@ -366,16 +511,15 @@ extension GLTF {
     // get data by accessor
     fileprivate func loadData(_ accessor:GLTFAccessor) -> (Data, Int, Int)? {
         let bufferView = self.bufferViews![accessor.bufferView!] 
-        if self.buffers != nil && bufferView.buffer! < self.buffers!.count { 
-            let buffer = self.buffers![bufferView.buffer!]
+        if self.buffers != nil && bufferView.buffer < self.buffers!.count { 
+            let buffer = self.buffers![bufferView.buffer]
             
             var addAccessorOffset = false
             if (bufferView.byteStride == nil || accessor.components()*accessor.bytesPerElement() == bufferView.byteStride) {
                 addAccessorOffset = true
             }
             
-            
-            let count = (accessor.count == nil) ? 0 : accessor.count!
+            let count = accessor.count
             let byteStride = (bufferView.byteStride == nil) ? accessor.components()*accessor.bytesPerElement() : bufferView.byteStride!
             let bytesLength = byteStride*count            
             
@@ -384,7 +528,9 @@ extension GLTF {
                 let start = bufferView.byteOffset+((addAccessorOffset) ? accessor.byteOffset : 0)
                 let end = start+bytesLength
                 
-                data = data.subdata(in: start..<end)
+                if start != 0 || end != data.count {
+                    data = data.subdata(in: start..<end)
+                }
                     
                 let byteOffset = ((!addAccessorOffset) ? accessor.byteOffset : 0)
                 return (data, byteStride, byteOffset)
@@ -396,7 +542,7 @@ extension GLTF {
     fileprivate func loadAccessorAsArray(_ accessor:GLTFAccessor) -> [Any] {
         var values = [Any]()
         if let (data, _, _) = loadData(accessor) {
-            switch accessor.componentType! {
+            switch accessor.componentType {
             case .BYTE:
                 values = data.int8Array
                 break
@@ -409,15 +555,12 @@ extension GLTF {
             case .UNSIGNED_SHORT:
                 values = data.uint16Array
                 break
-            case .INT:
-                values = data.int32Array
-                break
             case .UNSIGNED_INT:
                 values = data.uint32Array
                 break
             case .FLOAT: 
                 do {
-                    switch accessor.type! {
+                    switch accessor.type {
                     case .SCALAR:
                         values = data.floatArray
                         break
@@ -494,7 +637,7 @@ extension GLTF {
             if let pbr = material.pbrMetallicRoughness {
                 scnMaterial.lightingModel = .physicallyBased
                 if let baseTextureInfo = pbr.baseColorTexture {
-                    self.loadTexture(index:baseTextureInfo.index!, property: scnMaterial.diffuse)
+                    self.loadTexture(index:baseTextureInfo.index, property: scnMaterial.diffuse)
                 } else {
                     let color = (pbr.baseColorFactor.count < 4) ? [1, 1, 1, 1] : (pbr.baseColorFactor)
                     scnMaterial.diffuse.contents = ColorClass(red: CGFloat(color[0]), green: CGFloat(color[1]), blue: CGFloat(color[2]), alpha: CGFloat(color[3]))
@@ -504,12 +647,12 @@ extension GLTF {
                     if #available(OSX 10.13, *) {
                         scnMaterial.metalness.textureComponents = .blue
                         scnMaterial.roughness.textureComponents = .green
-                        self.loadTexture(index:metallicRoughnessTextureInfo.index!, property: scnMaterial.metalness)
-                        self.loadTexture(index:metallicRoughnessTextureInfo.index!, property: scnMaterial.roughness)
+                        self.loadTexture(index:metallicRoughnessTextureInfo.index, property: scnMaterial.metalness)
+                        self.loadTexture(index:metallicRoughnessTextureInfo.index, property: scnMaterial.roughness)
                     } else {
                         // Fallback on earlier versions
-                        if self.textures != nil &&  metallicRoughnessTextureInfo.index! < (self.textures?.count)! {
-                            let texture = self.textures![metallicRoughnessTextureInfo.index!]
+                        if self.textures != nil &&  metallicRoughnessTextureInfo.index < (self.textures?.count)! {
+                            let texture = self.textures![metallicRoughnessTextureInfo.index]
                             if texture.source != nil {
                                 
                                 loadSampler(sampler:texture.sampler, property: scnMaterial.roughness)
@@ -540,7 +683,7 @@ extension GLTF {
             }
             
             if let emissiveTextureInfo = material.emissiveTexture {
-                self.loadTexture(index: emissiveTextureInfo.index!, property: scnMaterial.emission)
+                self.loadTexture(index: emissiveTextureInfo.index, property: scnMaterial.emission)
             } else {
                 let color = (material.emissiveFactor.count < 3) ? [1, 1, 1] : (material.emissiveFactor)
                 scnMaterial.emission.contents = SCNVector4Make(SCNFloat(color[0]), SCNFloat(color[1]), SCNFloat(color[2]), 1.0)
@@ -702,37 +845,31 @@ extension GLTFImage {
 
 extension GLTFAccessor {
     fileprivate func components() -> Int {
-        if let _type = self.type {
-            switch _type {
-            case .SCALAR:
-                return 1
-            case .VEC2:
-                return 2
-            case .VEC3:
-                return 3
-            case .VEC4, .MAT2:
-                return 4
-            case .MAT3:
-                return 9
-            case .MAT4:
-                return 16
-            }
+        switch type {
+        case .SCALAR:
+            return 1
+        case .VEC2:
+            return 2
+        case .VEC3:
+            return 3
+        case .VEC4, .MAT2:
+            return 4
+        case .MAT3:
+            return 9
+        case .MAT4:
+            return 16
         }
-        return 0
     }
     
     fileprivate func bytesPerElement() -> Int {
-        if let _componentType = self.componentType {
-            switch _componentType {
-            case .UNSIGNED_BYTE, .BYTE:
-                return 1
-            case .UNSIGNED_SHORT, .SHORT:
-                return 2
-            default:
-                return 4
-            }
+        switch componentType {
+        case .UNSIGNED_BYTE, .BYTE:
+            return 1
+        case .UNSIGNED_SHORT, .SHORT:
+            return 2
+        default:
+            return 4
         }
-        return 0
     }
 }
 

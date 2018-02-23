@@ -1,8 +1,8 @@
 //
 //  GLTFSkin.swift
 //
-//  Created by Volodymyr Boichentsov on 09/11/2017.
-//  Copyright © 2017 3D4Medical, LLC. All rights reserved.
+//  Created by Volodymyr Boichentsov on 23/02/2018.
+//  Copyright © 2018 3D4Medical, LLC. All rights reserved.
 //
 //  Code generated with SchemeCompiler tool, developed by 3D4Medical.
 //
@@ -14,16 +14,16 @@ import Foundation
 @objcMembers
 open class GLTFSkin : NSObject, Codable {
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: [String: Codable]]?
+    public var extensions:[String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Codable]?
+    public var extras:[String: Any]?
 
     /// The index of the accessor containing the floating-point 4x4 inverse-bind matrices.  The default is that each matrix is a 4x4 identity matrix, which implies that inverse-bind matrices were pre-applied.
     public var inverseBindMatrices:Int?
 
     /// Indices of skeleton nodes, used as joints in this skin.
-    public var joints:[Int]?
+    public var joints:[Int]
 
     /// The user-defined name of this object.
     public var name:String?
@@ -42,10 +42,10 @@ open class GLTFSkin : NSObject, Codable {
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        extensions = try? container.decode([String: [String: Codable]].self, forKey: .extensions)
-        extras = try? container.decode([String: Codable].self, forKey: .extras)
+        extensions = try? container.decode([String: Any].self, forKey: .extensions)
+        extras = try? container.decode([String: Any].self, forKey: .extras)
         inverseBindMatrices = try? container.decode(Int.self, forKey: .inverseBindMatrices)
-        joints = try? container.decode([Int].self, forKey: .joints)
+        joints = try container.decode([Int].self, forKey: .joints)
         name = try? container.decode(String.self, forKey: .name)
         skeleton = try? container.decode(Int.self, forKey: .skeleton)
     }

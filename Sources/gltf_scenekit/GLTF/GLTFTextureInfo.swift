@@ -1,8 +1,8 @@
 //
 //  GLTFTextureInfo.swift
 //
-//  Created by Volodymyr Boichentsov on 09/11/2017.
-//  Copyright © 2017 3D4Medical, LLC. All rights reserved.
+//  Created by Volodymyr Boichentsov on 23/02/2018.
+//  Copyright © 2018 3D4Medical, LLC. All rights reserved.
 //
 //  Code generated with SchemeCompiler tool, developed by 3D4Medical.
 //
@@ -14,13 +14,13 @@ import Foundation
 @objcMembers
 open class GLTFTextureInfo : NSObject, Codable {
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: [String: Codable]]?
+    public var extensions:[String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Codable]?
+    public var extras:[String: Any]?
 
     /// The index of the texture.
-    public var index:Int?
+    public var index:Int
 
     /// The set index of texture's TEXCOORD attribute used for texture coordinate mapping.
     public var texCoord:Int
@@ -34,9 +34,9 @@ open class GLTFTextureInfo : NSObject, Codable {
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        extensions = try? container.decode([String: [String: Codable]].self, forKey: .extensions)
-        extras = try? container.decode([String: Codable].self, forKey: .extras)
-        index = try? container.decode(Int.self, forKey: .index)
+        extensions = try? container.decode([String: Any].self, forKey: .extensions)
+        extras = try? container.decode([String: Any].self, forKey: .extras)
+        index = try container.decode(Int.self, forKey: .index)
         do {
             texCoord = try container.decode(Int.self, forKey: .texCoord)
         } catch {
