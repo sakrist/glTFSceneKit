@@ -3,10 +3,10 @@
     "pins": [
       {
         "package": "Draco",
-        "repositoryURL": "https://github.com/sakrist/DracoSwiftPackage.git",
+        "repositoryURL": "https://github.com/3d4medical/DracoSwiftPackage.git",
         "state": {
           "branch": null,
-          "revision": "a0e8d4aaedb39b47d992eb08f8e026d73ff1cdb9",
+          "revision": "40b3891642223b8ca51ee3efb7751748b3cd10c5",
           "version": "0.0.1"
         }
       }

@@ -266,6 +266,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = OBJ_63 /* Build configuration list for PBXNativeTarget "gltf_scenekit" */;
 			buildPhases = (
+				D2DC4CE820568D31004C8F45 /* ShellScript */,
 				OBJ_66 /* Sources */,
 				OBJ_97 /* Frameworks */,
 			);
@@ -322,6 +323,22 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		D2DC4CE820568D31004C8F45 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "swift package update";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		OBJ_51 /* Sources */ = {
@@ -519,18 +536,16 @@
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/.build/checkouts/DracoSwiftPackage.git-6830057821000934015",
+					"$(SRCROOT)/.build/checkouts/**",
 				);
 				INFOPLIST_FILE = gltf_scenekit.xcodeproj/gltf_scenekit_Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/.build/checkouts/DracoSwiftPackage.git-6830057821000934015",
-					"$(PROJECT_DIR)/.build/checkouts/DracoSwiftPackage.git-6830057821000934015",
-				);
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/.build/checkouts/**";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-lc++",
+					"-ldraco",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "gltf-scenekit";
@@ -552,18 +567,16 @@
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/.build/checkouts/DracoSwiftPackage.git-6830057821000934015",
+					"$(SRCROOT)/.build/checkouts/**",
 				);
 				INFOPLIST_FILE = gltf_scenekit.xcodeproj/gltf_scenekit_Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/.build/checkouts/DracoSwiftPackage.git-6830057821000934015",
-					"$(PROJECT_DIR)/.build/checkouts/DracoSwiftPackage.git-6830057821000934015",
-				);
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/.build/checkouts/**";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-lc++",
+					"-ldraco",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "gltf-scenekit";
