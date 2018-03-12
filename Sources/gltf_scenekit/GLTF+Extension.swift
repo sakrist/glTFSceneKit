@@ -32,8 +32,8 @@ extension GLTF {
         set { GLTF.associationMap[Keys.animation_duration] = newValue }
     }
     
-    private var directory:String? {
-        get { return GLTF.associationMap[Keys._directory] as? String }
+    private var directory:String {
+        get { return (GLTF.associationMap[Keys._directory] ?? "") as! String  }
         set { GLTF.associationMap[Keys._directory] = newValue }
     }
 
@@ -814,30 +814,38 @@ extension GLTFSamplerWrapT {
 
 extension GLTFBuffer {
     
-    fileprivate func data(inDirectory directory:String?) -> Data? {
+    fileprivate func data(inDirectory directory:String) -> Data? {
         var data:Data?
         if self.extras != nil {
             data = self.extras!["data"] as? Data
         }
         if data == nil {
-            data = loadURI(uri: self.uri!, inDirectory: directory)
-            self.extras = ["data": data as Any as! Decodable & Encodable]
+            do {
+                data = try loadURI(uri: self.uri!, inDirectory: directory)
+                self.extras = ["data": data as Any as! Codable]
+            } catch {
+                print(error)
+            }
         }
         return data
     } 
 }
 
 extension GLTFImage {
-    fileprivate func image(inDirectory directory:String?) -> ImageClass? {
+    fileprivate func image(inDirectory directory:String) -> ImageClass? {
         var image:ImageClass?
         if self.extras != nil {
             image = self.extras!["image"] as? ImageClass
         }
         if image == nil {
-            if let imageData = loadURI(uri: self.uri!, inDirectory: directory) {
-                image = ImageClass.init(data: imageData)
+            do {
+                if let imageData = try loadURI(uri: self.uri!, inDirectory: directory) {
+                    image = ImageClass.init(data: imageData)
+                }
+                self.extras = ["image": image as Any as! Decodable & Encodable]
+            } catch {
+                print(error)
             }
-            self.extras = ["image": image as Any as! Decodable & Encodable]
         }
         return image
     } 
