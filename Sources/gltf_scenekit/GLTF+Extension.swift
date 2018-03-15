@@ -17,6 +17,7 @@ extension GLTF {
     private static var associationMap = [String: Any]()
     private struct Keys {
         static var cache_nodes:String = "cache_nodes"
+        static var cache_materials:String = "cache_materials"
         static var animation_duration:String = "animation_duration"
         static var _directory:String = "directory"
         static var _cameraCreated:String = "_cameraCreated"
@@ -25,6 +26,11 @@ extension GLTF {
     private var cache_nodes:[SCNNode?]? {
         get { return GLTF.associationMap[Keys.cache_nodes] as? [SCNNode?] }
         set { if newValue != nil { GLTF.associationMap[Keys.cache_nodes] = newValue } }
+    }
+    
+    private var cache_materials:[SCNMaterial?]? {
+        get { return GLTF.associationMap[Keys.cache_materials] as? [SCNMaterial?] }
+        set { if newValue != nil { GLTF.associationMap[Keys.cache_materials] = newValue } }
     }
     
     private var animationDuration:Double {
@@ -79,6 +85,7 @@ extension GLTF {
             }
             
             self.cache_nodes = [SCNNode?](repeating: nil, count: (self.nodes?.count)!)
+            self.cache_materials = [SCNMaterial?](repeating: nil, count: (self.materials?.count)!)
             
             // parse nodes
             for nodeIndex in sceneGlTF.nodes! {
@@ -628,7 +635,11 @@ extension GLTF {
     
     // load material by index
     fileprivate func material(index:Int) -> SCNMaterial {
-        let scnMaterial = SCNMaterial()
+        var scnMaterial_ = self.cache_materials![index]
+        if scnMaterial_ == nil {
+            scnMaterial_ = SCNMaterial() 
+        }
+        let scnMaterial = scnMaterial_!
         if self.materials != nil && index < (self.materials?.count)! {
             let material = self.materials![index]
             scnMaterial.name = material.name
