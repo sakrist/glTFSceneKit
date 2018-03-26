@@ -298,13 +298,28 @@ extension GLTF {
         var verticies:Data = Data()
         var stride:Int = 0
         data.withUnsafeBytes {(uint8Ptr: UnsafePointer<Int8>) in
-            let result = draco_decode(uint8Ptr, UInt(data.count))
-            let rawindicies = UnsafeRawPointer(result.indicesData)!
-            indicies = Data.init(bytes: rawindicies, count: Int(result.indicesDataSize))
-            let rawverticies = UnsafeRawPointer(result.interleavedVertexData)!
-            verticies = Data.init(bytes: rawverticies, count: Int(result.vertexDataSize))            
-            stride = Int(result.stride)
-            free_draco(result)
+            
+            var verts:UnsafeMutablePointer<Float>?
+            var lengthVerts:UInt = 0
+            
+            var inds:UnsafeMutablePointer<UInt32>?
+            var lengthInds:UInt = 0
+            
+            var descsriptors:UnsafeMutablePointer<DAttributeDescriptor>?
+            var descsriptorsCount:UInt = 0
+            
+            if draco_decode(uint8Ptr, UInt(data.count), &verts, &lengthVerts, &inds, &lengthInds, &descsriptors, &descsriptorsCount) {
+            
+                indicies = Data.init(bytes: UnsafeRawPointer(inds)!, count: Int(lengthInds)*4)
+                verticies = Data.init(bytes: UnsafeRawPointer(verts)!, count: Int(lengthVerts)*4)
+                for i in 0..<descsriptorsCount {
+                    stride += Int(descsriptors![Int(i)].size);
+                }
+                
+                descsriptors?.deallocate(capacity: Int(descsriptorsCount)*MemoryLayout<DAttributeDescriptor>.size)
+                verts?.deallocate(capacity: Int(lengthVerts)*4)
+                inds?.deallocate(capacity: Int(lengthInds)*4)
+            }
         }
         
         return (indicies, verticies, stride)
