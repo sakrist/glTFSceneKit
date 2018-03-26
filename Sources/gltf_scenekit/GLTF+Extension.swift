@@ -316,8 +316,11 @@ extension GLTF {
                     stride += Int(descsriptors![Int(i)].size);
                 }
                 
-                descsriptors?.deallocate(capacity: Int(descsriptorsCount)*MemoryLayout<DAttributeDescriptor>.size)
+                descsriptors?.deinitialize(count: Int(descsriptorsCount))
+                descsriptors?.deallocate(capacity: Int(descsriptorsCount))
+                verts?.deinitialize(count: Int(lengthVerts))
                 verts?.deallocate(capacity: Int(lengthVerts))
+                inds?.deinitialize(count: Int(lengthInds))
                 inds?.deallocate(capacity: Int(lengthInds))
             }
         }
