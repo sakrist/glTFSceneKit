@@ -317,8 +317,8 @@ extension GLTF {
                 }
                 
                 descsriptors?.deallocate(capacity: Int(descsriptorsCount)*MemoryLayout<DAttributeDescriptor>.size)
-                verts?.deallocate(capacity: Int(lengthVerts)*4)
-                inds?.deallocate(capacity: Int(lengthInds)*4)
+                verts?.deallocate(capacity: Int(lengthVerts))
+                inds?.deallocate(capacity: Int(lengthInds))
             }
         }
         
