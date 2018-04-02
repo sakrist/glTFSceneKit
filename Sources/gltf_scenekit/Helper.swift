@@ -38,6 +38,7 @@ extension String: Error {}
 
 extension SCNMatrix4 {
     init(array:[Double]) {
+        self.init()
         self.m11 = SCNFloat(array[0])
         self.m12 = SCNFloat(array[1])
         self.m13 = SCNFloat(array[2])

@@ -317,11 +317,11 @@ extension GLTF {
                 }
                 
                 descsriptors?.deinitialize(count: Int(descsriptorsCount))
-                descsriptors?.deallocate(capacity: Int(descsriptorsCount))
+                descsriptors?.deallocate()
                 verts?.deinitialize(count: Int(lengthVerts))
-                verts?.deallocate(capacity: Int(lengthVerts))
+                verts?.deallocate()
                 inds?.deinitialize(count: Int(lengthInds))
-                inds?.deallocate(capacity: Int(lengthInds))
+                inds?.deallocate()
             }
         }
         
@@ -851,7 +851,7 @@ extension GLTFBuffer {
         if data == nil {
             do {
                 data = try loadURI(uri: self.uri!, inDirectory: directory)
-                self.extras = ["data": data as Any as! Codable]
+                self.extras = ["data": data as Any]
             } catch {
                 print(error)
             }
@@ -871,7 +871,7 @@ extension GLTFImage {
                 if let imageData = try loadURI(uri: self.uri!, inDirectory: directory) {
                     image = ImageClass.init(data: imageData)
                 }
-                self.extras = ["image": image as Any as! Decodable & Encodable]
+                self.extras = ["image": image as Any]
             } catch {
                 print(error)
             }
