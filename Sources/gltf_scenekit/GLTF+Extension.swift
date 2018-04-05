@@ -11,6 +11,7 @@ import SceneKit
 import Draco
 
 let dracoExtensionKey = "KHR_draco_mesh_compression"
+let compressedTextureExtensionKey = "3D4M_compressed_texture"
 
 extension GLTF {
 
@@ -48,12 +49,18 @@ extension GLTF {
         set { GLTF.associationMap[Keys._cameraCreated] = newValue }
     }
     
+    private var view:SCNView? {
+        get { return (GLTF.associationMap["view"] as? SCNView)  }
+        set { GLTF.associationMap["view"] = newValue }
+    }
+    
     /// Convert GLTF to SceneKit scene. 
     ///
     /// - Parameter directory: location of other related resources to gltf
     /// - Returns: instance of Scene
     @objc
-    open func convertToSCNScene(directoryPath:String) -> SCNScene? {
+    open func convertToScene(view:SCNView, directoryPath:String) -> SCNScene? {
+        self.view = view
         
         if (self.extensionsUsed != nil) {
             for key in self.extensionsUsed! {
@@ -338,7 +345,7 @@ extension GLTF {
         let bufferView = self.bufferViews![bufferViewIndex]
         if self.buffers != nil && bufferView.buffer < self.buffers!.count { 
             let buffer = self.buffers![bufferView.buffer]
-            if let data = buffer.data(inDirectory:self.directory) {
+            if let data = buffer.data(inDirectory:self.directory, cache: false) {
                                     
 //                    let start = bufferView.byteOffset
 //                    let end = (bufferView.byteLength != nil) ? bufferView.byteLength! : data.count 
@@ -731,14 +738,127 @@ extension GLTF {
         return nil
     }
     
+    
+    /// Load texture by index.
+    ///
+    /// - Parameters:
+    ///   - index: index of GLTFTexture in textures
+    ///   - property: material's property
     fileprivate func loadTexture(index:Int, property:SCNMaterialProperty) {
         if self.textures != nil && index < self.textures!.count {
             let texture = self.textures![index]
-            if texture.source != nil {
-                property.contents = self.image(byIndex:texture.source!)
-            }
+            
             loadSampler(sampler:texture.sampler, property: property)
+            
+            if texture.extras != nil && texture.extras!["texture"] != nil {
+                property.contents = texture.extras!["texture"]
+                return
+            }
+            
+            if (texture.extensions != nil) {
+                if let descriptorJson = texture.extensions![compressedTextureExtensionKey] {
+                    if let json = try? JSONSerialization.data(withJSONObject: descriptorJson) {
+                        if let descriptor = try? JSONDecoder().decode(GLTF_3D4MCompressedTextureExtension.self, from: json) {
+                            if let textureCompressed = createCompressedTexture(descriptor) {
+                                texture.extras = ["texture":textureCompressed as Any]
+                                property.contents = textureCompressed
+                                return
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if texture.source != nil {
+                let loadedImage = self.image(byIndex:texture.source!)
+                texture.extras = ["texture":loadedImage as Any]
+                property.contents = loadedImage
+            }
         }
+    }
+    
+    fileprivate func createCompressedTexture(_ descriptor:GLTF_3D4MCompressedTextureExtension) -> Any? {
+        
+        if self.view?.renderingAPI == .metal {
+            
+            var bytesPerRow:(Int, Int)->Int = {_,_ in return 0 }
+            var pixelFormat:MTLPixelFormat = .invalid;
+            var width = descriptor.width;
+            var height = descriptor.height;
+#if os(macOS)
+            if (descriptor.compression == .COMPRESSED_RGBA_S3TC_DXT1) {
+                pixelFormat = .bc1_rgba
+                bytesPerRow = {width, height in return ((width + 3) / 4) * 8 };
+            } else if (descriptor.compression == .COMPRESSED_SRGB_ALPHA_S3TC_DXT1) {
+                pixelFormat = .bc1_rgba_srgb
+                bytesPerRow = {width, height in return ((width + 3) / 4) * 8 };
+            } else if (descriptor.compression == .COMPRESSED_RGBA_S3TC_DXT3) {
+                pixelFormat = .bc2_rgba
+                bytesPerRow = {width, height in return ((width + 3) / 4) * 16 };
+            } else if (descriptor.compression == .COMPRESSED_SRGB_ALPHA_S3TC_DXT3) {
+                pixelFormat = .bc2_rgba_srgb
+                bytesPerRow = {width, height in return ((width + 3) / 4) * 16 };
+            } else if (descriptor.compression == .COMPRESSED_RGBA_S3TC_DXT5) {
+                pixelFormat = .bc3_rgba
+                bytesPerRow = {width, height in return ((width + 3) / 4) * 16 };
+            } else if (descriptor.compression == .COMPRESSED_SRGB_ALPHA_S3TC_DXT5) {
+                pixelFormat = .bc3_rgba_srgb
+                bytesPerRow = {width, height in return ((width + 3) / 4) * 16 };
+            } else if (descriptor.compression == .COMPRESSED_RGBA_BPTC_UNORM) {
+                pixelFormat = .bc7_rgbaUnorm
+                bytesPerRow = {width, height in return ((width + 3) / 4) * 16 };
+            } else if (descriptor.compression == .COMPRESSED_SRGB_ALPHA_BPTC_UNORM) {
+                pixelFormat = .bc7_rgbaUnorm_srgb
+                bytesPerRow = {width, height in return ((width + 3) / 4) * 16 };
+            }
+#endif
+            
+            if (pixelFormat == .invalid ) {
+                print("GLTF_3D4MCompressedTextureExtension: Failed to load texture, unsupported compression format \(descriptor.compression).")
+                return nil
+            }
+            
+            if (width == 0 || height == 0) {
+                print("GLTF_3D4MCompressedTextureExtension: Failed to load texture, inappropriate texture size.")
+                return nil
+            }
+            
+            let mipmapsCount = descriptor.sources.count
+            let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat, 
+                                                                             width: width, 
+                                                                             height: height, 
+                                                                             mipmapped: (mipmapsCount > 1))
+            textureDescriptor.mipmapLevelCount = mipmapsCount
+            
+            let texture = self.view?.device?.makeTexture(descriptor: textureDescriptor)
+            
+            for i in 0 ..< mipmapsCount {
+                let bufferViewsIndex = descriptor.sources[i]
+                if self.bufferViews!.count > bufferViewsIndex {
+                    let bufferView = self.bufferViews![bufferViewsIndex]
+                    let buffer = self.buffers![bufferView.buffer]
+                    let data = buffer.data(inDirectory: self.directory, cache: false)
+                    if (data == nil) {
+                        print("GLTF_3D4MCompressedTextureExtension: Failed to load texture, \(String(describing: buffer.uri))")
+                        return nil
+                    }
+                    data?.withUnsafeBytes {
+                        texture?.replace(region: MTLRegionMake2D(0, 0, width, height), 
+                                         mipmapLevel: i, 
+                                         withBytes: $0, 
+                                         bytesPerRow: bytesPerRow(width, height))
+                    }
+                }
+                
+                width = max(width >> 1, 1);
+                height = max(height >> 1, 1);
+            }
+            return texture 
+        } else {
+            // TODO: implement for OpenGL  
+        }
+        
+        return nil
     }
     
     fileprivate func loadSampler(sampler samplerIndex:Int?, property:SCNMaterialProperty) {
@@ -762,6 +882,11 @@ extension GLTF {
         if self.images != nil {
             for image in self.images! {
                 image.extras = nil
+            }
+        }
+        if self.textures != nil {
+            for texture in self.textures! {
+                texture.extras = nil
             }
         }
         
@@ -843,7 +968,7 @@ extension GLTFSamplerWrapT {
 
 extension GLTFBuffer {
     
-    fileprivate func data(inDirectory directory:String) -> Data? {
+    fileprivate func data(inDirectory directory:String, cache:Bool = true) -> Data? {
         var data:Data?
         if self.extras != nil {
             data = self.extras!["data"] as? Data
@@ -851,7 +976,9 @@ extension GLTFBuffer {
         if data == nil {
             do {
                 data = try loadURI(uri: self.uri!, inDirectory: directory)
-                self.extras = ["data": data as Any]
+                if (cache) {
+                    self.extras = ["data": data as Any]
+                }
             } catch {
                 print(error)
             }
