@@ -45,6 +45,24 @@ extension GLTF {
                 pixelFormat = .bc7_rgbaUnorm_srgb
                 bytesPerRow = {width, height in return ((width + 3) / 4) * 16 };
             }
+            #elseif os(iOS)
+            if (descriptor.compression == .COMPRESSED_RGB_PVRTC_2BPPV1) {
+                pixelFormat = .pvrtc_rgb_2bpp
+            } else if (descriptor.compression == .COMPRESSED_RGB_PVRTC_4BPPV1) {
+                pixelFormat = .pvrtc_rgb_4bpp
+            } else if (descriptor.compression == .COMPRESSED_SRGB_PVRTC_2BPPV1) {
+                pixelFormat = .pvrtc_rgb_2bpp_srgb
+            } else if (descriptor.compression == .COMPRESSED_SRGB_PVRTC_4BPPV1) {
+                pixelFormat = .pvrtc_rgb_4bpp_srgb
+            } else if (descriptor.compression == .COMPRESSED_RGBA_PVRTC_2BPPV1) {
+                pixelFormat = .pvrtc_rgba_2bpp
+            } else if (descriptor.compression == .COMPRESSED_RGBA_PVRTC_4BPPV1) {
+                pixelFormat = .pvrtc_rgba_4bpp
+            } else if (descriptor.compression == .COMPRESSED_SRGB_ALPHA_PVRTC_2BPPV1) {
+                pixelFormat = .pvrtc_rgba_2bpp_srgb
+            } else if (descriptor.compression == .COMPRESSED_SRGB_ALPHA_PVRTC_4BPPV1) {
+                pixelFormat = .pvrtc_rgba_4bpp_srgb
+            } 
             #endif
             
             if (pixelFormat == .invalid ) {
