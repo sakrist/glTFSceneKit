@@ -555,7 +555,7 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-lc++",
-					"-ldraco",
+					"-ldraco_ios",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "gltf-scenekit";
@@ -587,7 +587,7 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-lc++",
-					"-ldraco",
+					"-ldraco_ios",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = "gltf-scenekit";
