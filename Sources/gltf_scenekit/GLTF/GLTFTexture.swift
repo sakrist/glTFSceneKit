@@ -28,6 +28,8 @@ open class GLTFTexture : NSObject, Codable {
     /// The index of the image used by this texture.
     public var source:Int?
 
+    var lock = os_unfair_lock_s()
+    
     private enum CodingKeys: String, CodingKey {
         case extensions
         case extras

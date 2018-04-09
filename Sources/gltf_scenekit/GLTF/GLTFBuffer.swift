@@ -28,6 +28,8 @@ open class GLTFBuffer : NSObject, Codable {
     /// The uri of the buffer.
     public var uri:String?
 
+    var lock = os_unfair_lock_s()
+    
     private enum CodingKeys: String, CodingKey {
         case byteLength
         case extensions

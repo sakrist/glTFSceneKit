@@ -24,14 +24,34 @@ extension GLTF {
         static var _cameraCreated:String = "_cameraCreated"
     }
     
+    private static var lock_nodes = os_unfair_lock_s()
     private var cache_nodes:[SCNNode?]? {
-        get { return GLTF.associationMap[Keys.cache_nodes] as? [SCNNode?] }
-        set { if newValue != nil { GLTF.associationMap[Keys.cache_nodes] = newValue } }
+        get { 
+            os_unfair_lock_lock(&GLTF.lock_nodes)
+            let node = GLTF.associationMap[Keys.cache_nodes] as? [SCNNode?]
+            os_unfair_lock_unlock(&GLTF.lock_nodes)
+            return node
+        }
+        set {
+            os_unfair_lock_lock(&GLTF.lock_nodes)
+            if newValue != nil { GLTF.associationMap[Keys.cache_nodes] = newValue } 
+            os_unfair_lock_unlock(&GLTF.lock_nodes)
+        }
     }
     
+    private static var lock_materials = os_unfair_lock_s()
     private var cache_materials:[SCNMaterial?]? {
-        get { return GLTF.associationMap[Keys.cache_materials] as? [SCNMaterial?] }
-        set { if newValue != nil { GLTF.associationMap[Keys.cache_materials] = newValue } }
+        get { 
+            os_unfair_lock_lock(&GLTF.lock_materials)
+            let material = GLTF.associationMap[Keys.cache_materials] as? [SCNMaterial?] 
+            os_unfair_lock_unlock(&GLTF.lock_materials)
+            return material
+        }
+        set { 
+            os_unfair_lock_lock(&GLTF.lock_materials)
+            if newValue != nil { GLTF.associationMap[Keys.cache_materials] = newValue } 
+            os_unfair_lock_unlock(&GLTF.lock_materials)
+        }
     }
     
     private var animationDuration:Double {
@@ -60,6 +80,12 @@ extension GLTF {
     /// - Returns: instance of Scene
     @objc
     open func convertToScene(view:SCNView, directoryPath:String) -> SCNScene? {
+        let scene:SCNScene = SCNScene.init()
+        return load(to: scene, view: view, directoryPath: directoryPath)
+    }
+    
+    @objc
+    open func load(to scene:SCNScene, view:SCNView, directoryPath:String) -> SCNScene? {
         self.view = view
         
         if (self.extensionsUsed != nil) {
@@ -84,7 +110,6 @@ extension GLTF {
         }
         
         self.directory = directoryPath
-        let scene:SCNScene = SCNScene.init()
         if self.scenes != nil && self.scene != nil {
             let sceneGlTF = self.scenes![(self.scene)!]
             if let sceneName = sceneGlTF.name {
@@ -94,21 +119,29 @@ extension GLTF {
             self.cache_nodes = [SCNNode?](repeating: nil, count: (self.nodes?.count)!)
             self.cache_materials = [SCNMaterial?](repeating: nil, count: (self.materials?.count)!)
             
+            let worker = DispatchQueue.global()
+            let group = DispatchGroup()
+            
             // parse nodes
             for nodeIndex in sceneGlTF.nodes! {
-                let node = buildNode(index:nodeIndex)
-                scene.rootNode.addChildNode(node)
-                
-                node.runAction(SCNAction.rotateBy(x: 0, y: .pi, z: 0, duration: 0))
+                group.enter()
+                worker.async {
+                    let node = self.buildNode(index:nodeIndex)
+                    scene.rootNode.addChildNode(node)
+                    group.leave()
+                }
             }
             
-            parseAnimations()
-            
-            // TODO: replace with other internal objects
-            cleanExtras()
-            
-            // remove cache information
-            GLTF.associationMap = [String: Any]()
+            // completion
+            group.notify(queue: worker) {
+                self.parseAnimations()
+                
+                // TODO: replace with other internal objects
+                self.cleanExtras()
+                
+                // remove cache information
+                GLTF.associationMap = [String: Any]()
+            }
         }
         
         return scene
@@ -667,6 +700,9 @@ extension GLTF {
         let scnMaterial = scnMaterial_!
         if self.materials != nil && index < (self.materials?.count)! {
             let material = self.materials![index]
+            
+            os_unfair_lock_lock(&material.lock)
+            
             scnMaterial.name = material.name
             scnMaterial.isDoubleSided = material.doubleSided
             
@@ -724,6 +760,8 @@ extension GLTF {
                 let color = (material.emissiveFactor.count < 3) ? [1, 1, 1] : (material.emissiveFactor)
                 scnMaterial.emission.contents = SCNVector4Make(SCNFloat(color[0]), SCNFloat(color[1]), SCNFloat(color[2]), 1.0)
             }
+            
+            os_unfair_lock_unlock(&material.lock)
         }
         
         return scnMaterial
@@ -748,32 +786,32 @@ extension GLTF {
         if self.textures != nil && index < self.textures!.count {
             let texture = self.textures![index]
             
+            os_unfair_lock_lock(&texture.lock)
+            
             loadSampler(sampler:texture.sampler, property: property)
             
             if texture.extras != nil && texture.extras!["texture"] != nil {
                 property.contents = texture.extras!["texture"]
-                return
-            }
-            
-            if (texture.extensions != nil) {
+            } else if (texture.extensions != nil) {
                 if let descriptorJson = texture.extensions![compressedTextureExtensionKey] {
                     if let json = try? JSONSerialization.data(withJSONObject: descriptorJson) {
                         if let descriptor = try? JSONDecoder().decode(GLTF_3D4MCompressedTextureExtension.self, from: json) {
                             if let textureCompressed = createCompressedTexture(descriptor) {
                                 texture.extras = ["texture":textureCompressed as Any]
                                 property.contents = textureCompressed
-                                return
                             }
                         }
                     }
                 }
             }
             
-            if texture.source != nil {
+            if texture.source != nil && property.contents == nil {
                 let loadedImage = self.image(byIndex:texture.source!)
                 texture.extras = ["texture":loadedImage as Any]
                 property.contents = loadedImage
             }
+            
+            os_unfair_lock_unlock(&texture.lock)
         }
     }
     
@@ -886,6 +924,9 @@ extension GLTFSamplerWrapT {
 extension GLTFBuffer {
     
     func data(inDirectory directory:String, cache:Bool = true) -> Data? {
+        
+        os_unfair_lock_lock(&self.lock)
+        
         var data:Data?
         if self.extras != nil {
             data = self.extras!["data"] as? Data
@@ -900,6 +941,9 @@ extension GLTFBuffer {
                 print(error)
             }
         }
+        
+        os_unfair_lock_unlock(&self.lock)
+        
         return data
     } 
 }
