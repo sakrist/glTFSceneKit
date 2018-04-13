@@ -714,7 +714,8 @@ extension GLTF {
                     let color = (pbr.baseColorFactor.count < 4) ? [1, 1, 1, 1] : (pbr.baseColorFactor)
                     scnMaterial.diffuse.contents = ColorClass(red: CGFloat(color[0]), green: CGFloat(color[1]), blue: CGFloat(color[2]), alpha: CGFloat(color[3]))
                 }
-                
+                scnMaterial.transparency = CGFloat(pbr.baseColorFactor[3])
+                    
                 if let metallicRoughnessTextureInfo = pbr.metallicRoughnessTexture {
                     if #available(OSX 10.13, *) {
                         scnMaterial.metalness.textureComponents = .blue
@@ -740,8 +741,8 @@ extension GLTF {
                     }
                     
                 } else {
-                    scnMaterial.metalness.intensity = CGFloat(pbr.metallicFactor)
-                    scnMaterial.roughness.intensity = CGFloat(pbr.roughnessFactor)
+                    scnMaterial.metalness.contents = pbr.metallicFactor
+                    scnMaterial.roughness.contents = pbr.roughnessFactor
                 }
             }
 
