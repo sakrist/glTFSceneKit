@@ -13,6 +13,8 @@ import SceneKit
 let dracoExtensionKey = "KHR_draco_mesh_compression"
 let compressedTextureExtensionKey = "3D4M_compressed_texture"
 
+let supportedExtensions = [dracoExtensionKey, compressedTextureExtensionKey]
+
 extension GLTF {
 
     private static var associationMap = [String: Any]()
@@ -79,20 +81,18 @@ extension GLTF {
     /// - Parameter directory: location of other related resources to gltf
     /// - Returns: instance of Scene
     @objc
-    open func convertToScene(view:SCNView, directoryPath:String) -> SCNScene? {
+    open func convertToScene(view:SCNView, directoryPath:String, multiThread:Bool = true) -> SCNScene? {
         let scene:SCNScene = SCNScene.init()
-        return load(to: scene, view: view, directoryPath: directoryPath)
+        return load(to: scene, view: view, directoryPath: directoryPath, multiThread:multiThread)
     }
     
     @objc
-    open func load(to scene:SCNScene, view:SCNView, directoryPath:String) -> SCNScene? {
+    open func load(to scene:SCNScene, view:SCNView, directoryPath:String = "", multiThread:Bool = true) -> SCNScene? {
         self.view = view
         
         if (self.extensionsUsed != nil) {
             for key in self.extensionsUsed! {
-                if key == dracoExtensionKey {
-                    
-                } else {
+                if !supportedExtensions.contains(key) {
                     print("Used `\(key)` extension is not supported!")
                 }
             }
@@ -100,9 +100,7 @@ extension GLTF {
         
         if (self.extensionsRequired != nil) {
             for key in self.extensionsRequired! {
-                if key == dracoExtensionKey {
-                    
-                } else {
+                if !supportedExtensions.contains(key) {
                     print("Required `\(key)` extension is not supported!")
                     return nil
                 }
@@ -119,32 +117,46 @@ extension GLTF {
             self.cache_nodes = [SCNNode?](repeating: nil, count: (self.nodes?.count)!)
             self.cache_materials = [SCNMaterial?](repeating: nil, count: (self.materials?.count)!)
             
-            let worker = DispatchQueue.global()
-            let group = DispatchGroup()
-            
-            // parse nodes
-            for nodeIndex in sceneGlTF.nodes! {
-                group.enter()
-                worker.async {
+            // run in multi-thread or single
+            if (multiThread) {
+                // get global worker 
+                let worker = DispatchQueue.global()
+                let group = DispatchGroup()
+                
+                // parse nodes
+                for nodeIndex in sceneGlTF.nodes! {
+                    group.enter()
+                    worker.async {
+                        let node = self.buildNode(index:nodeIndex)
+                        scene.rootNode.addChildNode(node)
+                        group.leave()
+                    }
+                }
+                
+                // completion
+                group.notify(queue: worker) {
+                    self._finalize()
+                }
+            } else {
+                for nodeIndex in sceneGlTF.nodes! {
                     let node = self.buildNode(index:nodeIndex)
                     scene.rootNode.addChildNode(node)
-                    group.leave()
                 }
-            }
-            
-            // completion
-            group.notify(queue: worker) {
-                self.parseAnimations()
-                
-                // TODO: replace with other internal objects
-                self.cleanExtras()
-                
-                // remove cache information
-                GLTF.associationMap = [String: Any]()
+                self._finalize()
             }
         }
         
         return scene
+    }
+    
+    fileprivate func _finalize() {
+        self.parseAnimations()
+        
+        // TODO: replace with other internal objects
+        self.cleanExtras()
+        
+        // remove cache information
+        GLTF.associationMap = [String: Any]()
     }
     
     fileprivate func parseAnimations() {
@@ -686,8 +698,11 @@ extension GLTF {
             
             loadSampler(sampler:texture.sampler, property: property)
             
+            var loaded = false
+            
             if texture.extras != nil && texture.extras!["texture"] != nil {
                 property.contents = texture.extras!["texture"]
+                loaded = true
             } else if (texture.extensions != nil) {
                 if let descriptorJson = texture.extensions![compressedTextureExtensionKey] {
                     if let json = try? JSONSerialization.data(withJSONObject: descriptorJson) {
@@ -695,13 +710,14 @@ extension GLTF {
                             if let textureCompressed = createCompressedTexture(descriptor) {
                                 texture.extras = ["texture":textureCompressed as Any]
                                 property.contents = textureCompressed
+                                loaded = true
                             }
                         }
                     }
                 }
             }
             
-            if texture.source != nil && property.contents == nil {
+            if texture.source != nil && !loaded {
                 let loadedImage = self.image(byIndex:texture.source!)
                 texture.extras = ["texture":loadedImage as Any]
                 property.contents = loadedImage
