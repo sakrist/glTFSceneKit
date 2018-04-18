@@ -62,6 +62,13 @@ func loadURI(uri:String, inDirectory directory:String) throws -> Data? {
     var data = uri.base64Decoded()
     if data == nil {
         
+        if (uri.contains("http")) {
+            if let url = URL.init(string: uri) {
+                data = try Data.init(contentsOf: url)
+                return data
+            }
+        }
+        
         let filepath = [directory, uri].joined(separator: "/") 
         if FileManager.default.fileExists(atPath: filepath) {
             let url = URL(fileURLWithPath: filepath)

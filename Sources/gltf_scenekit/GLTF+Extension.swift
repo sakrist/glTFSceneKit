@@ -8,7 +8,7 @@
 
 import Foundation
 import SceneKit
-import Draco
+
 
 let dracoExtensionKey = "KHR_draco_mesh_compression"
 let compressedTextureExtensionKey = "3D4M_compressed_texture"
@@ -311,7 +311,7 @@ extension GLTF {
                 case .perspective:
                     scnNode.camera?.zNear = (camera.perspective?.znear)!
                     scnNode.camera?.zFar = (camera.perspective?.zfar)!
-                    if #available(OSX 10.13, *) {
+                    if #available(OSX 10.13, iOS 11.0, *) {
                         scnNode.camera?.fieldOfView = CGFloat((camera.perspective?.yfov)! * 180.0 / .pi)
                         scnNode.camera?.wantsDepthOfField = true
                         scnNode.camera?.motionBlurIntensity = 0.3
@@ -326,112 +326,7 @@ extension GLTF {
             }
         }
     }  
-    
-    
-    /// Decompress draco data
-    ///
-    /// - Parameter data: draco compressed data
-    /// - Returns: Indices data for triangles primitives, Vertices data and stride for vertices data
-    fileprivate func uncompressDracoData(_ data:Data) -> (Data, Data, Int) {
-        
-        var indicies:Data = Data()
-        var verticies:Data = Data()
-        var stride:Int = 0
-        data.withUnsafeBytes {(uint8Ptr: UnsafePointer<Int8>) in
-            
-            var verts:UnsafeMutablePointer<Float>?
-            var lengthVerts:UInt = 0
-            
-            var inds:UnsafeMutablePointer<UInt32>?
-            var lengthInds:UInt = 0
-            
-            var descsriptors:UnsafeMutablePointer<DAttributeDescriptor>?
-            var descsriptorsCount:UInt = 0
-            
-            if draco_decode(uint8Ptr, UInt(data.count), &verts, &lengthVerts, &inds, &lengthInds, &descsriptors, &descsriptorsCount) {
-            
-                indicies = Data.init(bytes: UnsafeRawPointer(inds)!, count: Int(lengthInds)*4)
-                verticies = Data.init(bytes: UnsafeRawPointer(verts)!, count: Int(lengthVerts)*4)
-                for i in 0..<descsriptorsCount {
-                    stride += Int(descsriptors![Int(i)].size);
-                }
-                
-                descsriptors?.deinitialize(count: Int(descsriptorsCount))
-                descsriptors?.deallocate()
-                verts?.deinitialize(count: Int(lengthVerts))
-                verts?.deallocate()
-                inds?.deinitialize(count: Int(lengthInds))
-                inds?.deallocate()
-            }
-        }
-        
-        return (indicies, verticies, stride)
-    }
-    
-    fileprivate func convertDracoMesh(_ dracoMesh:GLTFKHRDracoMeshCompressionExtension) -> (SCNGeometryElement?, [SCNGeometrySource]?) {
-        let bufferViewIndex = dracoMesh.bufferView
-        
-        if (self.bufferViews?.count)! <= bufferViewIndex {
-            return (nil, nil)
-        }
-        
-        let bufferView = self.bufferViews![bufferViewIndex]
-        if self.buffers != nil && bufferView.buffer < self.buffers!.count { 
-            let buffer = self.buffers![bufferView.buffer]
-            if let data = buffer.data(inDirectory:self.directory, cache: false) {
-                                    
-//                    let start = bufferView.byteOffset
-//                    let end = (bufferView.byteLength != nil) ? bufferView.byteLength! : data.count 
-//                    
-//                    if start != 0 && end != data.count {
-//                        data = data.subdata(in: start..<end)
-//                    }
-                
-                let (indicesData, verticies, stride) = self.uncompressDracoData(data)
-        
-                let primitiveCount = (indicesData.count / 12)
-                
-                let element = SCNGeometryElement.init(data: indicesData,
-                                               primitiveType: .triangles,
-                                               primitiveCount: primitiveCount,
-                                               bytesPerIndex: 4)
-                
-                
-                let byteStride = (bufferView.byteStride != nil) ? bufferView.byteStride! : (stride * 4)
-                let count = verticies.count / byteStride
-                var byteOffset = 0
-                
-                var geometrySources = [SCNGeometrySource]()
-                                        
-                // sort attributes
-                var sortedAttributes:[String] = [String](repeating: "", count: dracoMesh.attributes.count)
-                for pair in dracoMesh.attributes {
-                    sortedAttributes[pair.value] = pair.key
-                }
-                
-                for key in sortedAttributes {
-                    // convert string semantic to SceneKit enum type 
-                    let semantic = self.sourceSemantic(name:key)
-                    
-                    let geometrySource = SCNGeometrySource.init(data: verticies, 
-                                                                semantic: semantic, 
-                                                                vectorCount: count, 
-                                                                usesFloatComponents: true, 
-                                                                componentsPerVector: ((semantic == .texcoord) ? 2 : 3) , 
-                                                                bytesPerComponent: 4, 
-                                                                dataOffset: byteOffset, 
-                                                                dataStride: byteStride)
-                    geometrySources.append(geometrySource)
-                    
-                    byteOffset = byteOffset + ((semantic == .texcoord) ? 8 : 12)
-                }
-                
-                return (element, geometrySources)
-            } 
-        }
-        
-        return (nil, nil)
-    }
+
     
     /// convert glTF mesh into SCNGeometry
     ///
@@ -463,7 +358,7 @@ extension GLTF {
                             
                             if let json = try? JSONSerialization.data(withJSONObject: draco) {
                                 if let dracoMesh = try? JSONDecoder().decode(GLTFKHRDracoMeshCompressionExtension.self, from: json) {
-                                    let (dElement, dSources) = convertDracoMesh(dracoMesh)
+                                    let (dElement, dSources) = self.convertDracoMesh(dracoMesh)
                                     
                                     if (dElement != nil) {
                                         elements.append(dElement!)
@@ -663,7 +558,7 @@ extension GLTF {
     }
     
     // convert attributes name to SceneKit semantic
-    fileprivate func sourceSemantic(name:String) -> SCNGeometrySource.Semantic {
+    func sourceSemantic(name:String) -> SCNGeometrySource.Semantic {
         switch name {
         case "POSITION":
             return .vertex
@@ -717,7 +612,7 @@ extension GLTF {
                 scnMaterial.transparency = CGFloat(pbr.baseColorFactor[3])
                     
                 if let metallicRoughnessTextureInfo = pbr.metallicRoughnessTexture {
-                    if #available(OSX 10.13, *) {
+                    if #available(OSX 10.13, iOS 11.0, *) {
                         scnMaterial.metalness.textureComponents = .blue
                         scnMaterial.roughness.textureComponents = .green
                         self.loadTexture(index:metallicRoughnessTextureInfo.index, property: scnMaterial.metalness)
@@ -951,6 +846,9 @@ extension GLTFBuffer {
 
 extension GLTFImage {
     fileprivate func image(inDirectory directory:String) -> ImageClass? {
+        
+        os_unfair_lock_lock(&self.lock)
+        
         var image:ImageClass?
         if self.extras != nil {
             image = self.extras!["image"] as? ImageClass
@@ -965,6 +863,7 @@ extension GLTFImage {
                 print(error)
             }
         }
+        os_unfair_lock_unlock(&self.lock)
         return image
     } 
 }
