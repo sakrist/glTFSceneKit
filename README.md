@@ -13,8 +13,10 @@
  - [ ] Tests
  - [ ] Convert SceneKit to GLTF
  
- ## Dependecies
-    * [DracoSwiftPackage](https://github.com/3D4Medical/DracoSwiftPackage) - custom Draco package for decode   
+## Dependecies
+ 
+  - [DracoSwiftPackage](https://github.com/3D4Medical/DracoSwiftPackage) - custom Draco package for decode   
+
 
 Example:
 ```swift
