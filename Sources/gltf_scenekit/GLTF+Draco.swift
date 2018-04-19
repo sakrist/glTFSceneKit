@@ -96,7 +96,7 @@ extension GLTF {
             var descsriptors:UnsafeMutablePointer<DAttributeDescriptor>?
             var descsriptorsCount:UInt = 0
             
-            if draco_decode(uint8Ptr, UInt(data.count), &verts, &lengthVerts, &inds, &lengthInds, &descsriptors, &descsriptorsCount) {
+            if draco_decode(uint8Ptr, UInt(data.count), &verts, &lengthVerts, &inds, &lengthInds, &descsriptors, &descsriptorsCount, false) {
                 
                 indicies = Data.init(bytes: UnsafeRawPointer(inds)!, count: Int(lengthInds)*4)
                 verticies = Data.init(bytes: UnsafeRawPointer(verts)!, count: Int(lengthVerts)*4)
