@@ -157,7 +157,7 @@
 		OBJ_6 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		OBJ_9 /* GLTF+SceneKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GLTF+SceneKit.swift"; sourceTree = "<group>"; };
 		"gltf_scenekit::gltf_scenekit::Product" /* gltf_scenekit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = gltf_scenekit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		"gltf_scenekit::gltf_scenekitTests::Product" /* gltf_scenekitTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = gltf_scenekitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		"gltf_scenekit::gltf_scenekitTests::Product" /* gltf_scenekitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = gltf_scenekitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -614,12 +614,16 @@
 		OBJ_100 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
 		};
 		OBJ_101 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				VALID_ARCHS = x86_64;
 			};
 			name = Release;
 		};
@@ -693,11 +697,17 @@
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/.build/checkouts/DracoSwiftPackage.git-6830057821000934015",
+					"$(SRCROOT)/.build/checkouts/**",
 				);
 				INFOPLIST_FILE = gltf_scenekit.xcodeproj/gltf_scenekitTests_Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @loader_path/Frameworks";
-				OTHER_LDFLAGS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/.build/checkouts/**";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lc++",
+					"-ldraco",
+				);
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				SWIFT_VERSION = 4.0;
 				TARGET_NAME = gltf_scenekitTests;
@@ -714,11 +724,17 @@
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/.build/checkouts/DracoSwiftPackage.git-6830057821000934015",
+					"$(SRCROOT)/.build/checkouts/**",
 				);
 				INFOPLIST_FILE = gltf_scenekit.xcodeproj/gltf_scenekitTests_Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @loader_path/Frameworks";
-				OTHER_LDFLAGS = "$(inherited)";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/.build/checkouts/**";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lc++",
+					"-ldraco",
+				);
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				SWIFT_VERSION = 4.0;
 				TARGET_NAME = gltf_scenekitTests;

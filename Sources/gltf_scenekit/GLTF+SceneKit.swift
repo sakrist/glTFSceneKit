@@ -857,7 +857,17 @@ extension GLTFBuffer {
         os_unfair_lock_unlock(&self.lock)
         
         return data
-    } 
+    }
+    
+    func data(inDirectory directory:String, completionHandler: @escaping ( _ : Data? ) -> Void) {
+        var data:Data? = nil
+        do {
+            data = try loadURI(uri: self.uri!, inDirectory: directory)
+        } catch {
+            print(error)
+        }
+        completionHandler(data)
+    }
 }
 
 extension GLTFImage {
