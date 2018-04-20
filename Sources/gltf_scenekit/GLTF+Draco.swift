@@ -11,7 +11,7 @@ import Draco
 
 extension GLTF {
     
-    func convertDracoMesh(_ dracoMesh:GLTFKHRDracoMeshCompressionExtension) -> (SCNGeometryElement?, [SCNGeometrySource]?) {
+    func convertDracoMesh(_ dracoMesh:GLTFKHRDracoMeshCompressionExtension, triangleStrip:Bool = true) -> (SCNGeometryElement?, [SCNGeometrySource]?) {
         let bufferViewIndex = dracoMesh.bufferView
         
         if (self.bufferViews?.count)! <= bufferViewIndex {
@@ -30,14 +30,16 @@ extension GLTF {
                     data = data.subdata(in: start..<end)
                 }
                 
-                let (indicesData, verticies, stride) = self.uncompressDracoData(data)
+                let (indicesData, verticies, stride) = self.uncompressDracoData(data, triangleStrip: triangleStrip)
                 
-                let primitiveCount = (indicesData.count / 12)
+                let indexSize = MemoryLayout<UInt32>.size;
+                
+                let primitiveCount = (triangleStrip) ? ((indicesData.count / indexSize) - 2) : (indicesData.count / (indexSize * 3)) 
                 
                 let element = SCNGeometryElement.init(data: indicesData,
-                                                      primitiveType: .triangles,
+                                                      primitiveType: ((triangleStrip) ? .triangleStrip : .triangles),
                                                       primitiveCount: primitiveCount,
-                                                      bytesPerIndex: 4)
+                                                      bytesPerIndex: indexSize)
                 
                 
                 let byteStride = (bufferView.byteStride != nil) ? bufferView.byteStride! : (stride * 4)
@@ -80,7 +82,7 @@ extension GLTF {
     ///
     /// - Parameter data: draco compressed data
     /// - Returns: Indices data for triangles primitives, Vertices data and stride for vertices data
-    func uncompressDracoData(_ data:Data) -> (Data, Data, Int) {
+    func uncompressDracoData(_ data:Data, triangleStrip:Bool = false) -> (Data, Data, Int) {
         
         var indicies:Data = Data()
         var verticies:Data = Data()
@@ -96,7 +98,7 @@ extension GLTF {
             var descsriptors:UnsafeMutablePointer<DAttributeDescriptor>?
             var descsriptorsCount:UInt = 0
             
-            if draco_decode(uint8Ptr, UInt(data.count), &verts, &lengthVerts, &inds, &lengthInds, &descsriptors, &descsriptorsCount, false) {
+            if draco_decode(uint8Ptr, UInt(data.count), &verts, &lengthVerts, &inds, &lengthInds, &descsriptors, &descsriptorsCount, triangleStrip) {
                 
                 indicies = Data.init(bytes: UnsafeRawPointer(inds)!, count: Int(lengthInds)*4)
                 verticies = Data.init(bytes: UnsafeRawPointer(verts)!, count: Int(lengthVerts)*4)
