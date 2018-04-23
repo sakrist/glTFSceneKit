@@ -40,7 +40,7 @@ open class GLTFTexture : NSObject, Codable {
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        extensions = try? container.decode([String: Any].self, forKey: .extensions)
+        extensions = try? container.decode([String: GLTF_3D4MCompressedTextureExtension].self, forKey: .extensions)        
         extras = try? container.decode([String: Any].self, forKey: .extras)
         name = try? container.decode(String.self, forKey: .name)
         sampler = try? container.decode(Int.self, forKey: .sampler)

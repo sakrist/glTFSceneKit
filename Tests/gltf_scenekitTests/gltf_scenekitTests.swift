@@ -1,4 +1,5 @@
 import XCTest
+import SceneKit
 @testable import gltf_scenekit
 
 let jsonString = """
@@ -8,13 +9,22 @@ let jsonString = """
 
 class gltf_scenekitTests: XCTestCase {
     func testGLTFinit() {
+     
+        let view = SCNView()
+        
         
         let jsonData = jsonString.data(using: .utf8)
-        
         let decoder = JSONDecoder()
-        let glTF = try? decoder.decode(GLTF.self, from: jsonData!)
         
-        XCTAssert(glTF != nil)
+        self.measure {
+            let glTF = try? decoder.decode(GLTF.self, from: jsonData!)
+            
+            glTF?.convertToScene(view:view, directoryPath:"", multiThread:false)
+            
+        }
+        
+        
+//        XCTAssert(glTF != nil)
         
     }
 

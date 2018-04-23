@@ -119,6 +119,9 @@ extension GLTF {
             
             // run in multi-thread or single
             if (multiThread) {
+                
+                let start = Date() 
+                
                 // get global worker 
                 let worker = DispatchQueue.global()
                 let group = DispatchGroup()
@@ -136,6 +139,8 @@ extension GLTF {
                 // completion
                 group.notify(queue: worker) {
                     self._finalize()
+                    
+                    print("load glTF \(-1000 * start.timeIntervalSinceNow)")
                 }
             } else {
                 for nodeIndex in sceneGlTF.nodes! {
@@ -361,27 +366,18 @@ extension GLTF {
                     }
                     
                     // get sources from attributes information
-                    sources.append(contentsOf: self.loadSources(primitive.attributes))
+                    sources.append(contentsOf: self.geometrySources(primitive.attributes))
                     
                     // check on draco extension
-                    if let primitiveExtensions = primitive.extensions {
-                        if let draco = primitiveExtensions[dracoExtensionKey] {
-//                            let value = draco as [String : Any]
-                            
-                            if let json = try? JSONSerialization.data(withJSONObject: draco) {
-                                if let dracoMesh = try? JSONDecoder().decode(GLTFKHRDracoMeshCompressionExtension.self, from: json) {
-                                    let (dElement, dSources) = self.convertDracoMesh(dracoMesh)
-                                    
-                                    if (dElement != nil) {
-                                        elements.append(dElement!)
-                                    }
-                                    
-                                    if (dSources != nil) {
-                                        sources.append(contentsOf: dSources!)
-                                    }
-                                    
-                                }
-                            }
+                    if let dracoMesh = primitive.extensions![dracoExtensionKey] as? GLTFKHRDracoMeshCompressionExtension {
+                        let (dElement, dSources) = self.convertDracoMesh(dracoMesh)
+                        
+                        if (dElement != nil) {
+                            elements.append(dElement!)
+                        }
+                        
+                        if (dSources != nil) {
+                            sources.append(contentsOf: dSources!)
                         }
                     }
                     
@@ -399,7 +395,7 @@ extension GLTF {
                         let morpher = SCNMorpher()
                         for targetIndex in 0..<targets.count {
                             let target = targets[targetIndex]
-                            let sourcesMorph = loadSources(target)
+                            let sourcesMorph = geometrySources(target)
                             let geometryMorph = SCNGeometry(sources: sourcesMorph, elements: nil)
                             morpher.targets.append(geometryMorph)
                         }
@@ -453,7 +449,7 @@ extension GLTF {
     ///
     /// - Parameter attributes: dictionary of accessors
     /// - Returns: array of SCNGeometrySource objects
-    fileprivate func loadSources(_ attributes:[String:Int]) -> [SCNGeometrySource]  {
+    fileprivate func geometrySources(_ attributes:[String:Int]) -> [SCNGeometrySource]  {
         var geometrySources = [SCNGeometrySource]()
         for (key, accessorIndex) in attributes {
             if self.accessors != nil && self.bufferViews != nil {
@@ -704,15 +700,11 @@ extension GLTF {
                 property.contents = texture.extras!["texture"]
                 loaded = true
             } else if (texture.extensions != nil) {
-                if let descriptorJson = texture.extensions![compressedTextureExtensionKey] {
-                    if let json = try? JSONSerialization.data(withJSONObject: descriptorJson) {
-                        if let descriptor = try? JSONDecoder().decode(GLTF_3D4MCompressedTextureExtension.self, from: json) {
-                            if let textureCompressed = createCompressedTexture(descriptor) {
-                                texture.extras = ["texture":textureCompressed as Any]
-                                property.contents = textureCompressed
-                                loaded = true
-                            }
-                        }
+                if let descriptor = (texture.extensions![compressedTextureExtensionKey] as? GLTF_3D4MCompressedTextureExtension) {   
+                    if let textureCompressed = createCompressedTexture(descriptor) {
+                        texture.extras = ["texture":textureCompressed as Any]
+                        property.contents = textureCompressed
+                        loaded = true
                     }
                 }
             }
