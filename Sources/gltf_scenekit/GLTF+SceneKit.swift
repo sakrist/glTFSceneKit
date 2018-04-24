@@ -135,6 +135,8 @@ extension GLTF {
     }
     
     
+    
+    
     // MARK: - Nodes
     
     fileprivate func buildNode(index:Int) -> SCNNode {
@@ -364,6 +366,10 @@ extension GLTF {
     // get data by accessor
     func loadAcessor(_ accessor:GLTFAccessor) -> (Data, Int, Int)? {
         
+        if accessor.bufferView == nil {
+            return nil
+        }
+        
         if let (bufferView, data) = try? requestData(bufferView: accessor.bufferView!) { 
             
             var addAccessorOffset = false
@@ -386,6 +392,7 @@ extension GLTF {
             let byteOffset = ((!addAccessorOffset) ? accessor.byteOffset : 0)
             return (d, byteStride, byteOffset)
         }
+        
         return nil
     }
     
@@ -399,7 +406,7 @@ extension GLTF {
             return .normal
         case "TANGENT":
             return .tangent
-        case "COLOR":
+        case "COLOR", "COLOR_0", "COLOR_1", "COLOR_2":
             return .color
         case "TEXCOORD_0", "TEXCOORD_1", "TEXCOORD_2", "TEXCOORD_3", "TEXCOORD_4":
             return .texcoord

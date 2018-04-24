@@ -12,67 +12,59 @@ import Draco
 extension GLTF {
     
     func convertDracoMesh(_ dracoMesh:GLTFKHRDracoMeshCompressionExtension, triangleStrip:Bool = true) -> (SCNGeometryElement?, [SCNGeometrySource]?) {
-        let bufferViewIndex = dracoMesh.bufferView
         
-        if (self.bufferViews?.count)! <= bufferViewIndex {
-            return (nil, nil)
-        }
-        
-        let bufferView = self.bufferViews![bufferViewIndex]
-        if self.buffers != nil && bufferView.buffer < self.buffers!.count { 
-            let buffer = self.buffers![bufferView.buffer]
-            if var data = buffer.data(inDirectory:self.directory, cache: false) {
+        if let (bufferView, data_) =  try? requestData(bufferView: dracoMesh.bufferView) {
                 
-                let start = bufferView.byteOffset
-                let end = bufferView.byteLength 
+            let start = bufferView.byteOffset
+            let end = bufferView.byteLength 
+            var data = data_;
+            
+            if start != 0 && end != data.count {
+                data = data.subdata(in: start..<end)
+            }
+            
+            let (indicesData, verticies, stride) = self.uncompressDracoData(data, triangleStrip: triangleStrip)
+            
+            let indexSize = MemoryLayout<UInt32>.size;
+            
+            let primitiveCount = (triangleStrip) ? ((indicesData.count / indexSize) - 2) : (indicesData.count / (indexSize * 3)) 
+            
+            let element = SCNGeometryElement.init(data: indicesData,
+                                                  primitiveType: ((triangleStrip) ? .triangleStrip : .triangles),
+                                                  primitiveCount: primitiveCount,
+                                                  bytesPerIndex: indexSize)
+            
+            
+            let byteStride = (bufferView.byteStride != nil) ? bufferView.byteStride! : (stride * 4)
+            let count = verticies.count / byteStride
+            var byteOffset = 0
+            
+            var geometrySources = [SCNGeometrySource]()
+            
+            // sort attributes
+            var sortedAttributes:[String] = [String](repeating: "", count: dracoMesh.attributes.count)
+            for pair in dracoMesh.attributes {
+                sortedAttributes[pair.value] = pair.key
+            }
+            
+            for key in sortedAttributes {
+                // convert string semantic to SceneKit enum type 
+                let semantic = self.sourceSemantic(name:key)
                 
-                if start != 0 && end != data.count {
-                    data = data.subdata(in: start..<end)
-                }
+                let geometrySource = SCNGeometrySource.init(data: verticies, 
+                                                            semantic: semantic, 
+                                                            vectorCount: count, 
+                                                            usesFloatComponents: true, 
+                                                            componentsPerVector: ((semantic == .texcoord) ? 2 : 3) , 
+                                                            bytesPerComponent: 4, 
+                                                            dataOffset: byteOffset, 
+                                                            dataStride: byteStride)
+                geometrySources.append(geometrySource)
                 
-                let (indicesData, verticies, stride) = self.uncompressDracoData(data, triangleStrip: triangleStrip)
-                
-                let indexSize = MemoryLayout<UInt32>.size;
-                
-                let primitiveCount = (triangleStrip) ? ((indicesData.count / indexSize) - 2) : (indicesData.count / (indexSize * 3)) 
-                
-                let element = SCNGeometryElement.init(data: indicesData,
-                                                      primitiveType: ((triangleStrip) ? .triangleStrip : .triangles),
-                                                      primitiveCount: primitiveCount,
-                                                      bytesPerIndex: indexSize)
-                
-                
-                let byteStride = (bufferView.byteStride != nil) ? bufferView.byteStride! : (stride * 4)
-                let count = verticies.count / byteStride
-                var byteOffset = 0
-                
-                var geometrySources = [SCNGeometrySource]()
-                
-                // sort attributes
-                var sortedAttributes:[String] = [String](repeating: "", count: dracoMesh.attributes.count)
-                for pair in dracoMesh.attributes {
-                    sortedAttributes[pair.value] = pair.key
-                }
-                
-                for key in sortedAttributes {
-                    // convert string semantic to SceneKit enum type 
-                    let semantic = self.sourceSemantic(name:key)
-                    
-                    let geometrySource = SCNGeometrySource.init(data: verticies, 
-                                                                semantic: semantic, 
-                                                                vectorCount: count, 
-                                                                usesFloatComponents: true, 
-                                                                componentsPerVector: ((semantic == .texcoord) ? 2 : 3) , 
-                                                                bytesPerComponent: 4, 
-                                                                dataOffset: byteOffset, 
-                                                                dataStride: byteStride)
-                    geometrySources.append(geometrySource)
-                    
-                    byteOffset = byteOffset + ((semantic == .texcoord) ? 8 : 12)
-                }
-                
-                return (element, geometrySources)
-            } 
+                byteOffset = byteOffset + ((semantic == .texcoord) ? 8 : 12)
+            }
+            
+            return (element, geometrySources)
         }
         
         return (nil, nil)
