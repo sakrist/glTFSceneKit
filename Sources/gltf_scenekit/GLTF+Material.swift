@@ -119,9 +119,10 @@ extension GLTF {
     
     // get image by index
     fileprivate func image(byIndex index:Int) -> ImageClass? {
-        if self.images != nil {
-            let image = self.images![index]
-            return image.image(inDirectory:self.directory)
+        if let gltf_image = self.images?[index] {
+            if let image = try? self.loader.load(resource: gltf_image) {
+                return image
+            }
         }
         return nil
     }
@@ -177,29 +178,6 @@ extension GLTF {
     }
 }
 
-extension GLTFImage {
-    fileprivate func image(inDirectory directory:String) -> ImageClass? {
-        
-        os_unfair_lock_lock(&self.lock)
-        
-        var image:ImageClass?
-        if self.extras != nil {
-            image = self.extras!["image"] as? ImageClass
-        }
-        if image == nil {
-            do {
-                if let imageData = try loadURI(uri: self.uri!, inDirectory: directory) {
-                    image = ImageClass.init(data: imageData)
-                }
-                self.extras = ["image": image as Any]
-            } catch {
-                print(error)
-            }
-        }
-        os_unfair_lock_unlock(&self.lock)
-        return image
-    } 
-}
 
 extension GLTFSampler {
     fileprivate func magFilterScene() -> SCNFilterMode {

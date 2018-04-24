@@ -58,35 +58,6 @@ extension SCNMatrix4 {
     }
 }
 
-func loadURI(uri:String, inDirectory directory:String) throws -> Data? {
-    var data = uri.base64Decoded()
-    if data == nil {
-        
-        if (uri.contains("http")) {
-            if let url = URL.init(string: uri) {
-                data = try Data.init(contentsOf: url)
-                return data
-            }
-        }
-        
-        let filepath = [directory, uri].joined(separator: "/") 
-        if FileManager.default.fileExists(atPath: filepath) {
-            let url = URL(fileURLWithPath: filepath)
-            do {
-                data = try Data.init(contentsOf: url)
-            } catch {
-                throw "Can't load file at \(url) \(error)"
-            }
-        } else {
-            throw "Can't find file at \(filepath)"
-        }
-    } else {
-        return (data == nil) ? nil : Data(bytes: [UInt8](data!))
-    }
-    return data
-}
-
-
 extension String {
     //: ### Base64 encoding a string
     func base64Encoded() -> String? {

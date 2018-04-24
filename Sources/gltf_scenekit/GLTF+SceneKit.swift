@@ -21,7 +21,7 @@ extension GLTF {
         static var cache_nodes:String = "cache_nodes"
         static var cache_materials:String = "cache_materials"
         static var animation_duration:String = "animation_duration"
-        static var gltf_directory:String = "gltf_directory"
+        static var resource_loader:String = "resource_loader"
         static var camera_created:String = "camera_created"
         static var scnview:String = "scnview"
     }
@@ -29,11 +29,6 @@ extension GLTF {
     var cache_nodes:[SCNNode?]? {
         get { return objc_getAssociatedObject(self, &Keys.cache_nodes) as? [SCNNode?] }
         set { objc_setAssociatedObject(self, &Keys.cache_nodes, newValue, .OBJC_ASSOCIATION_RETAIN) }
-    }
-    
-    var directory:String {
-        get { return (objc_getAssociatedObject(self, &Keys.gltf_directory) ?? "") as! String }
-        set { objc_setAssociatedObject(self, &Keys.gltf_directory, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
     
     var cameraCreated:Bool {
@@ -51,13 +46,13 @@ extension GLTF {
     /// - Parameter directory: location of other related resources to gltf
     /// - Returns: instance of Scene
     @objc
-    open func convertToScene(view:SCNView, directoryPath:String, multiThread:Bool = true) -> SCNScene? {
+    open func convertToScene(view:SCNView, directoryPath:String?, multiThread:Bool = true) -> SCNScene? {
         let scene:SCNScene = SCNScene.init()
         return load(to: scene, view: view, directoryPath: directoryPath, multiThread:multiThread)
     }
     
     @objc
-    open func load(to scene:SCNScene, view:SCNView, directoryPath:String = "", multiThread:Bool = true) -> SCNScene? {
+    open func load(to scene:SCNScene, view:SCNView, directoryPath:String? , multiThread:Bool = true) -> SCNScene? {
         self.view = view
         
         if (self.extensionsUsed != nil) {
@@ -77,7 +72,11 @@ extension GLTF {
             }
         }
         
-        self.directory = directoryPath
+        if directoryPath != nil {
+            self.loader.directoryPath = directoryPath!
+        }
+        
+        
         if self.scenes != nil && self.scene != nil {
             let sceneGlTF = self.scenes![(self.scene)!]
             if let sceneName = sceneGlTF.name {
@@ -100,7 +99,7 @@ extension GLTF {
                 for nodeIndex in sceneGlTF.nodes! {
                     group.enter()
                     worker.async {
-                        let node = self.buildNode(index:nodeIndex)
+                        let node = self.buildNode(nodeIndex:nodeIndex)
                         scene.rootNode.addChildNode(node)
                         group.leave()
                     }
@@ -114,7 +113,7 @@ extension GLTF {
                 }
             } else {
                 for nodeIndex in sceneGlTF.nodes! {
-                    let node = self.buildNode(index:nodeIndex)
+                    let node = self.buildNode(nodeIndex:nodeIndex)
                     scene.rootNode.addChildNode(node)
                 }
                 self._finalize()
@@ -139,9 +138,9 @@ extension GLTF {
     
     // MARK: - Nodes
     
-    fileprivate func buildNode(index:Int) -> SCNNode {
+    fileprivate func buildNode(nodeIndex:Int) -> SCNNode {
         let scnNode = SCNNode()
-        if let node = self.nodes?[index] {
+        if let node = self.nodes?[nodeIndex] {
             scnNode.name = node.name
             
             // Get camera, if it has reference on any. 
@@ -171,11 +170,11 @@ extension GLTF {
             // bake all transformations into one mtarix
             scnNode.transform = bakeTransformationMatrix(node)
             
-            self.cache_nodes?[index] = scnNode
+            self.cache_nodes?[nodeIndex] = scnNode
             
             if let children = node.children {
                 for i in children {
-                    let subSCNNode = buildNode(index:i)
+                    let subSCNNode = buildNode(nodeIndex:i)
                     scnNode.addChildNode(subSCNNode)
                 }
             }
@@ -354,7 +353,8 @@ extension GLTF {
     func requestData(bufferView:Int) throws -> (GLTFBufferView, Data) {
         if let bufferView = self.bufferViews?[bufferView] {  
             let buffer = self.buffers![bufferView.buffer]
-            if let data = buffer.data(inDirectory: self.directory, cache:true) {
+            
+            if let data = try self.loader.load(resource: buffer) {
                 return (bufferView, data)
             }
             throw "Can't load data!"
@@ -423,13 +423,13 @@ extension GLTF {
     fileprivate func cleanExtras() {
         if self.buffers != nil {
             for buffer in self.buffers! {
-                buffer.extras = nil
+                buffer.data = nil
             }
         }
         
         if self.images != nil {
             for image in self.images! {
-                image.extras = nil
+                image.image = nil
             }
         }
         if self.textures != nil {
@@ -440,44 +440,6 @@ extension GLTF {
         
         self.cache_nodes?.removeAll()
         self.cache_materials?.removeAll()
-    }
-}
-
-
-extension GLTFBuffer {
-    
-    func data(inDirectory directory:String, cache:Bool = true) -> Data? {
-        
-        os_unfair_lock_lock(&self.lock)
-        
-        var data:Data?
-        if self.extras != nil {
-            data = self.extras!["data"] as? Data
-        }
-        if data == nil {
-            do {
-                data = try loadURI(uri: self.uri!, inDirectory: directory)
-                if (cache) {
-                    self.extras = ["data": data as Any]
-                }
-            } catch {
-                print(error)
-            }
-        }
-        
-        os_unfair_lock_unlock(&self.lock)
-        
-        return data
-    }
-    
-    func data(inDirectory directory:String, completionHandler: @escaping ( _ : Data? ) -> Void) {
-        var data:Data? = nil
-        do {
-            data = try loadURI(uri: self.uri!, inDirectory: directory)
-        } catch {
-            print(error)
-        }
-        completionHandler(data)
     }
 }
 

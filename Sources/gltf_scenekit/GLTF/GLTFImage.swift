@@ -57,8 +57,6 @@ open class GLTFImage : NSObject, Codable {
     /// The uri of the image.
     public var uri:String?
     
-    var lock = os_unfair_lock_s()
-
     private enum CodingKeys: String, CodingKey {
         case bufferView
         case extensions
