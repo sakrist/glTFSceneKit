@@ -12,68 +12,38 @@ import SceneKit
 
 let dracoExtensionKey = "KHR_draco_mesh_compression"
 let compressedTextureExtensionKey = "3D4M_compressed_texture"
-
 let supportedExtensions = [dracoExtensionKey, compressedTextureExtensionKey]
 
 extension GLTF {
 
     private static var associationMap = [String: Any]()
-    private struct Keys {
+    struct Keys {
         static var cache_nodes:String = "cache_nodes"
         static var cache_materials:String = "cache_materials"
         static var animation_duration:String = "animation_duration"
-        static var _directory:String = "directory"
-        static var _cameraCreated:String = "_cameraCreated"
+        static var gltf_directory:String = "gltf_directory"
+        static var camera_created:String = "camera_created"
+        static var scnview:String = "scnview"
     }
     
-    private static var lock_nodes = os_unfair_lock_s()
-    private var cache_nodes:[SCNNode?]? {
-        get { 
-            os_unfair_lock_lock(&GLTF.lock_nodes)
-            let node = GLTF.associationMap[Keys.cache_nodes] as? [SCNNode?]
-            os_unfair_lock_unlock(&GLTF.lock_nodes)
-            return node
-        }
-        set {
-            os_unfair_lock_lock(&GLTF.lock_nodes)
-            if newValue != nil { GLTF.associationMap[Keys.cache_nodes] = newValue } 
-            os_unfair_lock_unlock(&GLTF.lock_nodes)
-        }
-    }
-    
-    private static var lock_materials = os_unfair_lock_s()
-    private var cache_materials:[SCNMaterial?]? {
-        get { 
-            os_unfair_lock_lock(&GLTF.lock_materials)
-            let material = GLTF.associationMap[Keys.cache_materials] as? [SCNMaterial?] 
-            os_unfair_lock_unlock(&GLTF.lock_materials)
-            return material
-        }
-        set { 
-            os_unfair_lock_lock(&GLTF.lock_materials)
-            if newValue != nil { GLTF.associationMap[Keys.cache_materials] = newValue } 
-            os_unfair_lock_unlock(&GLTF.lock_materials)
-        }
-    }
-    
-    private var animationDuration:Double {
-        get { return (GLTF.associationMap[Keys.animation_duration] as? Double) ?? 0 }
-        set { GLTF.associationMap[Keys.animation_duration] = newValue }
+    var cache_nodes:[SCNNode?]? {
+        get { return objc_getAssociatedObject(self, &Keys.cache_nodes) as? [SCNNode?] }
+        set { objc_setAssociatedObject(self, &Keys.cache_nodes, newValue, .OBJC_ASSOCIATION_RETAIN) }
     }
     
     var directory:String {
-        get { return (GLTF.associationMap[Keys._directory] ?? "") as! String  }
-        set { GLTF.associationMap[Keys._directory] = newValue }
+        get { return (objc_getAssociatedObject(self, &Keys.gltf_directory) ?? "") as! String }
+        set { objc_setAssociatedObject(self, &Keys.gltf_directory, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
-
-    private var cameraCreated:Bool {
-        get { return (GLTF.associationMap[Keys._cameraCreated] as? Bool) ?? false }
-        set { GLTF.associationMap[Keys._cameraCreated] = newValue }
+    
+    var cameraCreated:Bool {
+        get { return (objc_getAssociatedObject(self, &Keys.camera_created) as? Bool) ?? false }
+        set { objc_setAssociatedObject(self, &Keys.camera_created, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
     
     var view:SCNView? {
-        get { return (GLTF.associationMap["view"] as? SCNView)  }
-        set { GLTF.associationMap["view"] = newValue }
+        get { return objc_getAssociatedObject(self, &Keys.scnview) as? SCNView }
+        set { objc_setAssociatedObject(self, &Keys.scnview, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
     
     /// Convert GLTF to SceneKit scene. 
@@ -164,110 +134,12 @@ extension GLTF {
         GLTF.associationMap = [String: Any]()
     }
     
-    fileprivate func parseAnimations() {
-        if self.animations != nil {
-            for animation in self.animations! {
-                for channel in animation.channels {
-                    let sampler = animation.samplers[channel.sampler]
-                    do {
-                        try constructAnimation(sampler: sampler, target:channel.target)
-                    } catch {
-                        print(error)
-                    }
-                }
-            }
-        }
-        
-        for node in self.cache_nodes! {
-            let group = node?.value(forUndefinedKey: "group") as? CAAnimationGroup
-            if group != nil && self.animationDuration != 0 {
-                group?.duration = self.animationDuration
-            }
-        }
-    }
-    
-    fileprivate func constructAnimation(sampler:GLTFAnimationSampler, target:GLTFAnimationChannelTarget ) throws {
-        
-        let node:SCNNode = self.cache_nodes![target.node!]!
-        
-        let accessorInput = self.accessors![sampler.input]
-        let accessorOutput = self.accessors![sampler.output]
-        
-        let keyTimesFloat = loadAccessorAsArray(accessorInput) as! [Float]
-        let duration = Double(keyTimesFloat.last!)
-        let f_duration = Float(duration)
-        let keyTimes: [NSNumber] = keyTimesFloat.map { NSNumber(value: $0 / f_duration ) }
-        
-        let values_ = loadAccessorAsArray(accessorOutput)
-        
-        var groupDuration:Double = 0
-        
-        var caanimations:[CAAnimation] = [CAAnimation]() 
-        if target.path == .weights {
-            let weightPaths = node.value(forUndefinedKey: "weightPaths") as? [String]
-                        
-            groupDuration = duration
-            
-            var keyAnimations = [CAKeyframeAnimation]()
-            for path in weightPaths! {
-                let animation = CAKeyframeAnimation()
-                animation.keyPath = path
-                animation.keyTimes = keyTimes
-                animation.duration = duration
-                keyAnimations.append(animation)
-            }
-                        
-            let step = keyAnimations.count
-            let dataLength = values_.count / step
-            guard dataLength == keyTimes.count else {
-                throw "data count mismatch: \(dataLength) != \(keyTimes.count)"
-            }
-            
-            for i in 0..<keyAnimations.count {
-                var valueIndex = i
-                var v = [NSNumber]()
-                v.reserveCapacity(dataLength)
-                for _ in 0..<dataLength {
-                    v.append(NSNumber(value: (values_[valueIndex] as! Float) ))
-                    valueIndex += step
-                }
-                keyAnimations[i].values = v
-            }
-            
-            caanimations = keyAnimations
-            
-        } else {
-            let keyFrameAnimation = CAKeyframeAnimation()
-            
-            self.animationDuration = max(self.animationDuration, duration)
-            
-            keyFrameAnimation.keyPath = target.path.scn()
-            keyFrameAnimation.keyTimes = keyTimes
-            keyFrameAnimation.values = values_
-            keyFrameAnimation.repeatCount = .infinity
-            keyFrameAnimation.duration = duration
-            
-            caanimations.append(keyFrameAnimation)
-            
-            groupDuration = self.animationDuration
-        }
-        
-        let group = (node.value(forUndefinedKey: "group") as? CAAnimationGroup) ?? CAAnimationGroup()
-        node.setValue(group, forUndefinedKey: "group")
-        var animations = group.animations ?? []
-        animations.append(contentsOf: caanimations)
-        group.animations = animations 
-        group.duration = groupDuration
-        group.repeatCount = .infinity
-        node.addAnimation(group, forKey: target.path.rawValue)
-    }
     
     // MARK: - Nodes
     
     fileprivate func buildNode(index:Int) -> SCNNode {
         let scnNode = SCNNode()
-        if self.nodes != nil {
-            let node = self.nodes![index]
+        if let node = self.nodes?[index] {
             scnNode.name = node.name
             
             // Get camera, if it has reference on any. 
@@ -352,8 +224,8 @@ extension GLTF {
     ///   - scnNode: SceneKit node, which is going to be parent node 
     fileprivate func geometryNode(_ node:GLTFNode, _ scnNode:SCNNode) {
         if let meshIndex = node.mesh {
-            if self.meshes != nil {
-                let mesh = self.meshes![meshIndex]
+            if let mesh = self.meshes?[meshIndex] {
+                
                 scnNode.name = mesh.name
                 for primitive in mesh.primitives {
                     
@@ -369,7 +241,7 @@ extension GLTF {
                     sources.append(contentsOf: self.geometrySources(primitive.attributes))
                     
                     // check on draco extension
-                    if let dracoMesh = primitive.extensions![dracoExtensionKey] as? GLTFKHRDracoMeshCompressionExtension {
+                    if let dracoMesh = primitive.extensions?[dracoExtensionKey] as? GLTFKHRDracoMeshCompressionExtension {
                         let (dElement, dSources) = self.convertDracoMesh(dracoMesh)
                         
                         if (dElement != nil) {
@@ -385,8 +257,9 @@ extension GLTF {
                     let geometry = SCNGeometry.init(sources: sources, elements: elements)
                     
                     if let materialIndex = primitive.material {
-                        let scnMaterial = self.material(index:materialIndex)
-                        geometry.materials = [scnMaterial]
+                        self.loadMaterial(index:materialIndex, completionHandler: { scnMaterial in 
+                            geometry.materials = [scnMaterial]
+                        })
                     }
                     
                     let primitiveNode = SCNNode.init(geometry: geometry)
@@ -411,10 +284,9 @@ extension GLTF {
     
     fileprivate func geometryElement(_ primitive: GLTFMeshPrimitive) -> SCNGeometryElement? {
         if let indicesIndex = primitive.indices {
-            if self.accessors != nil && self.bufferViews != nil {
-                let accessor = self.accessors![indicesIndex]
- 
-                if let (indicesData, _, _) = loadData(accessor) {
+            if let accessor = self.accessors?[indicesIndex] {
+                
+                if let (indicesData, _, _) = loadAcessor(accessor) {
                     
                     var count = accessor.count
                     
@@ -452,9 +324,9 @@ extension GLTF {
     fileprivate func geometrySources(_ attributes:[String:Int]) -> [SCNGeometrySource]  {
         var geometrySources = [SCNGeometrySource]()
         for (key, accessorIndex) in attributes {
-            if self.accessors != nil && self.bufferViews != nil {
-                let accessor = self.accessors![accessorIndex]
-                if let (data, byteStride, byteOffset) = loadData(accessor) {
+            if let accessor = self.accessors?[accessorIndex] {
+                
+                if let (data, byteStride, byteOffset) = loadAcessor(accessor) {
                     
                     let count = accessor.count
                     
@@ -476,11 +348,23 @@ extension GLTF {
         return geometrySources
     }
     
-    // get data by accessor
-    fileprivate func loadData(_ accessor:GLTFAccessor) -> (Data, Int, Int)? {
-        let bufferView = self.bufferViews![accessor.bufferView!] 
-        if self.buffers != nil && bufferView.buffer < self.buffers!.count { 
+    
+    func requestData(bufferView:Int) throws -> (GLTFBufferView, Data) {
+        if let bufferView = self.bufferViews?[bufferView] {  
             let buffer = self.buffers![bufferView.buffer]
+            if let data = buffer.data(inDirectory: self.directory, cache:true) {
+                return (bufferView, data)
+            }
+            throw "Can't load data!"
+        }
+        throw "Can't load data! Can't find bufferView or buffer" 
+    }
+    
+    
+    // get data by accessor
+    func loadAcessor(_ accessor:GLTFAccessor) -> (Data, Int, Int)? {
+        
+        if let (bufferView, data) = try? requestData(bufferView: accessor.bufferView!) { 
             
             var addAccessorOffset = false
             if (bufferView.byteStride == nil || accessor.components()*accessor.bytesPerElement() == bufferView.byteStride) {
@@ -489,81 +373,22 @@ extension GLTF {
             
             let count = accessor.count
             let byteStride = (bufferView.byteStride == nil) ? accessor.components()*accessor.bytesPerElement() : bufferView.byteStride!
-            let bytesLength = byteStride*count            
+            let bytesLength = byteStride*count
             
-            if var data = buffer.data(inDirectory:self.directory) {
-                
-                let start = bufferView.byteOffset+((addAccessorOffset) ? accessor.byteOffset : 0)
-                let end = start+bytesLength
-                
-                if start != 0 || end != data.count {
-                    data = data.subdata(in: start..<end)
-                }
-                    
-                let byteOffset = ((!addAccessorOffset) ? accessor.byteOffset : 0)
-                return (data, byteStride, byteOffset)
+            let start = bufferView.byteOffset+((addAccessorOffset) ? accessor.byteOffset : 0)
+            let end = start+bytesLength
+            
+            var d = data
+            if start != 0 || end != data.count {
+                d = data.subdata(in: start..<end)
             }
+            
+            let byteOffset = ((!addAccessorOffset) ? accessor.byteOffset : 0)
+            return (d, byteStride, byteOffset)
         }
         return nil
     }
     
-    fileprivate func loadAccessorAsArray(_ accessor:GLTFAccessor) -> [Any] {
-        var values = [Any]()
-        if let (data, _, _) = loadData(accessor) {
-            switch accessor.componentType {
-            case .BYTE:
-                values = data.int8Array
-                break
-            case .UNSIGNED_BYTE:
-                values = data.uint8Array
-                break
-            case .SHORT:
-                values = data.int16Array
-                break
-            case .UNSIGNED_SHORT:
-                values = data.uint16Array
-                break
-            case .UNSIGNED_INT:
-                values = data.uint32Array
-                break
-            case .FLOAT: 
-                do {
-                    switch accessor.type {
-                    case .SCALAR:
-                        values = data.floatArray
-                        break
-                    case .VEC2:
-                        values = data.vec2Array 
-                        break
-                    case .VEC3:
-                        values = data.vec3Array
-                        for i in 0..<values.count {
-                            values[i] = SCNVector3FromGLKVector3(values[i] as! GLKVector3)
-                        }
-                        break
-                    case .VEC4:
-                        values = data.vec4Array
-                        for i in 0..<values.count {
-                            values[i] = SCNVector4FromGLKVector4(values[i] as! GLKVector4)
-                        }
-                        break
-                    case .MAT2:
-                        break
-                    case .MAT3:
-                        break
-                    case .MAT4:
-                        values = data.mat4Array
-                        for i in 0..<values.count {
-                            values[i] = SCNMatrix4FromGLKMatrix4(values[i] as! GLKMatrix4)
-                        }
-                        break
-                    }
-                }
-                break
-            }
-        } 
-        return values
-    }
     
     // convert attributes name to SceneKit semantic
     func sourceSemantic(name:String) -> SCNGeometrySource.Semantic {
@@ -587,149 +412,6 @@ extension GLTF {
         }
     }
     
-    fileprivate func loadSkin(_ skin:Int, _ scnNode:SCNNode) {
-        // TODO: implement
-    }
-    
-    
-    // MARK: - Material
-    
-    // load material by index
-    fileprivate func material(index:Int) -> SCNMaterial {
-        var scnMaterial_ = self.cache_materials![index]
-        if scnMaterial_ == nil {
-            scnMaterial_ = SCNMaterial() 
-        }
-        let scnMaterial = scnMaterial_!
-        if self.materials != nil && index < (self.materials?.count)! {
-            let material = self.materials![index]
-            
-            os_unfair_lock_lock(&material.lock)
-            
-            scnMaterial.name = material.name
-            scnMaterial.isDoubleSided = material.doubleSided
-            
-            if let pbr = material.pbrMetallicRoughness {
-                scnMaterial.lightingModel = .physicallyBased
-                if let baseTextureInfo = pbr.baseColorTexture {
-                    self.loadTexture(index:baseTextureInfo.index, property: scnMaterial.diffuse)
-                } else {
-                    let color = (pbr.baseColorFactor.count < 4) ? [1, 1, 1, 1] : (pbr.baseColorFactor)
-                    scnMaterial.diffuse.contents = ColorClass(red: CGFloat(color[0]), green: CGFloat(color[1]), blue: CGFloat(color[2]), alpha: CGFloat(color[3]))
-                }
-                scnMaterial.transparency = CGFloat(pbr.baseColorFactor[3])
-                    
-                if let metallicRoughnessTextureInfo = pbr.metallicRoughnessTexture {
-                    if #available(OSX 10.13, iOS 11.0, *) {
-                        scnMaterial.metalness.textureComponents = .blue
-                        scnMaterial.roughness.textureComponents = .green
-                        self.loadTexture(index:metallicRoughnessTextureInfo.index, property: scnMaterial.metalness)
-                        self.loadTexture(index:metallicRoughnessTextureInfo.index, property: scnMaterial.roughness)
-                    } else {
-                        // Fallback on earlier versions
-                        if self.textures != nil &&  metallicRoughnessTextureInfo.index < (self.textures?.count)! {
-                            let texture = self.textures![metallicRoughnessTextureInfo.index]
-                            if texture.source != nil {
-                                
-                                loadSampler(sampler:texture.sampler, property: scnMaterial.roughness)
-                                loadSampler(sampler:texture.sampler, property: scnMaterial.metalness)
-                                
-                                let image = self.image(byIndex:texture.source!)
-                                if let images = try? image?.channels() {
-                                    scnMaterial.roughness.contents = images?[1]
-                                    scnMaterial.metalness.contents = images?[2]
-                                }
-                            }
-                        }
-                    }
-                    
-                } else {
-                    scnMaterial.metalness.contents = pbr.metallicFactor
-                    scnMaterial.roughness.contents = pbr.roughnessFactor
-                }
-            }
-
-            if let normalTextureInfo = material.normalTexture {
-                self.loadTexture(index: normalTextureInfo.index!, property: scnMaterial.normal)
-            }
-
-            if let occlusionTextureInfo = material.occlusionTexture {
-                self.loadTexture(index: occlusionTextureInfo.index!, property: scnMaterial.ambientOcclusion)
-                scnMaterial.ambientOcclusion.intensity = CGFloat(occlusionTextureInfo.strength)
-            }
-            
-            if let emissiveTextureInfo = material.emissiveTexture {
-                self.loadTexture(index: emissiveTextureInfo.index, property: scnMaterial.emission)
-            } else {
-                let color = (material.emissiveFactor.count < 3) ? [1, 1, 1] : (material.emissiveFactor)
-                scnMaterial.emission.contents = SCNVector4Make(SCNFloat(color[0]), SCNFloat(color[1]), SCNFloat(color[2]), 1.0)
-            }
-            
-            os_unfair_lock_unlock(&material.lock)
-        }
-        
-        return scnMaterial
-    }
-    
-    // get image by index
-    fileprivate func image(byIndex index:Int) -> ImageClass? {
-        if self.images != nil {
-            let image = self.images![index]
-            return image.image(inDirectory:self.directory)
-        }
-        return nil
-    }
-    
-    
-    /// Load texture by index.
-    ///
-    /// - Parameters:
-    ///   - index: index of GLTFTexture in textures
-    ///   - property: material's property
-    fileprivate func loadTexture(index:Int, property:SCNMaterialProperty) {
-        if self.textures != nil && index < self.textures!.count {
-            let texture = self.textures![index]
-            
-            os_unfair_lock_lock(&texture.lock)
-            
-            loadSampler(sampler:texture.sampler, property: property)
-            
-            var loaded = false
-            
-            if texture.extras != nil && texture.extras!["texture"] != nil {
-                property.contents = texture.extras!["texture"]
-                loaded = true
-            } else if (texture.extensions != nil) {
-                if let descriptor = (texture.extensions![compressedTextureExtensionKey] as? GLTF_3D4MCompressedTextureExtension) {   
-                    if let textureCompressed = createCompressedTexture(descriptor) {
-                        texture.extras = ["texture":textureCompressed as Any]
-                        property.contents = textureCompressed
-                        loaded = true
-                    }
-                }
-            }
-            
-            if texture.source != nil && !loaded {
-                let loadedImage = self.image(byIndex:texture.source!)
-                texture.extras = ["texture":loadedImage as Any]
-                property.contents = loadedImage
-            }
-            
-            os_unfair_lock_unlock(&texture.lock)
-        }
-    }
-    
-    
-    fileprivate func loadSampler(sampler samplerIndex:Int?, property:SCNMaterialProperty) {
-        if samplerIndex != nil && self.samplers != nil && samplerIndex! < self.samplers!.count {
-            let sampler = self.samplers![samplerIndex!]
-            property.wrapS = sampler.wrapS.scn()
-            property.wrapT = sampler.wrapT.scn()
-            property.magnificationFilter = sampler.magFilterScene()
-            (property.minificationFilter, property.mipFilter)  = sampler.minFilterScene()
-        }
-    }
-    
     
     fileprivate func cleanExtras() {
         if self.buffers != nil {
@@ -750,80 +432,10 @@ extension GLTF {
         }
         
         self.cache_nodes?.removeAll()
+        self.cache_materials?.removeAll()
     }
 }
 
-extension GLTFSampler {
-    fileprivate func magFilterScene() -> SCNFilterMode {
-        if self.magFilter != nil {
-            return (self.magFilter?.scn())!
-        }
-        return .none
-    }
-    
-    fileprivate func minFilterScene() -> (SCNFilterMode, SCNFilterMode) {
-        if self.minFilter != nil {
-            return (self.minFilter?.scn())!
-        }
-        return (.none, .none)
-    }
-}
-
-extension GLTFSamplerMagFilter {
-    fileprivate func scn() -> SCNFilterMode {
-        switch self {
-        case .LINEAR:
-            return .linear
-        case .NEAREST:
-            return .nearest
-        }
-    }
-}
-
-extension GLTFSamplerMinFilter {
-    fileprivate func scn() -> (SCNFilterMode, SCNFilterMode) {
-        switch self {
-        case .LINEAR:
-            return (.linear, .none)
-        case .NEAREST:
-            return (.nearest, .none)
-        case .LINEAR_MIPMAP_LINEAR:
-            return (.linear, .linear)
-        case .NEAREST_MIPMAP_NEAREST:
-            return (.nearest, .nearest)
-        case .LINEAR_MIPMAP_NEAREST:
-            return (.linear, .nearest)
-        case .NEAREST_MIPMAP_LINEAR:
-            return (.nearest, .linear)
-        }
-    }
-}
-
-extension GLTFSamplerWrapS {
-    fileprivate func scn() -> SCNWrapMode {
-        switch self {
-        case .CLAMP_TO_EDGE:
-            return .clampToBorder
-        case .REPEAT:
-            return .repeat
-        case .MIRRORED_REPEAT:
-            return .mirror
-        }
-    }
-}
-
-extension GLTFSamplerWrapT {
-    fileprivate func scn() -> SCNWrapMode {
-        switch self {
-        case .CLAMP_TO_EDGE:
-            return .clampToBorder
-        case .REPEAT:
-            return .repeat
-        case .MIRRORED_REPEAT:
-            return .mirror
-        }
-    }
-}
 
 extension GLTFBuffer {
     
@@ -862,29 +474,6 @@ extension GLTFBuffer {
     }
 }
 
-extension GLTFImage {
-    fileprivate func image(inDirectory directory:String) -> ImageClass? {
-        
-        os_unfair_lock_lock(&self.lock)
-        
-        var image:ImageClass?
-        if self.extras != nil {
-            image = self.extras!["image"] as? ImageClass
-        }
-        if image == nil {
-            do {
-                if let imageData = try loadURI(uri: self.uri!, inDirectory: directory) {
-                    image = ImageClass.init(data: imageData)
-                }
-                self.extras = ["image": image as Any]
-            } catch {
-                print(error)
-            }
-        }
-        os_unfair_lock_unlock(&self.lock)
-        return image
-    } 
-}
 
 extension GLTFAccessor {
     fileprivate func components() -> Int {
@@ -933,18 +522,5 @@ extension GLTFMeshPrimitiveMode {
     }
 }
 
-extension GLTFAnimationChannelTargetPath {
-    fileprivate func scn() -> String {
-        switch self {
-        case .translation:
-            return "position"
-        case .rotation:
-            return "orientation"
-        case .scale:
-            return self.rawValue
-        case .weights:
-            return self.rawValue
-        }
-    }
-}
+
 

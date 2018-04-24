@@ -47,17 +47,10 @@ extension GLTF {
             let texture = device?.makeTexture(descriptor: textureDescriptor)
             
             for i in 0 ..< mipmapsCount {
-                let bufferViewsIndex = descriptor.sources[i]
-                if self.bufferViews!.count > bufferViewsIndex {
-                    let bufferView = self.bufferViews![bufferViewsIndex]
-                    let buffer = self.buffers![bufferView.buffer]
-                    let data = buffer.data(inDirectory: self.directory, cache: false)
-                    if (data == nil) {
-                        print("GLTF_3D4MCompressedTextureExtension: Failed to load texture, \(String(describing: buffer.uri))")
-                        return nil
-                    }
+                let bufferViewIndex = descriptor.sources[i]
+                if let (_, data) = try? requestData(bufferView: bufferViewIndex) {
                     let bPr = bytesPerRow(width, height)
-                    data?.withUnsafeBytes {
+                    data.withUnsafeBytes {
                         texture?.replace(region: MTLRegionMake2D(0, 0, width, height), 
                                          mipmapLevel: i, 
                                          withBytes: $0, 

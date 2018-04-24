@@ -63,6 +63,10 @@
 		D287556D2077CB16009B7FA9 /* GLTF+CompressedTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */; };
 		D287556E2077CB1B009B7FA9 /* GLTF+CompressedTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */; };
 		D2AC651E205D578B0091D5E0 /* GLTF_3D4MCompressedTextureExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AC651D205D578A0091D5E0 /* GLTF_3D4MCompressedTextureExtension.swift */; };
+		D2AFCFC0208F1DE00048A9DA /* GLTF+Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AFCFBF208F1DE00048A9DA /* GLTF+Animation.swift */; };
+		D2AFCFC1208F1DE00048A9DA /* GLTF+Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AFCFBF208F1DE00048A9DA /* GLTF+Animation.swift */; };
+		D2AFCFC3208F2A010048A9DA /* GLTF+Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AFCFC2208F2A010048A9DA /* GLTF+Material.swift */; };
+		D2AFCFC4208F2A010048A9DA /* GLTF+Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AFCFC2208F2A010048A9DA /* GLTF+Material.swift */; };
 		OBJ_52 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_6 /* Package.swift */; };
 		OBJ_58 /* gltf_scenekitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_42 /* gltf_scenekitTests.swift */; };
 		OBJ_60 /* gltf_scenekit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "gltf_scenekit::gltf_scenekit::Product" /* gltf_scenekit.framework */; };
@@ -124,6 +128,8 @@
 		D27BDF82203F0BEF0036F3A7 /* GLTFKHRDracoMeshCompressionExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GLTFKHRDracoMeshCompressionExtension.swift; sourceTree = "<group>"; };
 		D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GLTF+CompressedTexture.swift"; sourceTree = "<group>"; };
 		D2AC651D205D578A0091D5E0 /* GLTF_3D4MCompressedTextureExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GLTF_3D4MCompressedTextureExtension.swift; sourceTree = "<group>"; };
+		D2AFCFBF208F1DE00048A9DA /* GLTF+Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GLTF+Animation.swift"; sourceTree = "<group>"; };
+		D2AFCFC2208F2A010048A9DA /* GLTF+Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GLTF+Material.swift"; sourceTree = "<group>"; };
 		OBJ_11 /* GLTF.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTF.swift; sourceTree = "<group>"; };
 		OBJ_12 /* GLTFAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFAccessor.swift; sourceTree = "<group>"; };
 		OBJ_13 /* GLTFAccessorSparse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFAccessorSparse.swift; sourceTree = "<group>"; };
@@ -292,6 +298,8 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_9 /* GLTF+SceneKit.swift */,
+				D2AFCFC2208F2A010048A9DA /* GLTF+Material.swift */,
+				D2AFCFBF208F1DE00048A9DA /* GLTF+Animation.swift */,
 				D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */,
 				D2180CDD2087457D005353CF /* GLTF+Draco.swift */,
 				OBJ_10 /* GLTF */,
@@ -440,10 +448,12 @@
 				D2750CF12077B7AC00F6198D /* GLTFAccessorSparseIndices.swift in Sources */,
 				D2750CF22077B7AC00F6198D /* GLTFAccessorSparseValues.swift in Sources */,
 				D2750CF32077B7AC00F6198D /* GLTFAnimation.swift in Sources */,
+				D2AFCFC1208F1DE00048A9DA /* GLTF+Animation.swift in Sources */,
 				D2750CF42077B7AC00F6198D /* GLTFAnimationChannel.swift in Sources */,
 				D2750CF52077B7AC00F6198D /* GLTFAnimationChannelTarget.swift in Sources */,
 				D2750CF62077B7AC00F6198D /* GLTFAnimationSampler.swift in Sources */,
 				D2750CF72077B7AC00F6198D /* GLTF_3D4MCompressedTextureExtension.swift in Sources */,
+				D2AFCFC4208F2A010048A9DA /* GLTF+Material.swift in Sources */,
 				D2750CF82077B7AC00F6198D /* GLTFAsset.swift in Sources */,
 				D2750CF92077B7AC00F6198D /* GLTFBuffer.swift in Sources */,
 				D2750CFA2077B7AC00F6198D /* GLTFBufferView.swift in Sources */,
@@ -498,10 +508,12 @@
 				OBJ_71 /* GLTFAccessorSparseIndices.swift in Sources */,
 				OBJ_72 /* GLTFAccessorSparseValues.swift in Sources */,
 				OBJ_73 /* GLTFAnimation.swift in Sources */,
+				D2AFCFC0208F1DE00048A9DA /* GLTF+Animation.swift in Sources */,
 				OBJ_74 /* GLTFAnimationChannel.swift in Sources */,
 				OBJ_75 /* GLTFAnimationChannelTarget.swift in Sources */,
 				OBJ_76 /* GLTFAnimationSampler.swift in Sources */,
 				D2AC651E205D578B0091D5E0 /* GLTF_3D4MCompressedTextureExtension.swift in Sources */,
+				D2AFCFC3208F2A010048A9DA /* GLTF+Material.swift in Sources */,
 				OBJ_77 /* GLTFAsset.swift in Sources */,
 				OBJ_78 /* GLTFBuffer.swift in Sources */,
 				OBJ_79 /* GLTFBufferView.swift in Sources */,
