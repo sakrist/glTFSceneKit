@@ -14,11 +14,11 @@ public protocol GLTFResourceLoader {
     var directoryPath: String { get set }
     
     func load(resource: GLTFBuffer) throws -> Data?
-    func load(resource: GLTFBuffer, completionHandler: @escaping (GLTFBuffer) -> Void )
-    func load(resources: [GLTFBuffer], completionHandler: @escaping () -> Void )
+    func load(resource: GLTFBuffer, completionHandler: @escaping (GLTFBuffer, Error?) -> Void )
+    func load(resources: Set<GLTFBuffer>, completionHandler: @escaping (Error?) -> Void )
     
     func load(resource: GLTFImage) throws -> OSImage?
-    func load(resource: GLTFImage, completionHandler: @escaping (GLTFImage) -> Void )
+    func load(resource: GLTFImage, completionHandler: @escaping (GLTFImage, Error?) -> Void )
 } 
 
 extension GLTF {
@@ -50,16 +50,36 @@ open class GLTFResourceLoaderDefault : GLTFResourceLoader {
         return resource.data
     }
     
-    open func load(resource: GLTFBuffer, completionHandler: @escaping (GLTFBuffer) -> Void) {
-        if resource.data == nil && resource.uri != nil {
-            if let data = try? loadUri(uri: resource.uri!) {
-               resource.data = data 
+    open func load(resource: GLTFBuffer, completionHandler: @escaping (GLTFBuffer, Error?) -> Void) {
+        var error_:Error?
+        do {
+            if resource.data == nil && resource.uri != nil {
+                if let data = try loadUri(uri: resource.uri!) {
+                    resource.data = data 
+                }
             }
+        } catch {
+            error_ = error
         }
-        completionHandler(resource)
+        completionHandler(resource, error_)
     }
     
-    open func load(resources: [GLTFBuffer], completionHandler: @escaping () -> Void) {
+    open func load(resources: Set<GLTFBuffer>, completionHandler: @escaping (Error?) -> Void) {
+        var error_:Error?
+        do {
+            for resource in resources {
+                if resource.data == nil && resource.uri != nil {
+                    if let data = try loadUri(uri: resource.uri!) {
+                        resource.data = data 
+                    }
+                }
+            }
+        } catch {
+            error_ = error
+        }
+        DispatchQueue.global().async {
+            completionHandler(error_)   
+        }
         
     }
     
@@ -72,8 +92,18 @@ open class GLTFResourceLoaderDefault : GLTFResourceLoader {
         return resource.image
     }
     
-    open func load(resource: GLTFImage, completionHandler: @escaping (GLTFImage) -> Void) {
-        
+    open func load(resource: GLTFImage, completionHandler: @escaping (GLTFImage, Error?) -> Void) {
+        var error_:Error?
+        do {
+            if resource.image == nil && resource.uri != nil {
+                if let imageData = try loadUri(uri: resource.uri!) {
+                        resource.image = OSImage.init(data: imageData)                
+                }
+            }
+        } catch {
+            error_ = error
+        }
+        completionHandler(resource, error_)
     }
     
     fileprivate func loadUri(uri: String) throws -> Data? {
@@ -90,11 +120,7 @@ open class GLTFResourceLoaderDefault : GLTFResourceLoader {
             let filepath = [self.directoryPath, uri].joined(separator: "/") 
             if FileManager.default.fileExists(atPath: filepath) {
                 let url = URL(fileURLWithPath: filepath)
-                do {
-                    data = try Data.init(contentsOf: url)
-                } catch {
-                    throw "Can't load file at \(url) \(error)"
-                }
+                data = try Data.init(contentsOf: url)
             } else {
                 throw "Can't find file at \(filepath)"
             }

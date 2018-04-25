@@ -19,7 +19,7 @@ class gltf_scenekitTests: XCTestCase {
         self.measure {
             let glTF = try? decoder.decode(GLTF.self, from: jsonData!)
             
-            glTF?.convertToScene(view:view, directoryPath:nil, multiThread:false)
+            _ = glTF?.convertToScene(view:view, directoryPath:nil, multiThread:false)
             
         }
         

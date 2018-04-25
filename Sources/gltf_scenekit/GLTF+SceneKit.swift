@@ -97,14 +97,19 @@ extension GLTF {
                 
                 // parse nodes
                 for nodeIndex in sceneGlTF.nodes! {
+                    
                     group.enter()
-                    worker.async {
+                    self._preloadBuffersData(nodeIndex: nodeIndex) { error in
                         let node = self.buildNode(nodeIndex:nodeIndex)
                         scene.rootNode.addChildNode(node)
                         group.leave()
+                        if error != nil {
+                            print(error!)
+                        }
                     }
+
                 }
-                
+                print("preload time \(-1000 * start.timeIntervalSinceNow)")
                 // completion
                 group.notify(queue: worker) {
                     self._finalize()
@@ -126,15 +131,52 @@ extension GLTF {
     fileprivate func _finalize() {
         self.parseAnimations()
         
-        // TODO: replace with other internal objects
-        self.cleanExtras()
+        // clear cache
+        self.clearCache()
         
         // remove cache information
         GLTF.associationMap = [String: Any]()
     }
     
     
-    
+    // TODO: Collect associated buffers for node into a Set on Decode time.  
+    fileprivate func _preloadBuffersData(nodeIndex:Int, completionHandler: @escaping (Error?) -> Void ) {
+        
+        var buffers:Set = Set<GLTFBuffer>()
+        
+        if let node = self.nodes?[nodeIndex] {
+            if node.mesh != nil {
+                if let mesh = self.meshes?[node.mesh!] {
+                    for primitive in mesh.primitives {
+                        // check on draco extension
+                        if let dracoMesh = primitive.extensions?[dracoExtensionKey] as? GLTFKHRDracoMeshCompressionExtension {
+                            let buffer = self.buffers![self.bufferViews![dracoMesh.bufferView].buffer]
+                            buffers.insert(buffer)
+                        } else {
+                            for (_,index) in primitive.attributes {
+                                if let accessor = self.accessors?[index] {
+                                    if let bufferView = accessor.bufferView {
+                                        let buffer = self.buffers![self.bufferViews![bufferView].buffer]
+                                        buffers.insert(buffer)
+                                    }
+                                }
+                            }
+                            if primitive.indices != nil {
+                                if let accessor = self.accessors?[primitive.indices!] {
+                                    if let bufferView = accessor.bufferView {
+                                        let buffer = self.buffers![self.bufferViews![bufferView].buffer]
+                                        buffers.insert(buffer)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }                        
+        }
+        
+        self.loader.load(resources: buffers, completionHandler:completionHandler)
+    }
     
     // MARK: - Nodes
     
@@ -420,7 +462,7 @@ extension GLTF {
     }
     
     
-    fileprivate func cleanExtras() {
+    fileprivate func clearCache() {
         if self.buffers != nil {
             for buffer in self.buffers! {
                 buffer.data = nil
