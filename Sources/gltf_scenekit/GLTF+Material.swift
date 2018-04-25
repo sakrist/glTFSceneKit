@@ -55,7 +55,7 @@ extension GLTF {
                 self.loadTexture(index:baseTextureInfo.index, property: scnMaterial.diffuse)
             } else {
                 let color = (pbr.baseColorFactor.count < 4) ? [1, 1, 1, 1] : (pbr.baseColorFactor)
-                scnMaterial.diffuse.contents = ColorClass(red: CGFloat(color[0]), green: CGFloat(color[1]), blue: CGFloat(color[2]), alpha: CGFloat(color[3]))
+                scnMaterial.diffuse.contents = OSColor(red: CGFloat(color[0]), green: CGFloat(color[1]), blue: CGFloat(color[2]), alpha: CGFloat(color[3]))
             }
             scnMaterial.transparency = CGFloat(pbr.baseColorFactor[3])
             
@@ -118,7 +118,7 @@ extension GLTF {
     }
     
     // get image by index
-    fileprivate func image(byIndex index:Int) -> ImageClass? {
+    fileprivate func image(byIndex index:Int) -> OSImage? {
         if let gltf_image = self.images?[index] {
             if let image = try? self.loader.load(resource: gltf_image) {
                 return image

@@ -8,7 +8,7 @@
 import Foundation
 
 
-protocol GLTFResourceLoader {
+public protocol GLTFResourceLoader {
     
     // location where is gltf file is located.
     var directoryPath: String { get set }
@@ -17,12 +17,12 @@ protocol GLTFResourceLoader {
     func load(resource: GLTFBuffer, completionHandler: @escaping (GLTFBuffer) -> Void )
     func load(resources: [GLTFBuffer], completionHandler: @escaping () -> Void )
     
-    func load(resource: GLTFImage) throws -> ImageClass?
+    func load(resource: GLTFImage) throws -> OSImage?
     func load(resource: GLTFImage, completionHandler: @escaping (GLTFImage) -> Void )
 } 
 
 extension GLTF {
-    var loader:GLTFResourceLoader {
+    public var loader:GLTFResourceLoader {
         get {
             var loader_ = objc_getAssociatedObject(self, &Keys.resource_loader) as? GLTFResourceLoader
             if loader_ != nil {
@@ -37,35 +37,42 @@ extension GLTF {
 }
 
 
-class GLTFResourceLoaderDefault : GLTFResourceLoader {
+open class GLTFResourceLoaderDefault : GLTFResourceLoader {
     
-    var directoryPath: String = ""
+    public var directoryPath: String = ""
     
-    func load(resource: GLTFBuffer) throws -> Data? {
+    public init() {}
+    
+    open func load(resource: GLTFBuffer) throws -> Data? {
         if resource.data == nil && resource.uri != nil {
             resource.data = try loadUri(uri: resource.uri!)
         }
         return resource.data
     }
     
-    func load(resource: GLTFBuffer, completionHandler: @escaping (GLTFBuffer) -> Void) {
+    open func load(resource: GLTFBuffer, completionHandler: @escaping (GLTFBuffer) -> Void) {
+        if resource.data == nil && resource.uri != nil {
+            if let data = try? loadUri(uri: resource.uri!) {
+               resource.data = data 
+            }
+        }
+        completionHandler(resource)
+    }
+    
+    open func load(resources: [GLTFBuffer], completionHandler: @escaping () -> Void) {
         
     }
     
-    func load(resources: [GLTFBuffer], completionHandler: @escaping () -> Void) {
-        
-    }
-    
-    func load(resource: GLTFImage) throws -> ImageClass? {
+    open func load(resource: GLTFImage) throws -> OSImage? {
         if resource.image == nil && resource.uri != nil {
             if let imageData = try loadUri(uri: resource.uri!) {
-                resource.image = ImageClass.init(data: imageData)
+                resource.image = OSImage.init(data: imageData)
             }
         }
         return resource.image
     }
     
-    func load(resource: GLTFImage, completionHandler: @escaping (GLTFImage) -> Void) {
+    open func load(resource: GLTFImage, completionHandler: @escaping (GLTFImage) -> Void) {
         
     }
     
@@ -73,7 +80,7 @@ class GLTFResourceLoaderDefault : GLTFResourceLoader {
         var data = uri.base64Decoded()
         if data == nil {
             
-            if (uri.contains("http")) {
+            if (uri.hasPrefix("http")) {
                 if let url = URL.init(string: uri) {
                     data = try Data.init(contentsOf: url)
                     return data
@@ -105,7 +112,7 @@ extension GLTFBuffer {
     
     static var data_associate_key = "data_associate_key"
     
-    var data:Data? {
+    public var data:Data? {
         get { return objc_getAssociatedObject(self, &GLTFBuffer.data_associate_key) as? Data }
         set { objc_setAssociatedObject(self, &GLTFBuffer.data_associate_key, newValue, .OBJC_ASSOCIATION_RETAIN) }
     }
@@ -115,8 +122,8 @@ extension GLTFImage {
     
     static var image_associate_key = "image_associate_key"
     
-    var image:ImageClass? {
-        get { return objc_getAssociatedObject(self, &GLTFImage.image_associate_key) as? ImageClass }
+    public var image:OSImage? {
+        get { return objc_getAssociatedObject(self, &GLTFImage.image_associate_key) as? OSImage }
         set { objc_setAssociatedObject(self, &GLTFImage.image_associate_key, newValue, .OBJC_ASSOCIATION_RETAIN) }
     }
 }

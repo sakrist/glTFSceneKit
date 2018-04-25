@@ -10,12 +10,12 @@ import Foundation
 import SceneKit
 
 #if os(iOS)
-    typealias ImageClass = UIImage
-    typealias ColorClass = UIColor
+    public typealias OSImage = UIImage
+    public typealias OSColor = UIColor
     typealias SCNFloat = Float
 #elseif os(macOS)
-    typealias ImageClass = NSImage
-    typealias ColorClass = NSColor
+    public typealias OSImage = NSImage
+    public typealias OSColor = NSColor
     typealias SCNFloat = CGFloat
 #endif
 
@@ -179,9 +179,9 @@ extension Data {
 // Code reference to here
 // https://github.com/magicien/GLTFSceneKit/blob/master/Source/Common/GLTFFunctions.swift
 
-extension ImageClass {
+extension OSImage {
     
-    func channels() throws -> [ImageClass] {
+    func channels() throws -> [OSImage] {
         #if os(macOS)
             var rect = CGRect(x: 0, y: 0, width: self.size.width, height: self.size.height)
             guard let cgImage = self.cgImage(forProposedRect: &rect, context: nil, hints: nil) else {
@@ -196,7 +196,7 @@ extension ImageClass {
     }
     
     
-    func channels(from image: CGImage) throws -> [ImageClass] {
+    func channels(from image: CGImage) throws -> [OSImage] {
         let w = image.width
         let h = image.height
         let rect = CGRect(x: 0, y: 0, width: w, height: h)
@@ -246,7 +246,7 @@ extension ImageClass {
         }
         let dstColorSpace = CGColorSpaceCreateDeviceGray()
         
-        var images = [ImageClass]()
+        var images = [OSImage]()
         
         for i in 0..<componentsPerPixel {
             let componentPtr = componentsPtr[i] as! UnsafeMutablePointer<UInt8>
@@ -272,9 +272,9 @@ extension ImageClass {
                     throw "Failed to create CGImage"
             }
             #if os(macOS)
-                let image_ = ImageClass(cgImage: imageChannel, size: NSSize.init(width: w, height: h))
+                let image_ = OSImage(cgImage: imageChannel, size: NSSize.init(width: w, height: h))
             #else
-                let image_ = ImageClass(cgImage: imageChannel)
+                let image_ = OSImage(cgImage: imageChannel)
             #endif
             images.append(image_)
         }
