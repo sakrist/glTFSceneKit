@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "D2750CEA2077B7AC00F6198D"
-               BuildableName = "gltf_scenekit.framework"
+               BuildableName = "glTFSceneKit.framework"
                BlueprintName = "glTFSceneKit (iOS)"
                ReferencedContainer = "container:glTFSceneKit.xcodeproj">
             </BuildableReference>
@@ -46,7 +46,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D2750CEA2077B7AC00F6198D"
-            BuildableName = "gltf_scenekit.framework"
+            BuildableName = "glTFSceneKit.framework"
             BlueprintName = "glTFSceneKit (iOS)"
             ReferencedContainer = "container:glTFSceneKit.xcodeproj">
          </BuildableReference>
@@ -64,7 +64,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D2750CEA2077B7AC00F6198D"
-            BuildableName = "gltf_scenekit.framework"
+            BuildableName = "glTFSceneKit.framework"
             BlueprintName = "glTFSceneKit (iOS)"
             ReferencedContainer = "container:glTFSceneKit.xcodeproj">
          </BuildableReference>

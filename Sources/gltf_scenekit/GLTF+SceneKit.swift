@@ -9,6 +9,9 @@
 import Foundation
 import SceneKit
 
+// TODO: clear cache
+// TODO: download cancellation
+
 
 let dracoExtensionKey = "KHR_draco_mesh_compression"
 let compressedTextureExtensionKey = "3D4M_compressed_texture"
@@ -19,7 +22,6 @@ extension GLTF {
     private static var associationMap = [String: Any]()
     struct Keys {
         static var cache_nodes:String = "cache_nodes"
-        static var cache_materials:String = "cache_materials"
         static var animation_duration:String = "animation_duration"
         static var resource_loader:String = "resource_loader"
         static var camera_created:String = "camera_created"
@@ -84,7 +86,6 @@ extension GLTF {
             }
             
             self.cache_nodes = [SCNNode?](repeating: nil, count: (self.nodes?.count)!)
-            self.cache_materials = [SCNMaterial?](repeating: nil, count: (self.materials?.count)!)
             
             // run in multi-thread or single
             if (multiThread) {
@@ -463,25 +464,19 @@ extension GLTF {
     
     
     fileprivate func clearCache() {
-        if self.buffers != nil {
-            for buffer in self.buffers! {
-                buffer.data = nil
-            }
-        }
+//        if self.buffers != nil {
+//            for buffer in self.buffers! {
+//                buffer.data = nil
+//            }
+//        }
         
         if self.images != nil {
             for image in self.images! {
                 image.image = nil
             }
         }
-        if self.textures != nil {
-            for texture in self.textures! {
-                texture.extras = nil
-            }
-        }
         
         self.cache_nodes?.removeAll()
-        self.cache_materials?.removeAll()
     }
 }
 

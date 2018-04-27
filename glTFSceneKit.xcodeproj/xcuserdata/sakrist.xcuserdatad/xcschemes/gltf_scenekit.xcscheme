@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "gltf_scenekit::gltf_scenekit"
-               BuildableName = "gltf_scenekit.framework"
+               BuildableName = "glTFSceneKit.framework"
                BlueprintName = "glTFSceneKit"
                ReferencedContainer = "container:glTFSceneKit.xcodeproj">
             </BuildableReference>
@@ -46,7 +46,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "gltf_scenekit::gltf_scenekit"
-            BuildableName = "gltf_scenekit.framework"
+            BuildableName = "glTFSceneKit.framework"
             BlueprintName = "glTFSceneKit"
             ReferencedContainer = "container:glTFSceneKit.xcodeproj">
          </BuildableReference>
@@ -64,7 +64,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "gltf_scenekit::gltf_scenekit"
-            BuildableName = "gltf_scenekit.framework"
+            BuildableName = "glTFSceneKit.framework"
             BlueprintName = "glTFSceneKit"
             ReferencedContainer = "container:glTFSceneKit.xcodeproj">
          </BuildableReference>

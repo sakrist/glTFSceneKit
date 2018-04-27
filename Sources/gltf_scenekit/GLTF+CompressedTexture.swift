@@ -10,120 +10,212 @@ import SceneKit
 
 extension GLTF {
     
-    func createCompressedTexture(_ descriptor:GLTF_3D4MCompressedTextureExtension) -> Any? {
+    func loadCompressedTexture(descriptor:GLTF_3D4MCompressedTextureExtension, firstLevel:Bool, completionHandler: @escaping (Any?, Error?) -> Void ) {
+        
+        let width = descriptor.width
+        let height = descriptor.height
+        
+        if (width == 0 || height == 0) {
+            completionHandler(nil, "GLTF_3D4MCompressedTextureExtension: Failed to load texture, inappropriate texture size.")
+            return
+        }
+        
+        let (bytesPerRow, pixelFormat) = _get_bpp_pixelFormat(descriptor.compression)
         
         if self.view?.renderingAPI == .metal {
             
-            var width = descriptor.width
-            var height = descriptor.height
-            
-            let (bytesPerRow, pixelFormat) = _get_bpp_pixelFormat(descriptor)
-            
             if (pixelFormat == .invalid ) {
-                print("GLTF_3D4MCompressedTextureExtension: Failed to load texture, unsupported compression format \(descriptor.compression).")
-                return nil
+                completionHandler(nil, "GLTF_3D4MCompressedTextureExtension: Failed to load texture, unsupported compression format \(descriptor.compression).")
+                return
             }
             
-            if (width == 0 || height == 0) {
-                print("GLTF_3D4MCompressedTextureExtension: Failed to load texture, inappropriate texture size.")
-                return nil
-            }
-            
-            let mipmapsCount = descriptor.sources.count
-            let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat, 
-                                                                             width: width, 
-                                                                             height: height, 
-                                                                             mipmapped: (mipmapsCount > 1))
-            textureDescriptor.mipmapLevelCount = mipmapsCount
-            
-            var device:MTLDevice?
-            #if os(macOS)
-            device = self.view?.device
-            #endif            
-            if (device == nil) {
-                device = MTLCreateSystemDefaultDevice()
-            }
-            
-            let texture = device?.makeTexture(descriptor: textureDescriptor)
-            
-            for i in 0 ..< mipmapsCount {
-                let bufferViewIndex = descriptor.sources[i]
-                if let (_, data) = try? requestData(bufferView: bufferViewIndex) {
-                    let bPr = bytesPerRow(width, height)
-                    data.withUnsafeBytes {
-                        texture?.replace(region: MTLRegionMake2D(0, 0, width, height), 
-                                         mipmapLevel: i, 
-                                         withBytes: $0, 
-                                         bytesPerRow: bPr)
-                    }
+            if firstLevel {
+                if let bView = self.bufferViews?[descriptor.sources.last!] {
+                    let buffer_ = self.buffers![bView.buffer]
+                    self.loader.load(resource: buffer_) { (buffer, error) in
+                        var error_ = error
+                        var textureResult:Any?
+                        var datas = [Data]()
+                        if buffer.data != nil {
+                            datas.append(buffer.data!)
+                            do {
+                                textureResult = try self._createMetalTexture(32, 32, pixelFormat, datas, bytesPerRow)
+                            } catch {
+                                error_ = error
+                            }
+                        } else {
+                            error_ = "Can't load data for \(buffer.uri ?? "")"
+                        }
+                        
+                        completionHandler(textureResult, error_)
+                    }     
+                }
+            } else {
+                var buffers = [GLTFBuffer]()
+                for bViewIndex in descriptor.sources {
+                    let buffer = self.buffers![self.bufferViews![bViewIndex].buffer]
+                    buffers.append(buffer)
                 }
                 
-                width = max(width >> 1, 1);
-                height = max(height >> 1, 1);
+                self.loader.load(resources: Set(buffers)) { (error) in
+                    var error_ = error
+                    var textureResult:Any?
+                    
+                    if error == nil {
+                        var datas = [Data]()    
+                        for buffer in buffers {
+                            if buffer.data != nil {
+                                datas.append(buffer.data!)
+                            } else {
+                                break
+                            }
+                        }
+                        do {
+                            textureResult = try self._createMetalTexture(width, height, pixelFormat, datas, bytesPerRow)
+                        } catch {
+                            error_ = error
+                        }
+                    }
+                    completionHandler(textureResult, error_)
+                }
             }
-            return texture 
+            
+             
         } else {
             // TODO: implement for OpenGL  
             // Use GLKTextureInfo
+            completionHandler(OSColor.white, "loadCompressedTexture for OpenGL not impemented, yet.")
         }
-        
-        return nil
     }
     
-    fileprivate func _get_bpp_pixelFormat(_ descriptor:GLTF_3D4MCompressedTextureExtension) ->((Int, Int)->Int,  MTLPixelFormat) {
+    fileprivate func _createMetalTexture( _ width:Int, _ height:Int, _ pixelFormat:MTLPixelFormat, _ mipmaps:[Data], _ bppBlock:(Int, Int)->Int) throws -> MTLTexture {
+        var width = width
+        var height = height
+        let mipmapsCount = mipmaps.count
+        
+        if mipmapsCount == 0 {
+            throw "mipmaps array can't be empty."
+        }
+        
+        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat, 
+                                                                         width: width, 
+                                                                         height: height, 
+                                                                         mipmapped: (mipmapsCount > 1))
+        textureDescriptor.mipmapLevelCount = mipmapsCount
+        
+        var device:MTLDevice?
+        #if os(macOS)
+        device = self.view?.device
+        #endif            
+        if (device == nil) {
+            device = MTLCreateSystemDefaultDevice()
+        }
+        
+        if (device == nil) {
+            throw "View has Metal's render APi but can't get instance of MTLDevice."
+        }
+        
+        let texture = device?.makeTexture(descriptor: textureDescriptor)
+        
+        if (texture == nil) {
+            throw "Failed to create metal texture with descriptor \(textureDescriptor)"
+        }
+        
+        for i in 0 ..< mipmapsCount {
+            let data = mipmaps[i]
+            let bPr = bppBlock(width, height)
+            data.withUnsafeBytes {
+                texture?.replace(region: MTLRegionMake2D(0, 0, width, height), 
+                                 mipmapLevel: i, 
+                                 withBytes: $0, 
+                                 bytesPerRow: bPr)
+            }
+            
+            width = max(width >> 1, 1);
+            height = max(height >> 1, 1);
+        }
+        
+        return texture!
+    }
+    
+    func _compress(image:OSImage) -> Any? {
+        #if os(iOS)
+        if #available(iOS 11.0, *) {
+//            if let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil) {
+            if let cg = image.cgImage {
+                let data = CFDataCreateMutable(nil, 0)!
+                let uti: CFString = "org.khronos.astc" as CFString 
+                let imageDestination = CGImageDestinationCreateWithData(data, uti, 1, nil)
+                CGImageDestinationAddImage(imageDestination!, cg, nil)
+                CGImageDestinationFinalize(imageDestination!)
+                let (bytesPerRow, pixelFormat) = _get_bpp_pixelFormat(.COMPRESSED_RGBA_ASTC_4x4)
+                
+                var _data = (data as Data)
+                // remove astc header of 16 bytes 
+                _data = _data.subdata(in: 16..<_data.count)
+                
+                return try? _createMetalTexture(cg.width, cg.height, pixelFormat, [_data as Data], bytesPerRow) as Any
+            }
+        }
+        #endif
+        return image
+    }
+    
+    
+    fileprivate func _get_bpp_pixelFormat(_ compression:GLTF_3D4MCompressedTextureExtensionCompression) ->((Int, Int)->Int,  MTLPixelFormat) {
         var bytesPerRow:(Int, Int)->Int = {_,_ in return 0 }
         var pixelFormat:MTLPixelFormat = .invalid;
         
         
         #if os(macOS)
-        if (descriptor.compression == .COMPRESSED_RGBA_S3TC_DXT1) {
+        if (compression == .COMPRESSED_RGBA_S3TC_DXT1) {
             pixelFormat = .bc1_rgba
             bytesPerRow = {width, height in return ((width + 3) / 4) * 8 };
-        } else if (descriptor.compression == .COMPRESSED_SRGB_ALPHA_S3TC_DXT1) {
+        } else if (compression == .COMPRESSED_SRGB_ALPHA_S3TC_DXT1) {
             pixelFormat = .bc1_rgba_srgb
             bytesPerRow = {width, height in return ((width + 3) / 4) * 8 };
-        } else if (descriptor.compression == .COMPRESSED_RGBA_S3TC_DXT3) {
+        } else if (compression == .COMPRESSED_RGBA_S3TC_DXT3) {
             pixelFormat = .bc2_rgba
             bytesPerRow = {width, height in return ((width + 3) / 4) * 16 };
-        } else if (descriptor.compression == .COMPRESSED_SRGB_ALPHA_S3TC_DXT3) {
+        } else if (compression == .COMPRESSED_SRGB_ALPHA_S3TC_DXT3) {
             pixelFormat = .bc2_rgba_srgb
             bytesPerRow = {width, height in return ((width + 3) / 4) * 16 };
-        } else if (descriptor.compression == .COMPRESSED_RGBA_S3TC_DXT5) {
+        } else if (compression == .COMPRESSED_RGBA_S3TC_DXT5) {
             pixelFormat = .bc3_rgba
             bytesPerRow = {width, height in return ((width + 3) / 4) * 16 };
-        } else if (descriptor.compression == .COMPRESSED_SRGB_ALPHA_S3TC_DXT5) {
+        } else if (compression == .COMPRESSED_SRGB_ALPHA_S3TC_DXT5) {
             pixelFormat = .bc3_rgba_srgb
             bytesPerRow = {width, height in return ((width + 3) / 4) * 16 };
-        } else if (descriptor.compression == .COMPRESSED_RGBA_BPTC_UNORM) {
+        } else if (compression == .COMPRESSED_RGBA_BPTC_UNORM) {
             pixelFormat = .bc7_rgbaUnorm
             bytesPerRow = {width, height in return ((width + 3) / 4) * 16 };
-        } else if (descriptor.compression == .COMPRESSED_SRGB_ALPHA_BPTC_UNORM) {
+        } else if (compression == .COMPRESSED_SRGB_ALPHA_BPTC_UNORM) {
             pixelFormat = .bc7_rgbaUnorm_srgb
             bytesPerRow = {width, height in return ((width + 3) / 4) * 16 };
         }
         #elseif os(iOS)
         
-        switch descriptor.compression {
+        switch compression {
         case .ETC1_RGB8_OES:
-            assert(false, " \(descriptor.compression) not supported yet")
+            assert(false, " \(compression) not supported yet")
             break
         case .COMPRESSED_RGB8_ETC2:
-            assert(false, " \(descriptor.compression) not supported yet")
+            assert(false, " \(compression) not supported yet")
             break
         case .COMPRESSED_SRGB8_ETC2:
-            assert(false, " \(descriptor.compression) not supported yet")
+            assert(false, " \(compression) not supported yet")
             break
         case .COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
-            assert(false, " \(descriptor.compression) not supported yet")
+            assert(false, " \(compression) not supported yet")
             break
         case .COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
-            assert(false, " \(descriptor.compression) not supported yet")
+            assert(false, " \(compression) not supported yet")
             break
         case .COMPRESSED_RGBA8_ETC2_EAC:
-            assert(false, " \(descriptor.compression) not supported yet")
+            assert(false, " \(compression) not supported yet")
             break
         case .COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
-            assert(false, " \(descriptor.compression) not supported yet")
+            assert(false, " \(compression) not supported yet")
             break
         case .COMPRESSED_SRGB_PVRTC_2BPPV1:
             pixelFormat = .pvrtc_rgb_2bpp_srgb
@@ -263,7 +355,7 @@ extension GLTF {
             break
             
         default:
-            assert(false, " \(descriptor.compression) can't bbe supported on iOS")
+            assert(false, " \(compression) can't bbe supported on iOS")
             break
         }
         

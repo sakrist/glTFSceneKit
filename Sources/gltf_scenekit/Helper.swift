@@ -232,17 +232,15 @@ extension OSImage {
         
         var srcPos = 0
         var dstPos = 0
-        for _ in 0..<h {
-            for _ in 0..<w {
-                var i = 0
-                for component in componentsPtr {
-                    let componentPtr = component as! UnsafeMutablePointer<UInt8>
-                    componentPtr[dstPos] = ptr[srcPos + i]
-                    i += 1
-                }
-                srcPos += srcBytesPerPixel
-                dstPos += dstBytesPerPixel
+        for _ in 0..<(w * h) {
+            var i = 0
+            for component in componentsPtr {
+                let componentPtr = component as! UnsafeMutablePointer<UInt8>
+                componentPtr[dstPos] = ptr[srcPos + i]
+                i += 1
             }
+            srcPos += srcBytesPerPixel
+            dstPos += dstBytesPerPixel
         }
         let dstColorSpace = CGColorSpaceCreateDeviceGray()
         

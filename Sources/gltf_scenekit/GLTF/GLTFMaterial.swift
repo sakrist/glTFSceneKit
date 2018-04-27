@@ -79,8 +79,6 @@ open class GLTFMaterial : NSObject, Codable {
 
     /// A set of parameter values that are used to define the metallic-roughness material model from Physically-Based Rendering (PBR) methodology.
     public var pbrMetallicRoughness:GLTFMaterialPBRMetallicRoughness?
-
-    var lock = os_unfair_lock_s()
     
     private enum CodingKeys: String, CodingKey {
         case alphaCutoff
