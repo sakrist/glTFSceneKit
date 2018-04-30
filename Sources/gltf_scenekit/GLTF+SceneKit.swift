@@ -10,8 +10,7 @@ import Foundation
 import SceneKit
 
 // TODO: clear cache
-// TODO: download cancellation
-
+// TODO: exec completion block
 
 let dracoExtensionKey = "KHR_draco_mesh_compression"
 let compressedTextureExtensionKey = "3D4M_compressed_texture"
@@ -19,42 +18,50 @@ let supportedExtensions = [dracoExtensionKey, compressedTextureExtensionKey]
 
 extension GLTF {
 
-    private static var associationMap = [String: Any]()
     struct Keys {
         static var cache_nodes:String = "cache_nodes"
         static var animation_duration:String = "animation_duration"
         static var resource_loader:String = "resource_loader"
-        static var camera_created:String = "camera_created"
+        static var load_canceled:String = "load_canceled"
         static var scnview:String = "scnview"
     }
     
     var cache_nodes:[SCNNode?]? {
         get { return objc_getAssociatedObject(self, &Keys.cache_nodes) as? [SCNNode?] }
-        set { objc_setAssociatedObject(self, &Keys.cache_nodes, newValue, .OBJC_ASSOCIATION_RETAIN) }
+        set { objc_setAssociatedObject(self, &Keys.cache_nodes, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
     
-    var cameraCreated:Bool {
-        get { return (objc_getAssociatedObject(self, &Keys.camera_created) as? Bool) ?? false }
-        set { objc_setAssociatedObject(self, &Keys.camera_created, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    @objc
+    open var isCanceled:Bool {
+        get { return (objc_getAssociatedObject(self, &Keys.load_canceled) as? Bool) ?? false }
+        set { objc_setAssociatedObject(self, &Keys.load_canceled, newValue, .OBJC_ASSOCIATION_ASSIGN) }
     }
     
     var view:SCNView? {
         get { return objc_getAssociatedObject(self, &Keys.scnview) as? SCNView }
-        set { objc_setAssociatedObject(self, &Keys.scnview, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+        set { objc_setAssociatedObject(self, &Keys.scnview, newValue, .OBJC_ASSOCIATION_ASSIGN) }
     }
     
     /// Convert GLTF to SceneKit scene. 
     ///
-    /// - Parameter directory: location of other related resources to gltf
+    /// - Parameter directory: location to others related resources of gltf
     /// - Returns: instance of Scene
     @objc
-    open func convertToScene(view:SCNView, directoryPath:String?, multiThread:Bool = true) -> SCNScene? {
+    open func convertToScene(view:SCNView, 
+                             directoryPath:String? = nil, 
+                             multiThread:Bool = true, 
+                             completionHandler: @escaping (() -> Void) = {} ) -> SCNScene? {
+        
         let scene:SCNScene = SCNScene.init()
-        return load(to: scene, view: view, directoryPath: directoryPath, multiThread:multiThread)
+        return load(to: scene, view: view, directoryPath: directoryPath, multiThread:multiThread, completionHandler:completionHandler)
     }
     
     @objc
-    open func load(to scene:SCNScene, view:SCNView, directoryPath:String? , multiThread:Bool = true) -> SCNScene? {
+    open func load(to scene:SCNScene, 
+                   view:SCNView, 
+                   directoryPath:String? = nil, 
+                   multiThread:Bool = true, 
+                   completionHandler: @escaping (() -> Void) = {} ) -> SCNScene? {
         self.view = view
         
         if (self.extensionsUsed != nil) {
@@ -93,7 +100,6 @@ extension GLTF {
                 let start = Date() 
                 
                 // get global worker 
-                let worker = DispatchQueue.global()
                 let group = DispatchGroup()
                 
                 // parse nodes
@@ -108,11 +114,12 @@ extension GLTF {
                             print(error!)
                         }
                     }
-
                 }
+                
                 print("preload time \(-1000 * start.timeIntervalSinceNow)")
+                
                 // completion
-                group.notify(queue: worker) {
+                group.notify(queue: DispatchQueue.global()) {
                     self._finalize()
                     
                     print("load glTF \(-1000 * start.timeIntervalSinceNow)")
@@ -126,17 +133,24 @@ extension GLTF {
             }
         }
         
+        if self.isCanceled {
+            return nil
+        }
+        
         return scene
+    }
+    
+    @objc
+    open func cancel() {
+        self.isCanceled = true
+        self.loader.cancelAll()
     }
     
     fileprivate func _finalize() {
         self.parseAnimations()
         
         // clear cache
-        self.clearCache()
-        
-        // remove cache information
-        GLTF.associationMap = [String: Any]()
+        self.cache_nodes?.removeAll()
     }
     
     
@@ -176,7 +190,7 @@ extension GLTF {
             }                        
         }
         
-        self.loader.load(resources: buffers, completionHandler:completionHandler)
+        self.loader.load(gltf:self, resources: buffers, completionHandler:completionHandler)
     }
     
     // MARK: - Nodes
@@ -213,6 +227,9 @@ extension GLTF {
             // bake all transformations into one mtarix
             scnNode.transform = bakeTransformationMatrix(node)
             
+            if self.isCanceled {
+                return scnNode
+            }
             self.cache_nodes?[nodeIndex] = scnNode
             
             if let children = node.children {
@@ -267,6 +284,11 @@ extension GLTF {
     ///   - node: gltf node
     ///   - scnNode: SceneKit node, which is going to be parent node 
     fileprivate func geometryNode(_ node:GLTFNode, _ scnNode:SCNNode) {
+        
+        if self.isCanceled {
+            return
+        }
+        
         if let meshIndex = node.mesh {
             if let mesh = self.meshes?[meshIndex] {
                 
@@ -295,6 +317,10 @@ extension GLTF {
                         if (dSources != nil) {
                             sources.append(contentsOf: dSources!)
                         }
+                    }
+                    
+                    if self.isCanceled {
+                        return
                     }
                     
                     // create geometry
@@ -374,7 +400,7 @@ extension GLTF {
                     
                     let count = accessor.count
                     
-                    // convert string semantic to SceneKit enum type 
+                    // convert string semantic to SceneKit semantic type 
                     let semantic = self.sourceSemantic(name:key)
                     
                     let geometrySource = SCNGeometrySource.init(data: data, 
@@ -397,7 +423,7 @@ extension GLTF {
         if let bufferView = self.bufferViews?[bufferView] {  
             let buffer = self.buffers![bufferView.buffer]
             
-            if let data = try self.loader.load(resource: buffer) {
+            if let data = try self.loader.load(gltf:self, resource: buffer) {
                 return (bufferView, data)
             }
             throw "Can't load data!"
@@ -427,13 +453,13 @@ extension GLTF {
             let start = bufferView.byteOffset+((addAccessorOffset) ? accessor.byteOffset : 0)
             let end = start+bytesLength
             
-            var d = data
+            var subdata = data
             if start != 0 || end != data.count {
-                d = data.subdata(in: start..<end)
+                subdata = data.subdata(in: start..<end)
             }
             
             let byteOffset = ((!addAccessorOffset) ? accessor.byteOffset : 0)
-            return (d, byteStride, byteOffset)
+            return (subdata, byteStride, byteOffset)
         }
         
         return nil
@@ -463,20 +489,19 @@ extension GLTF {
     }
     
     
-    fileprivate func clearCache() {
-//        if self.buffers != nil {
-//            for buffer in self.buffers! {
-//                buffer.data = nil
-//            }
-//        }
+    @objc
+    open func clearCache() {
+        if self.buffers != nil {
+            for buffer in self.buffers! {
+                buffer.data = nil
+            }
+        }
         
         if self.images != nil {
             for image in self.images! {
                 image.image = nil
             }
         }
-        
-        self.cache_nodes?.removeAll()
     }
 }
 

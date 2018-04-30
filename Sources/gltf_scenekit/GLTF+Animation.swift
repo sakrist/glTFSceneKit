@@ -11,12 +11,8 @@ import SceneKit
 extension GLTF {
     
     var animationDuration:Double {
-        get {
-            return (objc_getAssociatedObject(self, &Keys.animation_duration) as? Double ?? 0)
-        }        
-        set {
-            objc_setAssociatedObject(self, &Keys.animation_duration, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
+        get { return (objc_getAssociatedObject(self, &Keys.animation_duration) as? Double ?? 0) }        
+        set { objc_setAssociatedObject(self, &Keys.animation_duration, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
     
     func parseAnimations() {

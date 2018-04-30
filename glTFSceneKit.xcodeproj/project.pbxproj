@@ -62,6 +62,8 @@
 		D27BDF83203F0BEF0036F3A7 /* GLTFKHRDracoMeshCompressionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27BDF82203F0BEF0036F3A7 /* GLTFKHRDracoMeshCompressionExtension.swift */; };
 		D287556D2077CB16009B7FA9 /* GLTF+CompressedTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */; };
 		D287556E2077CB1B009B7FA9 /* GLTF+CompressedTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */; };
+		D287E3F5209602EB00EBCFD1 /* TextureStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287E3F4209602EB00EBCFD1 /* TextureStorageManager.swift */; };
+		D287E3F6209602EB00EBCFD1 /* TextureStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287E3F4209602EB00EBCFD1 /* TextureStorageManager.swift */; };
 		D2AC651E205D578B0091D5E0 /* GLTF_3D4MCompressedTextureExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AC651D205D578A0091D5E0 /* GLTF_3D4MCompressedTextureExtension.swift */; };
 		D2AFCFC0208F1DE00048A9DA /* GLTF+Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AFCFBF208F1DE00048A9DA /* GLTF+Animation.swift */; };
 		D2AFCFC1208F1DE00048A9DA /* GLTF+Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AFCFBF208F1DE00048A9DA /* GLTF+Animation.swift */; };
@@ -128,6 +130,7 @@
 		D27BDF7C203DCE6E0036F3A7 /* libdraco.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdraco.a; path = ".build/checkouts/DracoSwiftPackage.git-6830057821000934015/libdraco.a"; sourceTree = "<group>"; };
 		D27BDF82203F0BEF0036F3A7 /* GLTFKHRDracoMeshCompressionExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GLTFKHRDracoMeshCompressionExtension.swift; sourceTree = "<group>"; };
 		D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GLTF+CompressedTexture.swift"; sourceTree = "<group>"; };
+		D287E3F4209602EB00EBCFD1 /* TextureStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureStorageManager.swift; sourceTree = "<group>"; };
 		D2AC651D205D578A0091D5E0 /* GLTF_3D4MCompressedTextureExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GLTF_3D4MCompressedTextureExtension.swift; sourceTree = "<group>"; };
 		D2AFCFBF208F1DE00048A9DA /* GLTF+Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GLTF+Animation.swift"; sourceTree = "<group>"; };
 		D2AFCFC2208F2A010048A9DA /* GLTF+Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GLTF+Material.swift"; sourceTree = "<group>"; };
@@ -299,6 +302,7 @@
 			isa = PBXGroup;
 			children = (
 				OBJ_9 /* GLTF+SceneKit.swift */,
+				D287E3F4209602EB00EBCFD1 /* TextureStorageManager.swift */,
 				D2AFCFC2208F2A010048A9DA /* GLTF+Material.swift */,
 				D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */,
 				D2180CDD2087457D005353CF /* GLTF+Draco.swift */,
@@ -478,6 +482,7 @@
 				D2750D092077B7AC00F6198D /* GLTFScene.swift in Sources */,
 				D2180CE0208745A7005353CF /* GLTF+Draco.swift in Sources */,
 				D2750D0A2077B7AC00F6198D /* GLTFSkin.swift in Sources */,
+				D287E3F6209602EB00EBCFD1 /* TextureStorageManager.swift in Sources */,
 				D2750D0B2077B7AC00F6198D /* GLTFTexture.swift in Sources */,
 				D2750D0C2077B7AC00F6198D /* GLTFTextureInfo.swift in Sources */,
 				D2750D0D2077B7AC00F6198D /* Helper.swift in Sources */,
@@ -539,6 +544,7 @@
 				OBJ_92 /* GLTFScene.swift in Sources */,
 				D2180CDF208745A6005353CF /* GLTF+Draco.swift in Sources */,
 				OBJ_93 /* GLTFSkin.swift in Sources */,
+				D287E3F5209602EB00EBCFD1 /* TextureStorageManager.swift in Sources */,
 				OBJ_94 /* GLTFTexture.swift in Sources */,
 				OBJ_95 /* GLTFTextureInfo.swift in Sources */,
 				OBJ_96 /* Helper.swift in Sources */,
