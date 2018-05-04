@@ -80,13 +80,21 @@ class TextureStorageManager {
             group = groups[index]
             group?.enter()
             
+            #if DEBUG
+            let startLoadTextures = Date()
+            #endif
+            
             // notify when all textures are loaded
+            // this is last operation.
             group?.notify(queue: DispatchQueue.main) {
+                #if DEBUG
+                print("load textures \(-1000 * startLoadTextures.timeIntervalSinceNow)")
+                #endif
                 self.groups[index] = nil
                 self._associators[index] = nil
-                print("textures loaded")
-                gltf._completionHandler()
+                gltf._converted()
             }
+            
         } else if enter {
             group?.enter()
         }

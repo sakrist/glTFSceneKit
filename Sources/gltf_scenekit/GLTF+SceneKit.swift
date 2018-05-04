@@ -117,20 +117,24 @@ extension GLTF {
                     }
                 }
                 
+                #if DEBUG                
                 print("preload time \(-1000 * start.timeIntervalSinceNow)")
+                #endif     
                 
                 // completion
                 group.notify(queue: DispatchQueue.global()) {
-                    self._finalize()
+                    self._loadAnimationsAndCompleteConvertion()
                     
+                    #if DEBUG
                     print("load glTF \(-1000 * start.timeIntervalSinceNow)")
+                    #endif
                 }
             } else {
                 for nodeIndex in sceneGlTF.nodes! {
                     let node = self.buildNode(nodeIndex:nodeIndex)
                     scene.rootNode.addChildNode(node)
                 }
-                self._finalize()
+                self._loadAnimationsAndCompleteConvertion()
             }
         }
         
@@ -147,15 +151,30 @@ extension GLTF {
         self.loader.cancelAll()
     }
     
-    fileprivate func _finalize() {
+     
+    /// Parse and create animation. 
+    /// And in case no textures required to load, complete convertion from glTF to SceneKit.
+    fileprivate func _loadAnimationsAndCompleteConvertion() {
+        
         self.parseAnimations()
         
+        if self.textures?.count == 0 {
+            self._converted()
+        }
+    }
+    
+    /// Completion function and cache cleaning.
+    func _converted() {
+        #if DEBUG
+        print("convert completed")
+        #endif
         // clear cache
+        _completionHandler()
+        _completionHandler = {}
+        
         self.cache_nodes?.removeAll()
         
-        if self.textures?.count == 0 {
-            self._completionHandler()
-        }
+        self.clearCache()
     }
     
     
