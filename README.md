@@ -42,10 +42,10 @@
 
 Example:
 ```swift
-import gltf_scenekit
+import glTFSceneKit
 
-let directory = "..." // path folder with gltf resources
+let directory = "..." // path to folder where is gltf file located
 let decoder = JSONDecoder()
 let glTF = try? decoder.decode(GLTF.self, from: jsonData)
-let scene:SCNScene = scene = glTF?.convertToSCNScene(directoryPath:directory)
+let scene = glTF?.convert(view:sceneView, directoryPath:directory)
 ```

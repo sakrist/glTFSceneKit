@@ -79,10 +79,13 @@ class TextureStorageManager {
             groups[index] = DispatchGroup()
             group = groups[index]
             group?.enter()
+            
+            // notify when all textures are loaded
             group?.notify(queue: DispatchQueue.main) {
                 self.groups[index] = nil
                 self._associators[index] = nil
                 print("textures loaded")
+                gltf._completionHandler()
             }
         } else if enter {
             group?.enter()
@@ -106,15 +109,8 @@ class TextureStorageManager {
             print("Failed to find texture")
             return
         } 
-        let group = self.group(gltf:gltf, true) 
         
         worker.async {
-            
-            if gltf.isCanceled {
-                group.leave()
-                return
-            }
-            
             let tStatus = self.textureAssociator(gltf:gltf, at:index)
             
             if tStatus.status == .no {
@@ -124,8 +120,11 @@ class TextureStorageManager {
                 gltf.loadSampler(sampler:texture.sampler, property: property)
                 
                 if let descriptor = texture.extensions?[compressedTextureExtensionKey] {
+                    
+                    let group = self.group(gltf:gltf, true) 
+                    
                     // load first level mipmap as texture
-                    gltf.loadCompressedTexture(descriptor:descriptor as! GLTF_3D4MCompressedTextureExtension, firstLevel: true) { cTexture, error in        
+                    gltf.loadCompressedTexture(descriptor:descriptor as! GLTF_3D4MCompressedTextureExtension, loadLevel: .first) { cTexture, error in        
                         
                         if gltf.isCanceled {
                             group.leave()
@@ -140,7 +139,7 @@ class TextureStorageManager {
                             tStatus.content = cTexture as Any?
                             
                             // load all levels
-                            gltf.loadCompressedTexture(descriptor:descriptor as! GLTF_3D4MCompressedTextureExtension, firstLevel: false) { (cTexture2, error) in
+                            gltf.loadCompressedTexture(descriptor:descriptor as! GLTF_3D4MCompressedTextureExtension, loadLevel: .all) { (cTexture2, error) in
                                 
                                 if gltf.isCanceled {
                                     group.leave()
@@ -162,7 +161,6 @@ class TextureStorageManager {
                 }
             } else {
                 tStatus.associate(property: property)
-                group.leave()
             }
         }
     }

@@ -8,9 +8,14 @@
 import Foundation
 import SceneKit
 
+enum CTLevel:Int {
+    case first = 0
+    case last
+    case all
+}
 extension GLTF {
     
-    func loadCompressedTexture(descriptor:GLTF_3D4MCompressedTextureExtension, firstLevel:Bool, completionHandler: @escaping (Any?, Error?) -> Void ) {
+    func loadCompressedTexture(descriptor:GLTF_3D4MCompressedTextureExtension, loadLevel:CTLevel, completionHandler: @escaping (Any?, Error?) -> Void ) {
         
         let width = descriptor.width
         let height = descriptor.height
@@ -29,28 +34,7 @@ extension GLTF {
                 return
             }
             
-            if firstLevel {
-                if let bView = self.bufferViews?[descriptor.sources.last!] {
-                    let buffer_ = self.buffers![bView.buffer]
-                    self.loader.load(gltf:self, resource: buffer_) { (buffer, error) in
-                        var error_ = error
-                        var textureResult:Any?
-                        var datas = [Data]()
-                        if buffer.data != nil {
-                            datas.append(buffer.data!)
-                            do {
-                                textureResult = try self._createMetalTexture(32, 32, pixelFormat, datas, bytesPerRow)
-                            } catch {
-                                error_ = error
-                            }
-                        } else {
-                            error_ = "Can't load data for \(buffer.uri ?? "")"
-                        }
-                        
-                        completionHandler(textureResult, error_)
-                    }     
-                }
-            } else {
+            if loadLevel == .all {
                 var buffers = [GLTFBuffer]()
                 for bViewIndex in descriptor.sources {
                     let buffer = self.buffers![self.bufferViews![bViewIndex].buffer]
@@ -77,6 +61,31 @@ extension GLTF {
                         }
                     }
                     completionHandler(textureResult, error_)
+                }
+            } else {
+                let sizeWidth = (loadLevel == .first) ? 32 : descriptor.width
+                let sizeHeight = (loadLevel == .first) ? 32 : descriptor.height
+                let index = (loadLevel == .first) ? descriptor.sources.last! : descriptor.sources.first!  
+                
+                if let bView = self.bufferViews?[index] {
+                    let buffer_ = self.buffers![bView.buffer]
+                    self.loader.load(gltf:self, resource: buffer_) { (buffer, error) in
+                        var error_ = error
+                        var textureResult:Any?
+                        var datas = [Data]()
+                        if buffer.data != nil {
+                            datas.append(buffer.data!)
+                            do {
+                                textureResult = try self._createMetalTexture(sizeWidth, sizeHeight, pixelFormat, datas, bytesPerRow)
+                            } catch {
+                                error_ = error
+                            }
+                        } else {
+                            error_ = "Can't load data for \(buffer.uri ?? "")"
+                        }
+                        
+                        completionHandler(textureResult, error_)
+                    }     
                 }
             }
             

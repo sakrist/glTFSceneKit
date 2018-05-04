@@ -19,16 +19,12 @@ let supportedExtensions = [dracoExtensionKey, compressedTextureExtensionKey]
 extension GLTF {
 
     struct Keys {
-        static var cache_nodes:String = "cache_nodes"
-        static var animation_duration:String = "animation_duration"
-        static var resource_loader:String = "resource_loader"
-        static var load_canceled:String = "load_canceled"
-        static var scnview:String = "scnview"
-    }
-    
-    var cache_nodes:[SCNNode?]? {
-        get { return objc_getAssociatedObject(self, &Keys.cache_nodes) as? [SCNNode?] }
-        set { objc_setAssociatedObject(self, &Keys.cache_nodes, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+        static var cache_nodes = "cache_nodes"
+        static var animation_duration = "animation_duration"
+        static var resource_loader = "resource_loader"
+        static var load_canceled = "load_canceled"
+        static var completion_handler = "completion_handler"
+        static var scnview = "scnview"
     }
     
     @objc
@@ -37,33 +33,35 @@ extension GLTF {
         set { objc_setAssociatedObject(self, &Keys.load_canceled, newValue, .OBJC_ASSOCIATION_ASSIGN) }
     }
     
+    var cache_nodes:[SCNNode?]? {
+        get { return objc_getAssociatedObject(self, &Keys.cache_nodes) as? [SCNNode?] }
+        set { objc_setAssociatedObject(self, &Keys.cache_nodes, newValue, .OBJC_ASSOCIATION_RETAIN) }
+    }
+    
     var view:SCNView? {
         get { return objc_getAssociatedObject(self, &Keys.scnview) as? SCNView }
         set { objc_setAssociatedObject(self, &Keys.scnview, newValue, .OBJC_ASSOCIATION_ASSIGN) }
     }
     
-    /// Convert GLTF to SceneKit scene. 
+    var _completionHandler:(() -> Void) {
+        get { return (objc_getAssociatedObject(self, &Keys.completion_handler) as? (() -> Void) ?? {}) }
+        set { objc_setAssociatedObject(self, &Keys.completion_handler, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    }
+    
+    /// Convert glTF object to SceneKit scene. 
     ///
-    /// - Parameter directory: location to others related resources of gltf
+    /// - Parameter scene: Optional parameter. If property is set then loaded model will be add to existing objects in scene.
+    /// - Parameter view: Required for Metal. But optional for OpenGL rendering.
+    /// - Parameter directoryPath: location to others related resources of glTF.
+    /// - Parameter multiThread: By default model will be load in multiple threads.
+    /// - Parameter completionHandler: Execute completion block once model fully loaded. If multiThread parameter set to true, then scene will be returned soon as possible and completion block will be executed later, after all textures load. 
     /// - Returns: instance of Scene
-    @objc
-    open func convertToScene(view:SCNView, 
+    @objc open func convert(to scene:SCNScene = SCNScene.init(),
+                             view:SCNView? = nil, 
                              directoryPath:String? = nil, 
                              multiThread:Bool = true, 
                              completionHandler: @escaping (() -> Void) = {} ) -> SCNScene? {
-        
-        let scene:SCNScene = SCNScene.init()
-        return load(to: scene, view: view, directoryPath: directoryPath, multiThread:multiThread, completionHandler:completionHandler)
-    }
-    
-    @objc
-    open func load(to scene:SCNScene, 
-                   view:SCNView, 
-                   directoryPath:String? = nil, 
-                   multiThread:Bool = true, 
-                   completionHandler: @escaping (() -> Void) = {} ) -> SCNScene? {
-        self.view = view
-        
+
         if (self.extensionsUsed != nil) {
             for key in self.extensionsUsed! {
                 if !supportedExtensions.contains(key) {
@@ -80,6 +78,9 @@ extension GLTF {
                 }
             }
         }
+        
+        self.view = view
+        self._completionHandler = completionHandler
         
         if directoryPath != nil {
             self.loader.directoryPath = directoryPath!
@@ -151,6 +152,10 @@ extension GLTF {
         
         // clear cache
         self.cache_nodes?.removeAll()
+        
+        if self.textures?.count == 0 {
+            self._completionHandler()
+        }
     }
     
     
@@ -327,9 +332,9 @@ extension GLTF {
                     let geometry = SCNGeometry.init(sources: sources, elements: elements)
                     
                     if let materialIndex = primitive.material {
-                        self.loadMaterial(index:materialIndex, completionHandler: { scnMaterial in 
+                        self.loadMaterial(index:materialIndex) { scnMaterial in 
                             geometry.materials = [scnMaterial]
-                        })
+                        }
                     }
                     
                     let primitiveNode = SCNNode.init(geometry: geometry)
