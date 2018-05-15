@@ -38,8 +38,8 @@ extension GLTF {
         set { objc_setAssociatedObject(self, &Keys.cache_nodes, newValue, .OBJC_ASSOCIATION_RETAIN) }
     }
     
-    var view:SCNView? {
-        get { return objc_getAssociatedObject(self, &Keys.scnview) as? SCNView }
+    var renderer:SCNSceneRenderer? {
+        get { return objc_getAssociatedObject(self, &Keys.scnview) as? SCNSceneRenderer }
         set { objc_setAssociatedObject(self, &Keys.scnview, newValue, .OBJC_ASSOCIATION_ASSIGN) }
     }
     
@@ -57,7 +57,7 @@ extension GLTF {
     /// - Parameter completionHandler: Execute completion block once model fully loaded. If multiThread parameter set to true, then scene will be returned soon as possible and completion block will be executed later, after all textures load. 
     /// - Returns: instance of Scene
     @objc open func convert(to scene:SCNScene = SCNScene.init(),
-                             view:SCNView? = nil, 
+                             renderer:SCNSceneRenderer? = nil, 
                              directoryPath:String? = nil, 
                              multiThread:Bool = true, 
                              completionHandler: @escaping (() -> Void) = {} ) -> SCNScene? {
@@ -79,7 +79,7 @@ extension GLTF {
             }
         }
         
-        self.view = view
+        self.renderer = renderer
         self._completionHandler = completionHandler
         
         if directoryPath != nil {
@@ -316,7 +316,6 @@ extension GLTF {
         if let meshIndex = node.mesh {
             if let mesh = self.meshes?[meshIndex] {
                 
-                scnNode.name = mesh.name
                 for primitive in mesh.primitives {
                     
                     var sources:[SCNGeometrySource] = [SCNGeometrySource]()
@@ -357,6 +356,7 @@ extension GLTF {
                     }
                     
                     let primitiveNode = SCNNode.init(geometry: geometry)
+                    primitiveNode.name = mesh.name
                     
                     if let targets = primitive.targets {
                         let morpher = SCNMorpher()
