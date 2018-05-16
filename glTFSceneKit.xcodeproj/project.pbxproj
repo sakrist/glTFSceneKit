@@ -293,12 +293,12 @@
 		OBJ_7 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_8 /* gltf_scenekit */,
+				OBJ_8 /* glTFSceneKit */,
 			);
 			name = Sources;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_8 /* gltf_scenekit */ = {
+		OBJ_8 /* glTFSceneKit */ = {
 			isa = PBXGroup;
 			children = (
 				OBJ_9 /* GLTF+SceneKit.swift */,
@@ -312,8 +312,8 @@
 				D2AC651D205D578A0091D5E0 /* GLTF_3D4MCompressedTextureExtension.swift */,
 				OBJ_39 /* Helper.swift */,
 			);
-			name = gltf_scenekit;
-			path = Sources/gltf_scenekit;
+			name = glTFSceneKit;
+			path = Sources/glTFSceneKit;
 			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
