@@ -258,7 +258,7 @@
 				OBJ_42 /* gltf_scenekitTests.swift */,
 			);
 			name = gltf_scenekitTests;
-			path = Tests/gltf_scenekitTests;
+			path = Tests/glTFSceneKitTests;
 			sourceTree = SOURCE_ROOT;
 		};
 		OBJ_43 /* Dependencies */ = {
