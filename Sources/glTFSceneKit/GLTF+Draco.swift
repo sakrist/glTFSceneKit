@@ -7,7 +7,6 @@
 
 import Foundation
 import SceneKit
-import Draco
 
 // https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md
 
@@ -25,7 +24,7 @@ extension GLTF {
                 data = data.subdata(in: start..<end)
             }
             
-            let (indicesData, verticies, stride) = Draco.uncompressDracoData(data, triangleStrip: triangleStrip)
+            let (indicesData, verticies, stride) = uncompressDracoData(data, triangleStrip: triangleStrip)
             
             let indexSize = MemoryLayout<UInt32>.size;
             
