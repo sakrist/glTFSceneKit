@@ -27,7 +27,9 @@ extension GLTF {
         
         let (bytesPerRow, pixelFormat) = _get_bpp_pixelFormat(descriptor.compression)
         
-        if self.renderer?.renderingAPI == .metal {
+        let device = MTLCreateSystemDefaultDevice()
+        
+        if self.renderer?.renderingAPI == .metal || device != nil {
             
             if (pixelFormat == .invalid ) {
                 completionHandler(nil, "GLTF_3D4MCompressedTextureExtension: Failed to load texture, unsupported compression format \(descriptor.compression).")
