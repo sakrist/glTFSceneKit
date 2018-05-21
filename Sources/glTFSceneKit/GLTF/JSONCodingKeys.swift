@@ -26,24 +26,11 @@ extension KeyedDecodingContainer {
         return try container.decode(type)
     }
     
-    func decodeIfPresent(_ type: Dictionary<String, Any>.Type, forKey key: K) throws -> Dictionary<String, Any>? {
-        guard contains(key) else {
-            return nil
-        }
-        return try decode(type, forKey: key)
-    }
-    
     func decode(_ type: Array<Any>.Type, forKey key: K) throws -> Array<Any> {
         var container = try self.nestedUnkeyedContainer(forKey: key)
         return try container.decode(type)
     }
     
-    func decodeIfPresent(_ type: Array<Any>.Type, forKey key: K) throws -> Array<Any>? {
-        guard contains(key) else {
-            return nil
-        }
-        return try decode(type, forKey: key)
-    }
     
     func decode(_ type: Dictionary<String, Any>.Type) throws -> Dictionary<String, Any> {
         var dictionary = Dictionary<String, Any>()
@@ -88,7 +75,6 @@ extension UnkeyedDecodingContainer {
     }
     
     mutating func decode(_ type: Dictionary<String, Any>.Type) throws -> Dictionary<String, Any> {
-        
         let nestedContainer = try self.nestedContainer(keyedBy: JSONCodingKeys.self)
         return try nestedContainer.decode(type)
     }
@@ -129,22 +115,10 @@ extension KeyedEncodingContainerProtocol {
         }
     }
     
-    mutating func encodeIfPresent(_ value: Dictionary<String, Any>?, forKey key: Key) throws {
-        if let value = value {
-            try encode(value, forKey: key)
-        }
-    }
-    
     mutating func encode(_ value: Array<Any>?, forKey key: Key) throws {
         if value != nil {
             var container = self.nestedUnkeyedContainer(forKey: key)
             try container.encode(value!)
-        }
-    }
-    
-    mutating func encodeIfPresent(_ value: Array<Any>?, forKey key: Key) throws {
-        if let value = value {
-            try encode(value, forKey: key)
         }
     }
 }

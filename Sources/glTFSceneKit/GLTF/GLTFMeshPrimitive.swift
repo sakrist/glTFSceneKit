@@ -116,11 +116,22 @@ open class GLTFMeshPrimitive : NSObject, Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(attributes, forKey: .attributes)
-        try container.encode(extensions, forKey: .extensions)
+        try container.encode(extensions as! [String: GLTFKHRDracoMeshCompressionExtension], forKey: .extensions)
         try container.encode(extras, forKey: .extras)
         try container.encode(indices, forKey: .indices)
         try container.encode(material, forKey: .material)
         try container.encode(mode, forKey: .mode)
         try container.encode(targets, forKey: .targets)
     }
+    
 }
+
+extension KeyedEncodingContainerProtocol {
+    mutating func encode(_ value: [String: GLTFKHRDracoMeshCompressionExtension]?, forKey key: Key) throws {
+        if value != nil {
+            var container = self.nestedContainer(keyedBy: JSONCodingKeys.self, forKey: key)
+            try container.encode(value!)
+        }
+    }
+}
+

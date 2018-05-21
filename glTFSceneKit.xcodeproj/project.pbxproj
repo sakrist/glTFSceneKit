@@ -10,6 +10,8 @@
 		D2157142204035E3009E9D16 /* JSONCodingKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = D215713A20402611009E9D16 /* JSONCodingKeys.swift */; };
 		D2180CDF208745A6005353CF /* GLTF+Draco.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2180CDD2087457D005353CF /* GLTF+Draco.swift */; };
 		D2180CE0208745A7005353CF /* GLTF+Draco.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2180CDD2087457D005353CF /* GLTF+Draco.swift */; };
+		D256CD0620B2B9F1002E841E /* glTFSceneKit-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = D2A67C0B20ADB9D0007523AF /* glTFSceneKit-Bridging-Header.h */; };
+		D256CD0720B2B9F2002E841E /* glTFSceneKit-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = D2A67C0B20ADB9D0007523AF /* glTFSceneKit-Bridging-Header.h */; };
 		D2750CED2077B7AC00F6198D /* GLTF+SceneKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* GLTF+SceneKit.swift */; };
 		D2750CEE2077B7AC00F6198D /* GLTF.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_11 /* GLTF.swift */; };
 		D2750CEF2077B7AC00F6198D /* GLTFAccessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* GLTFAccessor.swift */; };
@@ -332,6 +334,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D256CD0720B2B9F2002E841E /* glTFSceneKit-Bridging-Header.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,6 +342,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D256CD0620B2B9F1002E841E /* glTFSceneKit-Bridging-Header.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -726,6 +730,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_NAME = glTFSceneKitTests;
+				SWIFT_OBJC_BRIDGING_HEADER = "glTFSceneKit-Bridging-Header.h";
 				SWIFT_VERSION = 4.0;
 				TARGET_NAME = gltf_scenekitTests;
 			};
@@ -754,6 +759,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_NAME = glTFSceneKitTests;
+				SWIFT_OBJC_BRIDGING_HEADER = "glTFSceneKit-Bridging-Header.h";
 				SWIFT_VERSION = 4.0;
 				TARGET_NAME = gltf_scenekitTests;
 			};
