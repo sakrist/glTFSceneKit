@@ -25,6 +25,7 @@ extension GLTF {
         static var load_canceled = "load_canceled"
         static var completion_handler = "completion_handler"
         static var scnview = "scnview"
+        static var nodesDispatchGroup = "nodesDispatchGroup"
     }
     
     @objc
@@ -47,6 +48,20 @@ extension GLTF {
         get { return (objc_getAssociatedObject(self, &Keys.completion_handler) as? (() -> Void) ?? {}) }
         set { objc_setAssociatedObject(self, &Keys.completion_handler, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
+    
+    var nodesDispatchGroup:DispatchGroup {
+        get { 
+            if let d = objc_getAssociatedObject(self, &Keys.nodesDispatchGroup) {
+                return d as! DispatchGroup
+            } 
+            let group = DispatchGroup()
+            objc_setAssociatedObject(self, &Keys.nodesDispatchGroup, group, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            return group
+        }
+        set { objc_setAssociatedObject(self, &Keys.nodesDispatchGroup, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    }
+    
+    
     
     /// Convert glTF object to SceneKit scene. 
     ///
@@ -101,7 +116,7 @@ extension GLTF {
                 let start = Date() 
                 
                 // get global worker 
-                let group = DispatchGroup()
+                let group = self.nodesDispatchGroup
                 
                 // parse nodes
                 for nodeIndex in sceneGlTF.nodes! {
@@ -157,6 +172,8 @@ extension GLTF {
     fileprivate func _loadAnimationsAndCompleteConvertion() {
         
         self.parseAnimations()
+        
+        self.nodesDispatchGroup.wait()
         
         if self.textures?.count == 0 {
             self._converted()
