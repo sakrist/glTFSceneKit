@@ -36,6 +36,10 @@ open class GLTFMesh : NSObject, Codable {
         case weights
     }
 
+    public override init() {
+        primitives = [GLTFMeshPrimitive]()
+    }
+    
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         extensions = try? container.decode([String: Any].self, forKey: .extensions)

@@ -24,6 +24,11 @@ open class GLTFKHRDracoMeshCompressionExtension : NSObject, Codable {
         case bufferView
     }
 
+    public init(attributes a:[String: Int], bufferView bv:Int) {
+        attributes = a
+        bufferView = bv
+    }
+    
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         attributes = try container.decode([String: Int].self, forKey: .attributes)

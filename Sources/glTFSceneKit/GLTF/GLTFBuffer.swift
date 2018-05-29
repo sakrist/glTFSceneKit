@@ -35,6 +35,10 @@ open class GLTFBuffer : NSObject, Codable {
         case name
         case uri
     }
+    
+    public override init() {
+        byteLength = 0
+    }
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)

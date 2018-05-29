@@ -74,6 +74,12 @@ open class GLTFBufferView : NSObject, Codable {
         case target
     }
 
+    public init(buffer b:Int, byteLength bl:Int, byteOffset bo:Int) {
+        buffer = b
+        byteLength = bl
+        byteOffset = bo
+    } 
+    
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         buffer = try container.decode(Int.self, forKey: .buffer)

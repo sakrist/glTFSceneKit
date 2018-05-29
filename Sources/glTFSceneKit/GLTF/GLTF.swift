@@ -91,6 +91,10 @@ open class GLTF : NSObject, Codable {
         case skins
         case textures
     }
+    
+    public init(asset a:GLTFAsset) {
+        asset = a
+    }
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)

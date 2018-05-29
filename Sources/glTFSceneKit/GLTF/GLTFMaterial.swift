@@ -94,6 +94,13 @@ open class GLTFMaterial : NSObject, Codable {
         case pbrMetallicRoughness
     }
 
+    public override init() {
+        alphaCutoff = 0.5
+        alphaMode = GLTFMaterialAlphaMode()
+        doubleSided = false
+        emissiveFactor = [0, 0, 0]
+    }
+    
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         do {

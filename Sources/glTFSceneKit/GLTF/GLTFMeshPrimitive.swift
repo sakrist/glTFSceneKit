@@ -97,6 +97,11 @@ open class GLTFMeshPrimitive : NSObject, Codable {
         case mode
         case targets
     }
+    
+    public init(attributes a:[String: Int], mode m:GLTFMeshPrimitiveMode) {
+        attributes = a
+        mode = m
+    }
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)

@@ -63,6 +63,13 @@ open class GLTFNode : NSObject, Codable {
         case translation
         case weights
     }
+    
+    public override init() {
+        matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
+        rotation = [0, 0, 0, 1]
+        scale = [1, 1, 1]
+        translation = [0, 0, 0]
+    }
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)

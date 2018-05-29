@@ -39,6 +39,10 @@ open class GLTFAsset : NSObject, Codable {
         case minVersion
         case version
     }
+    
+    public init(version v:String) {
+        version = v
+    }
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
