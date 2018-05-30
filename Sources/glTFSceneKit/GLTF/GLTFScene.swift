@@ -31,6 +31,8 @@ open class GLTFScene : NSObject, Codable {
         case name
         case nodes
     }
+    
+    public override init() {}
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
