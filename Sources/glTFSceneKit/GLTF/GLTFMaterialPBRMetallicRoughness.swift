@@ -44,6 +44,12 @@ open class GLTFMaterialPBRMetallicRoughness : NSObject, Codable {
         case roughnessFactor
     }
 
+    public override init() {
+        baseColorFactor = [1, 1, 1, 1]
+        metallicFactor = 1
+        roughnessFactor = 1
+    }
+    
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         do {

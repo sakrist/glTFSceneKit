@@ -350,6 +350,9 @@ open class GLTF_3D4MCompressedTextureExtension : Codable {
     /// Compression type.
     public var compression:GLTF_3D4MCompressedTextureExtensionCompression
 
+    /// Texture width size in pixels.
+    public var width:Int
+
     /// Texture height size in pixels.
     public var height:Int
 
@@ -359,9 +362,6 @@ open class GLTF_3D4MCompressedTextureExtension : Codable {
     /// Texture 2D target.
     public var target:GLTF_3D4MCompressedTextureExtensionTarget
 
-    /// Texture width size in pixels.
-    public var width:Int
-
     private enum CodingKeys: String, CodingKey {
         case compression
         case height
@@ -370,6 +370,18 @@ open class GLTF_3D4MCompressedTextureExtension : Codable {
         case width
     }
 
+    public init(compression c:GLTF_3D4MCompressedTextureExtensionCompression, 
+                width w:Int,
+                height h:Int,
+                sources s:[Int],
+                target t:GLTF_3D4MCompressedTextureExtensionTarget) {
+        compression = c 
+        width = w
+        height = h
+        sources = s
+        target = t
+    } 
+    
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         compression = try container.decode(GLTF_3D4MCompressedTextureExtensionCompression.self, forKey: .compression)

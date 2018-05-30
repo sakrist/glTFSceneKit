@@ -36,6 +36,8 @@ open class GLTFTexture : NSObject, Codable {
         case source
     }
 
+    public override init() { }
+    
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         extensions = try? container.decode([String: GLTF_3D4MCompressedTextureExtension].self, forKey: .extensions)        

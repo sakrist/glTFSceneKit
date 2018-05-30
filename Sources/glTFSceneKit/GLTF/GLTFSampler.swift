@@ -184,6 +184,11 @@ open class GLTFSampler : NSObject, Codable {
         case wrapT
     }
 
+    public init(wrapS s:GLTFSamplerWrapS, wrapT t:GLTFSamplerWrapT) {
+        wrapS = s
+        wrapT = t
+    }
+    
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         extensions = try? container.decode([String: Any].self, forKey: .extensions)

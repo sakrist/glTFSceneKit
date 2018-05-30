@@ -25,6 +25,11 @@ open class GLTFTextureInfo : NSObject, Codable {
     /// The set index of texture's TEXCOORD attribute used for texture coordinate mapping.
     public var texCoord:Int
 
+    public init(index i:Int) {
+        index = i
+        texCoord = 0
+    }
+    
     private enum CodingKeys: String, CodingKey {
         case extensions
         case extras

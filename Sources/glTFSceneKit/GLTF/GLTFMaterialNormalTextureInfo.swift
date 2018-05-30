@@ -36,6 +36,11 @@ open class GLTFMaterialNormalTextureInfo : NSObject, Codable {
         case texCoord
     }
 
+    public override init() {
+        scale = 1
+        texCoord = 0
+    }
+    
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         extensions = try? container.decode([String: Any].self, forKey: .extensions)
