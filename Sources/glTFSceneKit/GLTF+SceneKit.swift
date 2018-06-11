@@ -8,9 +8,9 @@
 
 import Foundation
 import SceneKit
+import os
 
-// TODO: clear cache
-// TODO: exec completion block
+let log_scenekit = OSLog(subsystem: "org.glTFSceneKit", category: "scene")
 
 let dracoExtensionKey = "KHR_draco_mesh_compression"
 let compressedTextureExtensionKey = "3D4M_compressed_texture"
@@ -132,17 +132,13 @@ extension GLTF {
                     }
                 }
                 
-                #if DEBUG                
-                print("preload time \(-1000 * start.timeIntervalSinceNow)")
-                #endif     
+                os_log("submit data to download %d ms", log: log_scenekit, type: .debug, Int(start.timeIntervalSinceNow * -1000))
                 
                 // completion
                 group.notify(queue: DispatchQueue.global()) {
                     self._loadAnimationsAndCompleteConvertion()
-                    
-                    #if DEBUG
-                    print("load glTF \(-1000 * start.timeIntervalSinceNow)")
-                    #endif
+                
+                    os_log("geometry loaded %d ms", log: log_scenekit, type: .debug, Int(start.timeIntervalSinceNow * -1000))
                 }
             } else {
                 for nodeIndex in sceneGlTF.nodes! {
@@ -182,9 +178,8 @@ extension GLTF {
     
     /// Completion function and cache cleaning.
     func _converted() {
-        #if DEBUG
-        print("convert completed")
-        #endif
+        os_log("convert completed", log: log_scenekit, type: .debug)
+        
         // clear cache
         _completionHandler()
         _completionHandler = {}

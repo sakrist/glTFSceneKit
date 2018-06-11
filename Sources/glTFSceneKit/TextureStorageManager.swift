@@ -7,6 +7,7 @@
 
 import Foundation
 import SceneKit
+import os
 
 // Texture load status
 enum TextureStatus:Int {
@@ -80,16 +81,14 @@ class TextureStorageManager {
             group = groups[index]
             group?.enter()
             
-            #if DEBUG
             let startLoadTextures = Date()
-            #endif
             
             // notify when all textures are loaded
             // this is last operation.
             group?.notify(queue: DispatchQueue.main) {
-                #if DEBUG
-                print("load textures \(-1000 * startLoadTextures.timeIntervalSinceNow)")
-                #endif
+                
+                os_log("textures loaded %d ms", log: log_scenekit, type: .debug, Int(startLoadTextures.timeIntervalSinceNow * -1000))
+                
                 self.groups[index] = nil
                 self._associators[index] = nil
                 gltf._converted()
