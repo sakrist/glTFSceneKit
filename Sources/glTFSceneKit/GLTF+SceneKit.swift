@@ -120,11 +120,13 @@ extension GLTF {
                 
                 // parse nodes
                 for nodeIndex in sceneGlTF.nodes! {
-                    
                     group.enter()
+                    let scnNode = SCNNode()
+                    scene.rootNode.addChildNode(scnNode)
+                    self.cache_nodes?[nodeIndex] = scnNode
+                    
                     self._preloadBuffersData(nodeIndex: nodeIndex) { error in
-                        let node = self.buildNode(nodeIndex:nodeIndex)
-                        scene.rootNode.addChildNode(node)
+                        _ = self.buildNode(nodeIndex: nodeIndex, scnNode: scnNode)
                         group.leave()
                         if error != nil {
                             print(error!)
@@ -231,8 +233,8 @@ extension GLTF {
     
     // MARK: - Nodes
     
-    fileprivate func buildNode(nodeIndex:Int) -> SCNNode {
-        let scnNode = SCNNode()
+    fileprivate func buildNode(nodeIndex:Int, scnNode:SCNNode = SCNNode()) -> SCNNode {
+        
         if let node = self.nodes?[nodeIndex] {
             scnNode.name = node.name
             
@@ -266,7 +268,6 @@ extension GLTF {
             if self.isCanceled {
                 return scnNode
             }
-            self.cache_nodes?[nodeIndex] = scnNode
             
             if let children = node.children {
                 for i in children {
