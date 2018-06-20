@@ -3,6 +3,8 @@
 //
 // original https://gist.github.com/loudmouth/332e8d89d8de2c1eaf81875cfcd22e24
 
+import CoreGraphics
+
 public struct JSONCodingKeys: CodingKey {
     public var stringValue: String
     
@@ -94,6 +96,8 @@ public extension KeyedEncodingContainerProtocol where Key == JSONCodingKeys {
                 try encode(value, forKey: key)
             case let value as Double:
                 try encode(value, forKey: key)
+            case let value as CGFloat:
+                try encode(value, forKey: key)
             case let value as Dictionary<String, Any>:
                 try encode(value, forKey: key)
             case let value as Array<Any>:
@@ -134,6 +138,8 @@ public extension UnkeyedEncodingContainer {
             case let value as String:
                 try encode(value)
             case let value as Double:
+                try encode(value)
+            case let value as CGFloat:
                 try encode(value)
             case let value as Dictionary<String, Any>:
                 try encode(value)
