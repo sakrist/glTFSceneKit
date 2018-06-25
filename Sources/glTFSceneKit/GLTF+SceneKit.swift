@@ -122,6 +122,9 @@ extension GLTF {
                 for nodeIndex in sceneGlTF.nodes! {
                     group.enter()
                     let scnNode = SCNNode()
+                    if let node = self.nodes?[nodeIndex] {
+                        scnNode.name = node.name
+                    }
                     scene.rootNode.addChildNode(scnNode)
                     self.cache_nodes?[nodeIndex] = scnNode
                     
@@ -236,7 +239,6 @@ extension GLTF {
     fileprivate func buildNode(nodeIndex:Int, scnNode:SCNNode = SCNNode()) -> SCNNode {
         
         if let node = self.nodes?[nodeIndex] {
-            scnNode.name = node.name
             
             // Get camera, if it has reference on any. 
             constructCamera(node, scnNode)
