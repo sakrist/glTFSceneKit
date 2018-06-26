@@ -101,6 +101,7 @@ extension GLTF {
             self.loader.directoryPath = directoryPath!
         }
         
+        let texturesGroup = TextureStorageManager.manager.group(gltf: self, true)
         
         if self.scenes != nil && self.scene != nil {
             let sceneGlTF = self.scenes![(self.scene)!]
@@ -132,7 +133,7 @@ extension GLTF {
                         _ = self.buildNode(nodeIndex: nodeIndex, scnNode: scnNode)
                         group.leave()
                         if error != nil {
-                            print(error!)
+                            print(error?.localizedDescription ?? "")
                         }
                     }
                 }
@@ -153,6 +154,8 @@ extension GLTF {
                 self._loadAnimationsAndCompleteConvertion()
             }
         }
+        
+        texturesGroup.leave()
         
         if self.isCanceled {
             return nil
