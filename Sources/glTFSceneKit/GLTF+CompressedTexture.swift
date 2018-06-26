@@ -26,76 +26,65 @@ extension GLTF {
         }
         
         let (bytesPerRow, pixelFormat) = _get_bpp_pixelFormat(descriptor.compression)
-        
-        let device = MTLCreateSystemDefaultDevice()
-        
-        if self.renderer?.renderingAPI == .metal || device != nil {
             
-            if (pixelFormat == .invalid ) {
-                completionHandler(nil, "GLTF_3D4MCompressedTextureExtension: Failed to load texture, unsupported compression format \(descriptor.compression).")
-                return
+        if (pixelFormat == .invalid ) {
+            completionHandler(nil, "GLTF_3D4MCompressedTextureExtension: Failed to load texture, unsupported compression format \(descriptor.compression).")
+            return
+        }
+        
+        if loadLevel == .all {
+            var buffers = [GLTFBuffer]()
+            for bViewIndex in descriptor.sources {
+                let buffer = self.buffers![self.bufferViews![bViewIndex].buffer]
+                buffers.append(buffer)
             }
-            
-            if loadLevel == .all {
-                var buffers = [GLTFBuffer]()
-                for bViewIndex in descriptor.sources {
-                    let buffer = self.buffers![self.bufferViews![bViewIndex].buffer]
-                    buffers.append(buffer)
+                            
+            self.loader.load(gltf:self, resources: Set(buffers)) { (error) in
+                var error_ = error
+                var textureResult:Any?
+                
+                if error == nil {
+                    var datas = [Data]()    
+                    for buffer in buffers {
+                        if buffer.data != nil {
+                            datas.append(buffer.data!)
+                        } else {
+                            break
+                        }
+                    }
+                    do {
+                        textureResult = try self._createMetalTexture(width, height, pixelFormat, datas, bytesPerRow)
+                    } catch {
+                        error_ = error
+                    }
                 }
-                                
-                self.loader.load(gltf:self, resources: Set(buffers)) { (error) in
+                completionHandler(textureResult, error_)
+            }
+        } else {
+            let sizeWidth = (loadLevel == .first) ? 32 : descriptor.width
+            let sizeHeight = (loadLevel == .first) ? 32 : descriptor.height
+            let index = (loadLevel == .first) ? descriptor.sources.last! : descriptor.sources.first!  
+            
+            if let bView = self.bufferViews?[index] {
+                let buffer_ = self.buffers![bView.buffer]
+                self.loader.load(gltf:self, resource: buffer_) { (buffer, error) in
                     var error_ = error
                     var textureResult:Any?
-                    
-                    if error == nil {
-                        var datas = [Data]()    
-                        for buffer in buffers {
-                            if buffer.data != nil {
-                                datas.append(buffer.data!)
-                            } else {
-                                break
-                            }
-                        }
+                    var datas = [Data]()
+                    if buffer.data != nil {
+                        datas.append(buffer.data!)
                         do {
-                            textureResult = try self._createMetalTexture(width, height, pixelFormat, datas, bytesPerRow)
+                            textureResult = try self._createMetalTexture(sizeWidth, sizeHeight, pixelFormat, datas, bytesPerRow)
                         } catch {
                             error_ = error
                         }
+                    } else {
+                        error_ = "Can't load data for \(buffer.uri ?? "")"
                     }
+                    
                     completionHandler(textureResult, error_)
-                }
-            } else {
-                let sizeWidth = (loadLevel == .first) ? 32 : descriptor.width
-                let sizeHeight = (loadLevel == .first) ? 32 : descriptor.height
-                let index = (loadLevel == .first) ? descriptor.sources.last! : descriptor.sources.first!  
-                
-                if let bView = self.bufferViews?[index] {
-                    let buffer_ = self.buffers![bView.buffer]
-                    self.loader.load(gltf:self, resource: buffer_) { (buffer, error) in
-                        var error_ = error
-                        var textureResult:Any?
-                        var datas = [Data]()
-                        if buffer.data != nil {
-                            datas.append(buffer.data!)
-                            do {
-                                textureResult = try self._createMetalTexture(sizeWidth, sizeHeight, pixelFormat, datas, bytesPerRow)
-                            } catch {
-                                error_ = error
-                            }
-                        } else {
-                            error_ = "Can't load data for \(buffer.uri ?? "")"
-                        }
-                        
-                        completionHandler(textureResult, error_)
-                    }     
-                }
+                }     
             }
-            
-             
-        } else {
-            // TODO: implement for OpenGL  
-            // Use GLKTextureInfo
-            completionHandler(OSColor.white, "loadCompressedTexture for OpenGL not impemented, yet.")
         }
     }
     
