@@ -27,7 +27,9 @@ class TextureAssociator {
                 self.status = .loaded
                 
                 for property in associatedProperties {
-                    property.contents = content_
+                    DispatchQueue.main.async {
+                        property.contents = self.content_
+                    }
                 }
             }
         }
@@ -40,7 +42,13 @@ class TextureAssociator {
     
     func associate(property:SCNMaterialProperty) {
         associatedProperties.insert(property)
-        property.contents = content
+        DispatchQueue.main.async {
+            property.contents = self.content
+        }
+    }
+    
+    deinit {
+        associatedProperties.removeAll()
     }
 }
 
@@ -53,28 +61,30 @@ class TextureStorageManager {
     
     lazy private var _associators:[Int : [Int : TextureAssociator]] = [Int : [Int : TextureAssociator]]()
     
-    private var lock = os_unfair_lock_s()
-    private var glock = os_unfair_lock_s()
+    func clear(gltf: GLTF) {
+        let hash = gltf.hashValue
+        self.groups[hash] = nil
+        self._associators[hash] = nil
+    }
     
     func textureAssociator(gltf: GLTF, at index: Int) -> TextureAssociator {
-
-        os_unfair_lock_lock(&lock)
-        if _associators[gltf.hashValue] == nil {
-           _associators[gltf.hashValue] = [Int : TextureAssociator]()
+        let hash = gltf.hashValue
+        
+        if self._associators[hash] == nil {
+           self._associators[hash] = [Int : TextureAssociator]()
         }
-        var tStatus = (_associators[gltf.hashValue])![index] 
+        var tStatus = (self._associators[hash])![index] 
         if tStatus == nil {
             tStatus = TextureAssociator()
-            _associators[gltf.hashValue]![index] = tStatus
+            self._associators[hash]![index] = tStatus
         }
-        os_unfair_lock_unlock(&lock)
         return tStatus!
     }
     
     func group(gltf: GLTF, _ enter:Bool = false) -> DispatchGroup {
         let index = gltf.hashValue
         var group:DispatchGroup?
-        os_unfair_lock_lock(&glock)
+
         group = groups[index]
         if group == nil {
             groups[index] = DispatchGroup()
@@ -89,15 +99,12 @@ class TextureStorageManager {
                 
                 os_log("textures loaded %d ms", log: log_scenekit, type: .debug, Int(startLoadTextures.timeIntervalSinceNow * -1000))
                 
-                self.groups[index] = nil
-                self._associators[index] = nil
                 gltf._converted()
             }
             
         } else if enter {
             group?.enter()
         }
-        os_unfair_lock_unlock(&glock)
         return group!
     }
     
@@ -181,7 +188,7 @@ class TextureStorageManager {
             if gltf.isCanceled {
                 return
             }
-            let group = self.group(gltf:gltf, true) 
+            let group = self.worker.sync { self.group(gltf:gltf, true) } 
             
             var textureResult:OSImage?
             if let imageSourceIndex = texture.source {

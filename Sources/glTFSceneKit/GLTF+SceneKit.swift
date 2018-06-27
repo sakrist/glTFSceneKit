@@ -101,7 +101,9 @@ extension GLTF {
             self.loader.directoryPath = directoryPath!
         }
         
-        let texturesGroup = TextureStorageManager.manager.group(gltf: self, true)
+        // get global worker 
+        let group = self.nodesDispatchGroup
+        group.enter()
         
         if self.scenes != nil && self.scene != nil {
             let sceneGlTF = self.scenes![(self.scene)!]
@@ -115,9 +117,6 @@ extension GLTF {
             if (multiThread) {
                 
                 let start = Date() 
-                
-                // get global worker 
-                let group = self.nodesDispatchGroup
                 
                 // parse nodes
                 for nodeIndex in sceneGlTF.nodes! {
@@ -155,7 +154,7 @@ extension GLTF {
             }
         }
         
-        texturesGroup.leave()
+        group.leave()
         
         if self.isCanceled {
             return nil
@@ -195,6 +194,8 @@ extension GLTF {
         self.cache_nodes?.removeAll()
         
         self.clearCache()
+        
+        TextureStorageManager.manager.clear(gltf: self)
     }
     
     
@@ -387,8 +388,9 @@ extension GLTF {
                         morpher.calculationMode = .additive
                         primitiveNode.morpher = morpher
                     }
-                    
-                    scnNode.addChildNode(primitiveNode)
+                    DispatchQueue.main.async {
+                        scnNode.addChildNode(primitiveNode)
+                    }
                 }
             }
         }
