@@ -250,18 +250,6 @@ extension GLTF {
             // convert meshes if any exists in gltf node
             geometryNode(node, scnNode)
             
-            // construct animation paths
-            var weightPaths = [String]()
-            for i in 0..<scnNode.childNodes.count {
-                let primitive = scnNode.childNodes[i]
-                if let morpher = primitive.morpher {
-                    for j in 0..<morpher.targets.count {
-                        let path = "childNodes[\(i)].morpher.weights[\(j)]"
-                        weightPaths.append(path)
-                    }
-                }
-            }
-            scnNode.setValue(weightPaths, forUndefinedKey: "weightPaths")
             
             // load skin if any reference exists
             if let skin = node.skin {
@@ -276,8 +264,8 @@ extension GLTF {
             }
             
             if let children = node.children {
-                for i in children {
-                    let subSCNNode = buildNode(nodeIndex:i)
+                for i in children {     
+                    let subSCNNode = self.buildNode(nodeIndex:i)
                     scnNode.addChildNode(subSCNNode)
                 }
             }
@@ -333,7 +321,12 @@ extension GLTF {
         }
         
         if let meshIndex = node.mesh {
+            
+            var weightPaths = [String]()
+            
             if let mesh = self.meshes?[meshIndex] {
+                
+                var primitiveIndex = 0
                 
                 for primitive in mesh.primitives {
                     
@@ -379,20 +372,27 @@ extension GLTF {
                     
                     if let targets = primitive.targets {
                         let morpher = SCNMorpher()
-                        for targetIndex in 0..<targets.count {
+                        let targetsCount = targets.count 
+                        for targetIndex in 0..<targetsCount {
                             let target = targets[targetIndex]
                             let sourcesMorph = geometrySources(target)
                             let geometryMorph = SCNGeometry(sources: sourcesMorph, elements: nil)
                             morpher.targets.append(geometryMorph)
+                            
+                            let path = "childNodes[\(primitiveIndex)].morpher.weights[\(targetIndex)]"
+                            weightPaths.append(path)
                         }
                         morpher.calculationMode = .additive
                         primitiveNode.morpher = morpher
                     }
-                    DispatchQueue.main.async {
-                        scnNode.addChildNode(primitiveNode)
-                    }
+                    
+                    scnNode.addChildNode(primitiveNode)
+                    
+                    primitiveIndex += 1
                 }
             }
+            
+            scnNode.setValue(weightPaths, forUndefinedKey: "weightPaths")
         }
     }
     

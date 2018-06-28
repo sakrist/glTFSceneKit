@@ -121,7 +121,7 @@ open class GLTFMeshPrimitive : NSObject, Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(attributes, forKey: .attributes)
-        try container.encode(extensions as! [String: GLTFKHRDracoMeshCompressionExtension], forKey: .extensions)
+        try? container.encode(extensions as? [String: GLTFKHRDracoMeshCompressionExtension], forKey: .extensions)
         try container.encode(extras, forKey: .extras)
         try container.encode(indices, forKey: .indices)
         try container.encode(material, forKey: .material)

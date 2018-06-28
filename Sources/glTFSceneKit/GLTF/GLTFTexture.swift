@@ -49,7 +49,7 @@ open class GLTFTexture : NSObject, Codable {
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(extensions as! [String: GLTF_3D4MCompressedTextureExtension], forKey: .extensions)
+        try? container.encode(extensions as? [String: GLTF_3D4MCompressedTextureExtension], forKey: .extensions)
         try container.encode(extras, forKey: .extras)
         try container.encode(name, forKey: .name)
         try container.encode(sampler, forKey: .sampler)
