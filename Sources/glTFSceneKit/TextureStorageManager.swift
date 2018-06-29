@@ -186,20 +186,16 @@ class TextureStorageManager {
             }
             let group = self.worker.sync { self.group(gltf:gltf, true) } 
             
-            var textureResult:OSImage?
             if let imageSourceIndex = texture.source {
                 if let gltf_image = gltf.images?[imageSourceIndex] {
-                    do {
-                        textureResult = try gltf.loader.load(gltf:gltf, resource: gltf_image)
-                    } catch {
-                        print("Failed to load image. \(error)")
+                    
+                    gltf.loader.load(gltf:gltf, resource: gltf_image) { resource, error in
+                        if resource.image != nil {
+                            tStatus.content = gltf._compress(image:resource.image!)
+                        }
                         group.leave()
                     }
                 }
-            }
-            if textureResult != nil {
-                tStatus.content = gltf._compress(image:textureResult!)
-                group.leave()
             }
         }
     }
