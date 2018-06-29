@@ -66,6 +66,8 @@ open class GLTFImage : NSObject, Codable {
         case uri
     }
 
+    public override init() { }
+    
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         bufferView = try? container.decode(Int.self, forKey: .bufferView)

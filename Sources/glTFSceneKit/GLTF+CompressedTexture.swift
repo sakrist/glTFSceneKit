@@ -139,7 +139,7 @@ extension GLTF {
     }
     
     func _compress(image:OSImage) -> Any? {
-        #if os(iOS)
+        #if os(iOS) && !targetEnvironment(simulator)
         if #available(iOS 11.0, *) {
 //            if let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil) {
             if let cg = image.cgImage {
