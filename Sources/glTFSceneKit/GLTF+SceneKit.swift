@@ -16,6 +16,19 @@ let dracoExtensionKey = "KHR_draco_mesh_compression"
 let compressedTextureExtensionKey = "3D4M_compressed_texture"
 let supportedExtensions = [dracoExtensionKey, compressedTextureExtensionKey]
 
+
+struct ConvertionProgressMask : OptionSet {
+    let rawValue: Int
+    
+    static let nodes  = ConvertionProgressMask(rawValue: 1 << 0)
+    static let textures = ConvertionProgressMask(rawValue: 1 << 1)
+    static let animations  = ConvertionProgressMask(rawValue: 1 << 2)
+    
+    static func all() -> ConvertionProgressMask {
+        return [.nodes, .textures, .animations]
+    }
+}
+
 extension GLTF {
 
     struct Keys {
@@ -26,6 +39,7 @@ extension GLTF {
         static var completion_handler = "completion_handler"
         static var scnview = "scnview"
         static var nodesDispatchGroup = "nodesDispatchGroup"
+        static var convertionProgress = "convertionProgressMask"
     }
     
     @objc
@@ -37,6 +51,18 @@ extension GLTF {
     var cache_nodes:[SCNNode?]? {
         get { return objc_getAssociatedObject(self, &Keys.cache_nodes) as? [SCNNode?] }
         set { objc_setAssociatedObject(self, &Keys.cache_nodes, newValue, .OBJC_ASSOCIATION_RETAIN) }
+    }
+    
+    var convertionProgressMask:ConvertionProgressMask {
+        get {
+            var p = objc_getAssociatedObject(self, &Keys.convertionProgress)
+            if p == nil {
+                p = ConvertionProgressMask.init(rawValue: 0)
+                objc_setAssociatedObject(self, &Keys.convertionProgress, p, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            }
+            return p as! ConvertionProgressMask 
+        }
+        set { objc_setAssociatedObject(self, &Keys.convertionProgress, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
     
     var renderer:SCNSceneRenderer? {
@@ -141,7 +167,7 @@ extension GLTF {
                 
                 // completion
                 group.notify(queue: DispatchQueue.global()) {
-                    self._loadAnimationsAndCompleteConvertion()
+                    self._nodesConverted()
                 
                     os_log("geometry loaded %d ms", log: log_scenekit, type: .debug, Int(start.timeIntervalSinceNow * -1000))
                 }
@@ -150,7 +176,7 @@ extension GLTF {
                     let node = self.buildNode(nodeIndex:nodeIndex)
                     scene.rootNode.addChildNode(node)
                 }
-                self._loadAnimationsAndCompleteConvertion()
+                self._nodesConverted()
             }
         }
         
@@ -170,15 +196,31 @@ extension GLTF {
     }
     
      
-    /// Parse and create animation. 
+    /// Nodes converted, start parse and create animation. 
     /// And in case no textures required to load, complete convertion from glTF to SceneKit.
-    fileprivate func _loadAnimationsAndCompleteConvertion() {
+    fileprivate func _nodesConverted() {
+        self.convertionProgressMask.insert(.nodes)
         
         self.parseAnimations()
+        // probably should be inserted some where else and call on completion of animation parse 
+        self.convertionProgressMask.insert(.animations)
         
         self.nodesDispatchGroup.wait()
         
         if self.textures?.count == 0 {
+            self.convertionProgressMask.insert(.textures)
+        }
+        
+        if self.convertionProgressMask.rawValue == ConvertionProgressMask.all().rawValue {
+            self._converted()
+        }
+    }
+    
+    func _texturesLoaded() {
+        self.convertionProgressMask.insert(.textures)
+        TextureStorageManager.manager.clear(gltf: self)
+        
+        if self.convertionProgressMask.rawValue == ConvertionProgressMask.all().rawValue {
             self._converted()
         }
     }
@@ -195,9 +237,7 @@ extension GLTF {
         
         self.clearCache()
         
-        TextureStorageManager.manager.clear(gltf: self)
     }
-    
     
     // TODO: Collect associated buffers for node into a Set on Decode time.  
     fileprivate func _preloadBuffersData(nodeIndex:Int, completionHandler: @escaping (Error?) -> Void ) {

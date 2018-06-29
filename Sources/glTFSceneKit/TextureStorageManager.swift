@@ -27,9 +27,7 @@ class TextureAssociator {
                 self.status = .loaded
                 
                 for property in associatedProperties {
-                    DispatchQueue.main.async {
-                        property.contents = self.content_
-                    }
+                    property.contents = self.content_
                 }
             }
         }
@@ -42,9 +40,7 @@ class TextureAssociator {
     
     func associate(property:SCNMaterialProperty) {
         associatedProperties.insert(property)
-        DispatchQueue.main.async {
-            property.contents = self.content
-        }
+        property.contents = self.content
     }
     
     deinit {
@@ -99,7 +95,7 @@ class TextureStorageManager {
                 
                 os_log("textures loaded %d ms", log: log_scenekit, type: .debug, Int(startLoadTextures.timeIntervalSinceNow * -1000))
                 
-                gltf._converted()
+                gltf._texturesLoaded()
             }
             
         } else if enter {
