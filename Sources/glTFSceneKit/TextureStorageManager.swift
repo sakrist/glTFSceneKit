@@ -132,12 +132,12 @@ class TextureStorageManager {
                 let device = MTLCreateSystemDefaultDevice()
                 let metalOn = (gltf.renderer?.renderingAPI == .metal || device != nil)
                 
-                if let descriptor = texture.extensions?[compressedTextureExtensionKey], metalOn {
+                if let descriptor = texture.extensions?[compressedTextureExtensionKey] as? GLTF_3D4MCompressedTextureExtension, metalOn {
                     
                     let group = self.group(gltf:gltf, true) 
                     
                     // load first level mipmap as texture
-                    gltf.loadCompressedTexture(descriptor:descriptor as! GLTF_3D4MCompressedTextureExtension, loadLevel: .first) { cTexture, error in        
+                    gltf.loadCompressedTexture(descriptor:descriptor, loadLevel: .first) { cTexture, error in        
                         
                         if gltf.isCanceled {
                             group.leave()
@@ -152,7 +152,7 @@ class TextureStorageManager {
                             tStatus.content = cTexture as Any?
                             
                             // load all levels
-                            gltf.loadCompressedTexture(descriptor:descriptor as! GLTF_3D4MCompressedTextureExtension, loadLevel: .all) { (cTexture2, error) in
+                            gltf.loadCompressedTexture(descriptor:descriptor, loadLevel: .all) { (cTexture2, error) in
                                 
                                 if gltf.isCanceled {
                                     group.leave()
