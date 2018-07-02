@@ -180,11 +180,11 @@ class TextureStorageManager {
     
     // load original image source
     fileprivate func _loadImageTexture(_ gltf: GLTF, _ texture: GLTFTexture, _ tStatus: TextureAssociator) {
-        DispatchQueue.global().async {
+        self.worker.async {
             if gltf.isCanceled {
                 return
             }
-            let group = self.worker.sync { self.group(gltf:gltf, true) } 
+            let group = self.group(gltf:gltf, true) 
             
             if let imageSourceIndex = texture.source {
                 if let gltf_image = gltf.images?[imageSourceIndex] {
