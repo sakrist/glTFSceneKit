@@ -152,7 +152,7 @@ class TextureStorageManager {
                             tStatus.content = cTexture as Any?
                             
                             // load all levels
-                            gltf.loadCompressedTexture(descriptor:descriptor, loadLevel: .all) { (cTexture2, error) in
+                            gltf.loadCompressedTexture(descriptor:descriptor, loadLevel: .last) { (cTexture2, error) in
                                 
                                 if gltf.isCanceled {
                                     group.leave()
