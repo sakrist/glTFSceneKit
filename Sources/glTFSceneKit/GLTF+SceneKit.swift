@@ -42,8 +42,8 @@ extension GLTF {
         static var convertionProgress = "convertionProgressMask"
     }
     
-    @objc
-    open var isCanceled:Bool {
+    /// Status will be true if `cancel` was call.
+    @objc open private(set) var isCancelled:Bool {
         get { return (objc_getAssociatedObject(self, &Keys.load_canceled) as? Bool) ?? false }
         set { objc_setAssociatedObject(self, &Keys.load_canceled, newValue, .OBJC_ASSOCIATION_ASSIGN) }
     }
@@ -127,7 +127,7 @@ extension GLTF {
             self.loader.directoryPath = directoryPath!
         }
         
-        // get global worker 
+        // Get dispatch group for current GLTF 
         let group = self.nodesDispatchGroup
         group.enter()
         
@@ -143,6 +143,10 @@ extension GLTF {
             if (multiThread) {
                 
                 let start = Date() 
+                
+                // this enter is requered here in case materials has few textures
+                // which loaded very quickly even before all geometries submitted for load
+                let texturesGroup = TextureStorageManager.manager.group(gltf:self, true)
                 
                 // parse nodes
                 for nodeIndex in sceneGlTF.nodes! {
@@ -167,9 +171,11 @@ extension GLTF {
                 
                 // completion
                 group.notify(queue: DispatchQueue.global()) {
-                    self._nodesConverted()
-                
+                    texturesGroup.leave()
+                    
                     os_log("geometry loaded %d ms", log: log_scenekit, type: .debug, Int(start.timeIntervalSinceNow * -1000))
+                    
+                    self._nodesConverted()
                 }
             } else {
                 for nodeIndex in sceneGlTF.nodes! {
@@ -182,7 +188,7 @@ extension GLTF {
         
         group.leave()
         
-        if self.isCanceled {
+        if self.isCancelled {
             return nil
         }
         
@@ -191,7 +197,7 @@ extension GLTF {
     
     @objc
     open func cancel() {
-        self.isCanceled = true
+        self.isCancelled = true
         self.loader.cancelAll()
     }
     
@@ -299,7 +305,7 @@ extension GLTF {
             // bake all transformations into one mtarix
             scnNode.transform = bakeTransformationMatrix(node)
             
-            if self.isCanceled {
+            if self.isCancelled {
                 return scnNode
             }
             
@@ -356,7 +362,7 @@ extension GLTF {
     ///   - scnNode: SceneKit node, which is going to be parent node 
     fileprivate func geometryNode(_ node:GLTFNode, _ scnNode:SCNNode) {
         
-        if self.isCanceled {
+        if self.isCancelled {
             return
         }
         
@@ -394,7 +400,7 @@ extension GLTF {
                         }
                     }
                     
-                    if self.isCanceled {
+                    if self.isCancelled {
                         return
                     }
                     
@@ -572,9 +578,7 @@ extension GLTF {
         }
     }
     
-    
-    @objc
-    open func clearCache() {
+    func clearCache() {
         if self.buffers != nil {
             for buffer in self.buffers! {
                 buffer.data = nil

@@ -139,7 +139,7 @@ class TextureStorageManager {
                     // load first level mipmap as texture
                     gltf.loadCompressedTexture(descriptor:descriptor, loadLevel: .first) { cTexture, error in        
                         
-                        if gltf.isCanceled {
+                        if gltf.isCancelled {
                             group.leave()
                             return
                         }
@@ -154,7 +154,7 @@ class TextureStorageManager {
                             // load all levels
                             gltf.loadCompressedTexture(descriptor:descriptor, loadLevel: .last) { (cTexture2, error) in
                                 
-                                if gltf.isCanceled {
+                                if gltf.isCancelled {
                                     group.leave()
                                     return
                                 }
@@ -178,10 +178,10 @@ class TextureStorageManager {
         }
     }
     
-    // load original image source
+    /// load original image source png or jpg
     fileprivate func _loadImageTexture(_ gltf: GLTF, _ texture: GLTFTexture, _ tStatus: TextureAssociator) {
         self.worker.async {
-            if gltf.isCanceled {
+            if gltf.isCancelled {
                 return
             }
             let group = self.group(gltf:gltf, true) 

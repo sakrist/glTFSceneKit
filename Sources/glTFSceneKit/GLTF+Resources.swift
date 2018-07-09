@@ -8,9 +8,13 @@
 import Foundation
 
 
+/// Description for resources delivery by request from general GLTF converter. 
+/// - Simple implementation is GLTFResourceLoaderDefault and utilised as default resource delivery instrument.
+/// - Optionaly can be implemented own resource loader, for example if requered to deliver content from remote server.
+/// - All functionas with completion handler considered as possible delayed delivery, i.e. multi-thread or work with network.
 public protocol GLTFResourceLoader {
     
-    // location where is gltf file is located.
+    /// Set location where is gltf file is located.
     var directoryPath: String { get set }
     
     func load(gltf: GLTF, resource: GLTFBuffer) throws -> Data?
@@ -20,6 +24,7 @@ public protocol GLTFResourceLoader {
     func load(gltf: GLTF, resource: GLTFImage) throws -> OSImage?
     func load(gltf: GLTF, resource: GLTFImage, completionHandler: @escaping (GLTFImage, Error?) -> Void )
     
+    /// This function going to be call if `cancel` was occured on GLTF convert.
     func cancelAll()
 } 
 
@@ -39,6 +44,7 @@ extension GLTF {
 }
 
 
+/// Default resource delivery instrument.
 open class GLTFResourceLoaderDefault : GLTFResourceLoader {
     
     public var directoryPath: String = ""
