@@ -101,6 +101,7 @@ extension GLTF {
                              renderer:SCNSceneRenderer? = nil, 
                              directoryPath:String? = nil, 
                              multiThread:Bool = true, 
+                             hidden:Bool = false,
                              completionHandler: @escaping (() -> Void) = {} ) -> SCNScene? {
 
         if (self.extensionsUsed != nil) {
@@ -152,6 +153,7 @@ extension GLTF {
                 for nodeIndex in sceneGlTF.nodes! {
                     group.enter()
                     let scnNode = SCNNode()
+                    scnNode.isHidden = hidden
                     if let node = self.nodes?[nodeIndex] {
                         scnNode.name = node.name
                     }
@@ -179,8 +181,9 @@ extension GLTF {
                 }
             } else {
                 for nodeIndex in sceneGlTF.nodes! {
-                    let node = self.buildNode(nodeIndex:nodeIndex)
-                    scene.rootNode.addChildNode(node)
+                    let scnNode = self.buildNode(nodeIndex:nodeIndex)
+                    scnNode.isHidden = hidden
+                    scene.rootNode.addChildNode(scnNode)
                 }
                 self._nodesConverted()
             }
