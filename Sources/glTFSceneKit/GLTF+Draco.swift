@@ -13,14 +13,12 @@ import SceneKit
 extension GLTF {
     
     func convertDracoMesh(_ dracoMesh:GLTFKHRDracoMeshCompressionExtension, triangleStrip:Bool = true) -> (SCNGeometryElement?, [SCNGeometrySource]?) {
-        
-        if let (bufferView, data_) =  try? requestData(bufferView: dracoMesh.bufferView) {
-                
+        if let (bufferView, data) =  try? requestData(bufferView: dracoMesh.bufferView) {
+            var data = data
             let start = bufferView.byteOffset
-            let end = bufferView.byteLength 
-            var data = data_;
+            let end = start + bufferView.byteLength
             
-            if start != 0 && end != data.count {
+            if start != 0 || end != data.count {
                 data = data.subdata(in: start..<end)
             }
             
