@@ -20,9 +20,9 @@ let supportedExtensions = [dracoExtensionKey, compressedTextureExtensionKey]
 struct ConvertionProgressMask : OptionSet {
     let rawValue: Int
     
-    static let nodes  = ConvertionProgressMask(rawValue: 1 << 0)
-    static let textures = ConvertionProgressMask(rawValue: 1 << 1)
-    static let animations  = ConvertionProgressMask(rawValue: 1 << 2)
+    static let nodes  = ConvertionProgressMask(rawValue: 1 << 1)
+    static let textures = ConvertionProgressMask(rawValue: 1 << 2)
+    static let animations  = ConvertionProgressMask(rawValue: 1 << 3)
     
     static func all() -> ConvertionProgressMask {
         return [.nodes, .textures, .animations]
@@ -58,11 +58,11 @@ extension GLTF {
             var p = objc_getAssociatedObject(self, &Keys.convertionProgress)
             if p == nil {
                 p = ConvertionProgressMask.init(rawValue: 0)
-                objc_setAssociatedObject(self, &Keys.convertionProgress, p, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+                objc_setAssociatedObject(self, &Keys.convertionProgress, p, .OBJC_ASSOCIATION_RETAIN)
             }
             return p as! ConvertionProgressMask 
         }
-        set { objc_setAssociatedObject(self, &Keys.convertionProgress, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+        set { objc_setAssociatedObject(self, &Keys.convertionProgress, newValue, .OBJC_ASSOCIATION_RETAIN) }
     }
     
     var renderer:SCNSceneRenderer? {
@@ -150,26 +150,8 @@ extension GLTF {
                 // which loaded very quickly even before all geometries submitted for load
                 let texturesGroup = TextureStorageManager.manager.group(gltf:self, true)
                 
-                // parse nodes
-                for nodeIndex in sceneGlTF.nodes! {
-                    group.enter()
-                    let scnNode = SCNNode()
-                    scnNode.isHidden = hidden
-                    if let node = self.nodes?[nodeIndex] {
-                        scnNode.name = node.name
-                    }
-                    scene.rootNode.addChildNode(scnNode)
-                    self.cache_nodes?[nodeIndex] = scnNode
-                    
-                    self._preloadBuffersData(nodeIndex: nodeIndex) { error in
-                        if error != nil {
-                            print("Failed to load geometry node with error: \(error!)")
-                        } else {
-                            _ = self.buildNode(nodeIndex: nodeIndex, scnNode: scnNode)
-                        }
-                        group.leave()
-                    }
-                }
+                // construct nodes tree
+                _constructNodesTree(rootNode: scene.rootNode, nodes: sceneGlTF.nodes!, group: group, hidden: hidden)
                 
                 os_log("submit data to download %d ms", log: log_scenekit, type: .debug, Int(start.timeIntervalSinceNow * -1000))
                 
@@ -179,7 +161,9 @@ extension GLTF {
                     
                     os_log("geometry loaded %d ms", log: log_scenekit, type: .debug, Int(start.timeIntervalSinceNow * -1000))
                     
-                    self._nodesConverted()
+                    DispatchQueue.main.async {
+                        self._nodesConverted()
+                    }
                 }
             } else {
                 for nodeIndex in sceneGlTF.nodes! {
@@ -204,6 +188,39 @@ extension GLTF {
     open func cancel() {
         self.isCancelled = true
         self.loader.cancelAll()
+    }
+    
+    func _constructNodesTree(rootNode:SCNNode, nodes:[Int], group:DispatchGroup, hidden:Bool) {
+        for nodeIndex in nodes {
+            group.enter()
+            let scnNode = SCNNode()
+            scnNode.isHidden = hidden
+            if let node = self.nodes?[nodeIndex] {
+                scnNode.name = node.name
+                
+                if node.children != nil && node.children?.count != 0 {
+                    _constructNodesTree(rootNode: scnNode, nodes: node.children!, group: group, hidden: hidden)
+                }
+                
+                // create nodes up front to avoid deadlocks in multithreading
+                let primitivesCount = self.meshes?[node.mesh!].primitives.count ?? 0
+                for _ in 0..<primitivesCount {
+                    let scnNodePrimitiveNode = SCNNode()
+                    scnNode.addChildNode(scnNodePrimitiveNode)
+                }
+            }
+            rootNode.addChildNode(scnNode)
+            self.cache_nodes?[nodeIndex] = scnNode
+            
+            self._preloadBuffersData(nodeIndex: nodeIndex) { error in
+                if error != nil {
+                    print("Failed to load geometry node with error: \(error!)")
+                } else {
+                    _ = self.buildNode(nodeIndex: nodeIndex, scnNode: scnNode)
+                }
+                group.leave()
+            }
+        }
     }
     
      
@@ -260,7 +277,8 @@ extension GLTF {
                 if let mesh = self.meshes?[node.mesh!] {
                     for primitive in mesh.primitives {
                         // check on draco extension
-                        if let dracoMesh = primitive.extensions?[dracoExtensionKey] as? GLTFKHRDracoMeshCompressionExtension {
+                        if let dracoMesh = primitive.extensions?[dracoExtensionKey] {
+                            let dracoMesh = dracoMesh as! GLTFKHRDracoMeshCompressionExtension
                             let buffer = self.buffers![self.bufferViews![dracoMesh.bufferView].buffer]
                             buffers.insert(buffer)
                         } else {
@@ -393,8 +411,8 @@ extension GLTF {
                     sources.append(contentsOf: self.geometrySources(primitive.attributes))
                     
                     // check on draco extension
-                    if let dracoMesh = primitive.extensions?[dracoExtensionKey] as? GLTFKHRDracoMeshCompressionExtension {
-                        let (dElement, dSources) = self.convertDracoMesh(dracoMesh)
+                    if let dracoMesh = primitive.extensions?[dracoExtensionKey] {
+                        let (dElement, dSources) = self.convertDracoMesh(dracoMesh as! GLTFKHRDracoMeshCompressionExtension)
                         
                         if (dElement != nil) {
                             elements.append(dElement!)
@@ -418,7 +436,15 @@ extension GLTF {
                         }
                     }
                     
-                    let primitiveNode = SCNNode.init(geometry: geometry)
+                    let primitiveNode:SCNNode
+                    if primitiveIndex < scnNode.childNodes.count  {
+                        primitiveNode = scnNode.childNodes[primitiveIndex]
+                        primitiveNode.geometry = geometry
+                    } else {
+                        primitiveNode = SCNNode.init(geometry: geometry)
+                        scnNode.addChildNode(primitiveNode)
+                    }
+                    
                     primitiveNode.name = mesh.name
                     
                     if let targets = primitive.targets {
@@ -436,9 +462,7 @@ extension GLTF {
                         morpher.calculationMode = .additive
                         primitiveNode.morpher = morpher
                     }
-                    
-                    scnNode.addChildNode(primitiveNode)
-                    
+                                        
                     primitiveIndex += 1
                 }
             }
