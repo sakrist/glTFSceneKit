@@ -70,8 +70,8 @@ extension GLTF {
         set { objc_setAssociatedObject(self, &Keys.scnview, newValue, .OBJC_ASSOCIATION_ASSIGN) }
     }
     
-    var _completionHandler:(() -> Void) {
-        get { return (objc_getAssociatedObject(self, &Keys.completion_handler) as? (() -> Void) ?? {}) }
+    var _completionHandler:((Error?) -> Void) {
+        get { return (objc_getAssociatedObject(self, &Keys.completion_handler) as? ((Error?) -> Void) ?? {_ in }) }
         set { objc_setAssociatedObject(self, &Keys.completion_handler, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
     
@@ -102,12 +102,13 @@ extension GLTF {
                              directoryPath:String? = nil, 
                              multiThread:Bool = true, 
                              hidden:Bool = false,
-                             completionHandler: @escaping (() -> Void) = {} ) -> SCNScene? {
+                             completionHandler: @escaping ((Error?) -> Void) = {_ in } ) -> SCNScene? {
 
         if (self.extensionsUsed != nil) {
             for key in self.extensionsUsed! {
                 if !supportedExtensions.contains(key) {
-                    print("Used `\(key)` extension is not supported!")
+                    completionHandler("Used `\(key)` extension is not supported!")
+                    return nil
                 }
             }
         }
@@ -115,7 +116,7 @@ extension GLTF {
         if (self.extensionsRequired != nil) {
             for key in self.extensionsRequired! {
                 if !supportedExtensions.contains(key) {
-                    print("Required `\(key)` extension is not supported!")
+                    completionHandler("Required `\(key)` extension is not supported!")
                     return nil
                 }
             }
@@ -161,11 +162,12 @@ extension GLTF {
                     self.cache_nodes?[nodeIndex] = scnNode
                     
                     self._preloadBuffersData(nodeIndex: nodeIndex) { error in
-                        _ = self.buildNode(nodeIndex: nodeIndex, scnNode: scnNode)
-                        group.leave()
                         if error != nil {
-                            print(error?.localizedDescription ?? "")
+                            print("Failed to load geometry node with error: \(error!)")
+                        } else {
+                            _ = self.buildNode(nodeIndex: nodeIndex, scnNode: scnNode)
                         }
+                        group.leave()
                     }
                 }
                 
@@ -239,8 +241,8 @@ extension GLTF {
         os_log("convert completed", log: log_scenekit, type: .debug)
         
         // clear cache
-        _completionHandler()
-        _completionHandler = {}
+        _completionHandler(nil)
+        _completionHandler = {_ in }
         
         self.cache_nodes?.removeAll()
         
