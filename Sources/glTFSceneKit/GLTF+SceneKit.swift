@@ -165,17 +165,18 @@ extension GLTF {
                         self._nodesConverted()
                     }
                 }
+                group.leave()
             } else {
                 for nodeIndex in sceneGlTF.nodes! {
                     let scnNode = self.buildNode(nodeIndex:nodeIndex)
                     scnNode.isHidden = hidden
                     scene.rootNode.addChildNode(scnNode)
                 }
+                group.leave()
                 self._nodesConverted()
             }
         }
         
-        group.leave()
         
         if self.isCancelled {
             return nil
