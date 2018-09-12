@@ -448,6 +448,11 @@ extension GLTF {
                     
                     primitiveNode.name = mesh.name
                     
+                    if let transparency = primitiveNode.geometry?.firstMaterial?.transparency,
+                        transparency < 1.0 {
+                        primitiveNode.renderingOrder = 10
+                    }
+                    
                     if let targets = primitive.targets {
                         let morpher = SCNMorpher()
                         let targetsCount = targets.count 
