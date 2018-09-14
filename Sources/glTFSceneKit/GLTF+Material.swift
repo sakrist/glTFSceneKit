@@ -14,7 +14,7 @@ extension GLTF {
     // MARK: - Material
     
     // load material by index
-    func loadMaterial(index:Int, completionHandler: @escaping (SCNMaterial) -> Void) {
+    func loadMaterial(index:Int, textureSettedCallback: ((Any?)-> Void)? = nil, completionHandler: @escaping (SCNMaterial) -> Void) {
         
         if let material = self.materials?[index] {
             let scnMaterial = SCNMaterial()
@@ -27,12 +27,12 @@ extension GLTF {
                 scnMaterial.lightingModel = .physicallyBased
                 
                 if let baseTextureInfo = pbr.baseColorTexture {
-                    TextureStorageManager.loadTexture(gltf:self, index:baseTextureInfo.index, property: scnMaterial.diffuse)
+                    TextureStorageManager.loadTexture(gltf:self, index:baseTextureInfo.index, property: scnMaterial.diffuse, callback: textureSettedCallback)
                 } else {
                     let color = (pbr.baseColorFactor.count < 4) ? [1, 1, 1, 1] : (pbr.baseColorFactor)
                     scnMaterial.diffuse.contents = OSColor(red: CGFloat(color[0]), green: CGFloat(color[1]), blue: CGFloat(color[2]), alpha: CGFloat(color[3]))
                 }
-                
+               
                 // transparency/opacity
                 scnMaterial.transparency = CGFloat(pbr.baseColorFactor[3])
                 

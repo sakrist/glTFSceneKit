@@ -288,7 +288,26 @@ extension OSImage {
 }
 
 
+extension MTLPixelFormat {
+    public func hasAlpha() -> Bool {
+        switch self {
+        case .rgba8Unorm, .rgba8Unorm_srgb, .rgba8Snorm, .rgba8Uint, .rgba8Sint,
+            .bgra8Unorm, .bgra8Unorm_srgb, .rgb10a2Unorm, .rgb10a2Uint, .bgr10a2Unorm,
+            .rgba16Unorm, .rgba16Snorm, .rgba16Uint, .rgba16Sint, .rgba16Float, .rgba32Uint,
+            .rgba32Sint, .rgba32Float, .bc1_rgba, .bc1_rgba_srgb, .bc2_rgba, .bc2_rgba_srgb,
+            .bc3_rgba, .bc3_rgba_srgb, .bc7_rgbaUnorm, .bc7_rgbaUnorm_srgb:
+            return true
+        default:
+            return false
+        }
+    }
+}
 
+extension SCNMaterial {
+    public func hasAlpha() -> Bool {
+        return (diffuse.contents as? MTLTexture)?.pixelFormat.hasAlpha() ?? false
+    }
+}
 
 
 

@@ -428,16 +428,11 @@ extension GLTF {
                         return
                     }
                     
+                    
+                    let primitiveNode:SCNNode
                     // create geometry
                     let geometry = SCNGeometry.init(sources: sources, elements: elements)
                     
-                    if let materialIndex = primitive.material {
-                        self.loadMaterial(index:materialIndex) { scnMaterial in 
-                            geometry.materials = [scnMaterial]
-                        }
-                    }
-                    
-                    let primitiveNode:SCNNode
                     if primitiveIndex < scnNode.childNodes.count  {
                         primitiveNode = scnNode.childNodes[primitiveIndex]
                         primitiveNode.geometry = geometry
@@ -446,6 +441,21 @@ extension GLTF {
                         scnNode.addChildNode(primitiveNode)
                     }
                     
+                    if let materialIndex = primitive.material {
+                        self.loadMaterial(index:materialIndex, textureSettedCallback: { _ in
+                            if let material = primitiveNode.geometry?.firstMaterial {
+                                if let texture = material.diffuse.contents as? MTLTexture {
+                                    if texture.pixelFormat.hasAlpha() {
+                                         primitiveNode.renderingOrder = 10
+                                    }
+                                }
+                            }
+
+                        }) { scnMaterial in
+                            geometry.materials = [scnMaterial]
+                        }
+                    }
+                 
                     primitiveNode.name = mesh.name
                     
                     if let transparency = primitiveNode.geometry?.firstMaterial?.transparency,
@@ -453,6 +463,7 @@ extension GLTF {
                         primitiveNode.renderingOrder = 10
                     }
                     
+
                     if let targets = primitive.targets {
                         let morpher = SCNMorpher()
                         let targetsCount = targets.count 
