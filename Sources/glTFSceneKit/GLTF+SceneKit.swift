@@ -442,7 +442,7 @@ extension GLTF {
                     }
                     
                     if let materialIndex = primitive.material {
-                        self.loadMaterial(index:materialIndex, textureSettedCallback: { _ in
+                        self.loadMaterial(index:materialIndex, textureChangedCallback: { _ in
                             if let material = primitiveNode.geometry?.firstMaterial {
                                 if let texture = material.diffuse.contents as? MTLTexture {
                                     if texture.pixelFormat.hasAlpha() {
