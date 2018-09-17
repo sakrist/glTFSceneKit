@@ -101,8 +101,8 @@
 		D2B06502214FE0CC00309D6F /* GLTFTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_37 /* GLTFTexture.swift */; };
 		D2B06503214FE0CC00309D6F /* GLTFTextureInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* GLTFTextureInfo.swift */; };
 		D2B06504214FE0CC00309D6F /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_39 /* Helper.swift */; };
-		D2B06506214FE0CC00309D6F /* libdraco_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2A67C0420ADB93E007523AF /* libdraco_ios.a */; };
 		D2B06509214FE0CC00309D6F /* glTFSceneKit-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = D2A67C0B20ADB9D0007523AF /* glTFSceneKit-Bridging-Header.h */; };
+		D2B0651F214FEC7200309D6F /* libdraco_tvos.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2B0651E214FEC7200309D6F /* libdraco_tvos.a */; };
 		OBJ_58 /* gltf_scenekitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_42 /* gltf_scenekitTests.swift */; };
 		OBJ_60 /* glTFSceneKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "gltf_scenekit::gltf_scenekit::Product" /* glTFSceneKit.framework */; };
 		OBJ_67 /* GLTF+SceneKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* GLTF+SceneKit.swift */; };
@@ -181,7 +181,6 @@
 		D215713A20402611009E9D16 /* JSONCodingKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONCodingKeys.swift; sourceTree = "<group>"; };
 		D2180CDD2087457D005353CF /* GLTF+Draco.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GLTF+Draco.swift"; sourceTree = "<group>"; };
 		D2750D132077B7AC00F6198D /* glTFSceneKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = glTFSceneKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		D27BDF7C203DCE6E0036F3A7 /* libdraco.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdraco.a; path = ".build/checkouts/DracoSwiftPackage.git-6830057821000934015/libdraco.a"; sourceTree = "<group>"; };
 		D27BDF82203F0BEF0036F3A7 /* GLTFKHRDracoMeshCompressionExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GLTFKHRDracoMeshCompressionExtension.swift; sourceTree = "<group>"; };
 		D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GLTF+CompressedTexture.swift"; sourceTree = "<group>"; };
 		D287E3F4209602EB00EBCFD1 /* TextureStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureStorageManager.swift; sourceTree = "<group>"; };
@@ -194,6 +193,7 @@
 		D2AFCFC2208F2A010048A9DA /* GLTF+Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GLTF+Material.swift"; sourceTree = "<group>"; };
 		D2AFCFD1208F6F010048A9DA /* GLTF+Resources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GLTF+Resources.swift"; sourceTree = "<group>"; };
 		D2B0650D214FE0CC00309D6F /* glTFSceneKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = glTFSceneKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2B0651E214FEC7200309D6F /* libdraco_tvos.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdraco_tvos.a; path = Draco/libdraco_tvos.a; sourceTree = "<group>"; };
 		OBJ_11 /* GLTF.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTF.swift; sourceTree = "<group>"; };
 		OBJ_12 /* GLTFAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFAccessor.swift; sourceTree = "<group>"; };
 		OBJ_13 /* GLTFAccessorSparse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFAccessorSparse.swift; sourceTree = "<group>"; };
@@ -243,7 +243,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				D2B06506214FE0CC00309D6F /* libdraco_ios.a in Frameworks */,
+				D2B0651F214FEC7200309D6F /* libdraco_tvos.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -269,9 +269,9 @@
 		D27BDF7B203DCE6E0036F3A7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D2B0651E214FEC7200309D6F /* libdraco_tvos.a */,
 				D2A67C0420ADB93E007523AF /* libdraco_ios.a */,
 				D2A67C0220ADB92F007523AF /* libdraco.a */,
-				D27BDF7C203DCE6E0036F3A7 /* libdraco.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
