@@ -139,8 +139,8 @@ extension GLTF {
     }
     
     func _compress(image:OSImage) -> Any? {
-        #if os(iOS) && !targetEnvironment(simulator)
-        if #available(iOS 11.0, *) {
+        #if (os(iOS) || os(tvOS)) && !targetEnvironment(simulator)
+        if #available(iOS 11.0, tvOS 11.0, *) {
 //            if let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil) {
             if let cg = image.cgImage {
                 let data = CFDataCreateMutable(nil, 0)!
@@ -193,7 +193,7 @@ extension GLTF {
             pixelFormat = .bc7_rgbaUnorm_srgb
             bytesPerRow = {width, height in return ((width + 3) / 4) * 16 };
         }
-        #elseif os(iOS)
+        #elseif os(iOS) || os(tvOS)
         
         switch compression {
         case .ETC1_RGB8_OES:

@@ -37,7 +37,7 @@ extension GLTF {
                 scnMaterial.transparency = CGFloat(pbr.baseColorFactor[3])
                 
                 if let metallicRoughnessTextureInfo = pbr.metallicRoughnessTexture {
-                    if #available(OSX 10.13, iOS 11.0, *) {
+                    if #available(OSX 10.13, iOS 11.0, tvOS 11.0, *) {
                         scnMaterial.metalness.textureComponents = .blue
                         scnMaterial.roughness.textureComponents = .green
                         TextureStorageManager.loadTexture(gltf:self, index:metallicRoughnessTextureInfo.index, property: scnMaterial.metalness)

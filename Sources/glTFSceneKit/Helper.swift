@@ -9,7 +9,7 @@
 import Foundation
 import SceneKit
 
-#if os(iOS)
+#if os(iOS) || os(tvOS)
     public typealias OSImage = UIImage
     public typealias OSColor = UIColor
     typealias SCNFloat = Float

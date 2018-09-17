@@ -362,7 +362,7 @@ extension GLTF {
                 case .perspective:
                     scnNode.camera?.zNear = (camera.perspective?.znear)!
                     scnNode.camera?.zFar = (camera.perspective?.zfar)!
-                    if #available(OSX 10.13, iOS 11.0, *) {
+                    if #available(OSX 10.13, iOS 11.0, tvOS 11.0, *) {
                         scnNode.camera?.fieldOfView = CGFloat((camera.perspective?.yfov)! * 180.0 / .pi)
                         scnNode.camera?.wantsDepthOfField = true
                         scnNode.camera?.motionBlurIntensity = 0.3
