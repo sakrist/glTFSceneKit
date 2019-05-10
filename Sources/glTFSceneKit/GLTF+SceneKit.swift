@@ -105,12 +105,12 @@ extension GLTF {
                              completionHandler: @escaping ((Error?) -> Void) = {_ in } ) -> SCNScene? {
 
         if (self.extensionsUsed != nil) {
-            for key in self.extensionsUsed! {
-                if !supportedExtensions.contains(key) {
-                    completionHandler("Used `\(key)` extension is not supported!")
-                    return nil
-                }
-            }
+//            for key in self.extensionsUsed! {
+//                if !supportedExtensions.contains(key) {
+//                    completionHandler("Used `\(key)` extension is not supported!")
+//                    return nil
+//                }
+//            }
         }
         
         if (self.extensionsRequired != nil) {

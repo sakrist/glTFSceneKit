@@ -52,7 +52,7 @@ extension GLTF {
                                 loadSampler(sampler:texture.sampler, property: scnMaterial.metalness)
                                 
                                 let image = self.image(byIndex:texture.source!)
-                                if let images = try? image?.channels() {
+                                if let images = ((try? image?.channels()) as [OSImage]??) {
                                     scnMaterial.roughness.contents = images?[1]
                                     scnMaterial.metalness.contents = images?[2]
                                 }
@@ -92,7 +92,7 @@ extension GLTF {
     // get image by index
     fileprivate func image(byIndex index:Int) -> OSImage? {
         if let gltf_image = self.images?[index] {
-            if let image = try? self.loader.load(gltf:self, resource: gltf_image) {
+            if let image = ((try? self.loader.load(gltf:self, resource: gltf_image)) as OSImage??) {
                 return image
             }
         }
