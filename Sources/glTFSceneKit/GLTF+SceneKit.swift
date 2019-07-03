@@ -102,6 +102,7 @@ extension GLTF {
                              directoryPath:String? = nil, 
                              multiThread:Bool = true, 
                              hidden:Bool = false,
+                             geometryCompletionHandler: @escaping ()->Void,
                              completionHandler: @escaping ((Error?) -> Void) = {_ in } ) -> SCNScene? {
 
         if (self.extensionsUsed != nil) {
@@ -130,8 +131,10 @@ extension GLTF {
         }
         
         // Get dispatch group for current GLTF 
-        let group = self.nodesDispatchGroup
-        group.enter()
+        let convertGroup = self.nodesDispatchGroup
+        convertGroup.enter()
+        
+        let geometryGroup = DispatchGroup()
         
         if self.scenes != nil && self.scene != nil {
             let sceneGlTF = self.scenes![(self.scene)!]
@@ -151,28 +154,30 @@ extension GLTF {
                 let texturesGroup = TextureStorageManager.manager.group(gltf:self, true)
                 
                 // construct nodes tree
-                _constructNodesTree(rootNode: scene.rootNode, nodes: sceneGlTF.nodes!, group: group, hidden: hidden)
+                _constructNodesTree(rootNode: scene.rootNode, nodes: sceneGlTF.nodes!, group: geometryGroup, hidden: hidden)
                 
                 os_log("submit data to download %d ms", log: log_scenekit, type: .debug, Int(start.timeIntervalSinceNow * -1000))
                 
                 // completion
-                group.notify(queue: DispatchQueue.global()) {
+                geometryGroup.notify(queue: DispatchQueue.main) {
                     texturesGroup.leave()
                     
+                    geometryCompletionHandler()
                     os_log("geometry loaded %d ms", log: log_scenekit, type: .debug, Int(start.timeIntervalSinceNow * -1000))
                     
                     DispatchQueue.main.async {
                         self._nodesConverted()
                     }
                 }
-                group.leave()
+                
+                convertGroup.leave()
             } else {
                 for nodeIndex in sceneGlTF.nodes! {
                     let scnNode = self.buildNode(nodeIndex:nodeIndex)
                     scnNode.isHidden = hidden
                     scene.rootNode.addChildNode(scnNode)
                 }
-                group.leave()
+                convertGroup.leave()
                 self._nodesConverted()
             }
         }
@@ -441,6 +446,14 @@ extension GLTF {
                         scnNode.addChildNode(primitiveNode)
                     }
                     
+                    // create empty SCNMaterial. Callbacks call later then materail will be download, so we must provide materail for selection
+                    let emptyMaterial = SCNMaterial()
+                    emptyMaterial.name = "empty"
+                    emptyMaterial.isDoubleSided = true
+                    emptyMaterial.diffuse.contents = NSColor.white
+                    
+                    primitiveNode.geometry!.firstMaterial = emptyMaterial
+                    
                     if let materialIndex = primitive.material {
                         self.loadMaterial(index:materialIndex, textureChangedCallback: { _ in
                             if let material = primitiveNode.geometry?.firstMaterial {
@@ -451,7 +464,10 @@ extension GLTF {
                                 }
                             }
 
-                        }) { scnMaterial in
+                        })
+                    { scnMaterial in
+                            let emissionContent = emptyMaterial.emission.contents
+                            scnMaterial.emission.contents = emissionContent
                             geometry.materials = [scnMaterial]
                         }
                     }
