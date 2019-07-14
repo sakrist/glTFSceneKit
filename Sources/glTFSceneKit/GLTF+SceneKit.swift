@@ -133,9 +133,7 @@ extension GLTF {
         // Get dispatch group for current GLTF 
         let convertGroup = self.nodesDispatchGroup
         convertGroup.enter()
-        
-//        let geometryGroup = DispatchGroup()
-        
+                
         if self.scenes != nil && self.scene != nil {
             let sceneGlTF = self.scenes![(self.scene)!]
             if let sceneName = sceneGlTF.name {

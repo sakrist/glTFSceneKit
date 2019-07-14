@@ -124,11 +124,13 @@ extension GLTF {
         for i in 0 ..< mipmapsCount {
             let data = mipmaps[i]
             let bPr = bppBlock(width, height)
-            data.withUnsafeBytes {
-                texture?.replace(region: MTLRegionMake2D(0, 0, width, height), 
-                                 mipmapLevel: i, 
-                                 withBytes: $0, 
-                                 bytesPerRow: bPr)
+            data.withUnsafeBytes { (unsafeBufferPointer:UnsafeRawBufferPointer) in
+                if let unsafePointer = unsafeBufferPointer.bindMemory(to: UInt8.self).baseAddress {
+                    texture?.replace(region: MTLRegionMake2D(0, 0, width, height),
+                                     mipmapLevel: i,
+                                     withBytes: unsafePointer,
+                                     bytesPerRow: bPr)
+                }
             }
             
             width = max(width >> 1, 1);

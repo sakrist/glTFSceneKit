@@ -127,37 +127,37 @@ extension GLTF {
         var values = [Any]()
         switch componentType {
         case .BYTE:
-            values = data.int8Array
+            values = data.array() as [Int8]
             break
         case .UNSIGNED_BYTE:
-            values = data.uint8Array
+            values = data.array() as [UInt8]
             break
         case .SHORT:
-            values = data.int16Array
+            values = data.array() as [Int16]
             break
         case .UNSIGNED_SHORT:
-            values = data.uint16Array
+            values = data.array() as [UInt16]
             break
         case .UNSIGNED_INT:
-            values = data.uint32Array
+            values = data.array() as [UInt32]
             break
         case .FLOAT: 
             do {
                 switch type {
                 case .SCALAR:
-                    values = data.floatArray
+                    values = data.array() as [Float]
                     break
                 case .VEC2:
-                    values = data.vec2Array 
+                    values = data.array() as [SCNVector2]
                     break
                 case .VEC3:
-                    values = data.vec3Array
+                    values = data.array() as [GLKVector3]
                     for i in 0..<values.count {
                         values[i] = SCNVector3FromGLKVector3(values[i] as! GLKVector3)
                     }
                     break
                 case .VEC4:
-                    values = data.vec4Array
+                    values = data.array() as [GLKVector4]
                     for i in 0..<values.count {
                         values[i] = SCNVector4FromGLKVector4(values[i] as! GLKVector4)
                     }
@@ -167,7 +167,7 @@ extension GLTF {
                 case .MAT3:
                     break
                 case .MAT4:
-                    values = data.mat4Array
+                    values = data.array() as [GLKMatrix4]
                     for i in 0..<values.count {
                         values[i] = SCNMatrix4FromGLKMatrix4(values[i] as! GLKMatrix4)
                     }

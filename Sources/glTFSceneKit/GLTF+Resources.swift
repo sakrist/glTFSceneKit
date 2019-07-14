@@ -137,7 +137,7 @@ open class GLTFResourceLoaderDefault : GLTFResourceLoader {
                 throw "Can't find file at \(filepath)"
             }
         } else {
-            return (data == nil) ? nil : Data(bytes: [UInt8](data!))
+            return (data == nil) ? nil : Data([UInt8](data!))
         }
         return data
     }    

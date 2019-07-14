@@ -19,10 +19,13 @@ class gltf_scenekitTests: XCTestCase {
         self.measure {
             let glTF = try? decoder.decode(GLTF.self, from: jsonData!)
             
-            _ = glTF?.convert(renderer:view, directoryPath:nil, multiThread:false)
+            _ = glTF?.convert(renderer:view, directoryPath:nil, multiThread:false, geometryCompletionHandler: {
+                
+            })
             
         }
         
+        let jsonDataArray = jsonData!.array() as [UInt8]
         
 //        XCTAssert(glTF != nil)
         
