@@ -504,6 +504,7 @@
 						ProvisioningStyle = Manual;
 					};
 					D2B064DA214FE0CC00309D6F = {
+						LastSwiftMigration = 1020;
 						ProvisioningStyle = Manual;
 					};
 					"gltf_scenekit::gltf_scenekit" = {
@@ -861,8 +862,8 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
 				SWIFT_OBJC_BRIDGING_HEADER = "glTFSceneKit-Bridging-Header.h";
-				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
 				TARGET_NAME = glTFSceneKit;
 				TVOS_DEPLOYMENT_TARGET = 11.0;
 				VALID_ARCHS = arm64;
@@ -905,8 +906,8 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
 				SWIFT_OBJC_BRIDGING_HEADER = "glTFSceneKit-Bridging-Header.h";
-				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 3;
 				TARGET_NAME = glTFSceneKit;
 				TVOS_DEPLOYMENT_TARGET = 11.0;
 				VALID_ARCHS = arm64;
