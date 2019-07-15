@@ -195,6 +195,7 @@ extension GLTF {
     }
     
     func _constructNodesTree(rootNode:SCNNode, nodes:[Int], group:DispatchGroup, hidden:Bool) {
+        var cache_nodes = self.cache_nodes
         for nodeIndex in nodes {
             group.enter()
             let scnNode = SCNNode()
@@ -214,7 +215,7 @@ extension GLTF {
                 }
             }
             rootNode.addChildNode(scnNode)
-            self.cache_nodes?[nodeIndex] = scnNode
+            cache_nodes?[nodeIndex] = scnNode
             
             self._preloadBuffersData(nodeIndex: nodeIndex) { error in
                 if error != nil {
