@@ -233,8 +233,11 @@ extension GLTF {
     /// And in case no textures required to load, complete convertion from glTF to SceneKit.
     fileprivate func _nodesConverted() {
         self.convertionProgressMask.insert(.nodes)
-        
-        self.parseAnimations()
+        do {
+            try self.parseAnimations()
+        } catch {
+            
+        }
         // probably should be inserted some where else and call on completion of animation parse 
         self.convertionProgressMask.insert(.animations)
         
@@ -245,7 +248,7 @@ extension GLTF {
         }
         
         if self.convertionProgressMask.rawValue == ConvertionProgressMask.all().rawValue {
-            self._converted()
+            self._converted(nil)
         }
     }
     
@@ -254,16 +257,16 @@ extension GLTF {
         TextureStorageManager.manager.clear(gltf: self)
         
         if self.convertionProgressMask.rawValue == ConvertionProgressMask.all().rawValue {
-            self._converted()
+            self._converted(nil)
         }
     }
     
     /// Completion function and cache cleaning.
-    func _converted() {
+    func _converted(_ error:Error?) {
         os_log("convert completed", log: log_scenekit, type: .debug)
         
         // clear cache
-        _completionHandler(nil)
+        _completionHandler(error)
         _completionHandler = {_ in }
         
         self.cache_nodes?.removeAll()
@@ -322,8 +325,11 @@ extension GLTF {
             constructCamera(node, scnNode)
             
             // convert meshes if any exists in gltf node
-            geometryNode(node, scnNode)
-            
+            do {
+                try geometryNode(node, scnNode)
+            } catch {
+                print(error)
+            }
             
             // load skin if any reference exists
             if let skin = node.skin {
@@ -388,7 +394,7 @@ extension GLTF {
     /// - Parameters:
     ///   - node: gltf node
     ///   - scnNode: SceneKit node, which is going to be parent node 
-    fileprivate func geometryNode(_ node:GLTFNode, _ scnNode:SCNNode) {
+    fileprivate func geometryNode(_ node:GLTFNode, _ scnNode:SCNNode) throws {
         
         if self.isCancelled {
             return
@@ -408,12 +414,14 @@ extension GLTF {
                     var elements:[SCNGeometryElement] = [SCNGeometryElement]()
                     
                     // get indices 
-                    if let element = self.geometryElement(primitive) {
+                    if let element = try self.geometryElement(primitive) {
                         elements.append(element)   
                     }
                     
                     // get sources from attributes information
-                    sources.append(contentsOf: self.geometrySources(primitive.attributes))
+                    if let geometrySources = try self.geometrySources(primitive.attributes) {
+                        sources.append(contentsOf: geometrySources)
+                    }
                     
                     // check on draco extension
                     if let dracoMesh = primitive.extensions?[dracoExtensionKey] {
@@ -485,12 +493,13 @@ extension GLTF {
                         let targetsCount = targets.count 
                         for targetIndex in 0..<targetsCount {
                             let target = targets[targetIndex]
-                            let sourcesMorph = geometrySources(target)
-                            let geometryMorph = SCNGeometry(sources: sourcesMorph, elements: nil)
-                            morpher.targets.append(geometryMorph)
+                            if let sourcesMorph = try geometrySources(target) {
+                                let geometryMorph = SCNGeometry(sources: sourcesMorph, elements: nil)
+                                morpher.targets.append(geometryMorph)
                             
-                            let path = "childNodes[\(primitiveIndex)].morpher.weights[\(targetIndex)]"
-                            weightPaths.append(path)
+                                let path = "childNodes[\(primitiveIndex)].morpher.weights[\(targetIndex)]"
+                                weightPaths.append(path)
+                            }
                         }
                         morpher.calculationMode = .additive
                         primitiveNode.morpher = morpher
@@ -504,11 +513,11 @@ extension GLTF {
         }
     }
     
-    fileprivate func geometryElement(_ primitive: GLTFMeshPrimitive) -> SCNGeometryElement? {
+    fileprivate func geometryElement(_ primitive: GLTFMeshPrimitive) throws -> SCNGeometryElement? {
         if let indicesIndex = primitive.indices {
             if let accessor = self.accessors?[indicesIndex] {
                 
-                if let (indicesData, _, _) = loadAcessor(accessor) {
+                if let (indicesData, _, _) = try loadAcessor(accessor) {
                     
                     var count = accessor.count
                     
@@ -530,10 +539,9 @@ extension GLTF {
                                                    primitiveType: primitiveType,
                                                    primitiveCount: count,
                                                    bytesPerIndex: accessor.bytesPerElement())
-                } else {
-                    // here is should be errors handling
-                    print("Error load geometryElement")
                 }
+            } else {
+                throw "Can't find indices acessor with index \(indicesIndex)"
             }
         }
         return nil
@@ -543,55 +551,88 @@ extension GLTF {
     ///
     /// - Parameter attributes: dictionary of accessors
     /// - Returns: array of SCNGeometrySource objects
-    fileprivate func geometrySources(_ attributes:[String:Int]) -> [SCNGeometrySource]  {
+    fileprivate func geometrySources(_ attributes:[String:Int]) throws -> [SCNGeometrySource]?  {
         var geometrySources = [SCNGeometrySource]()
+        
+        var prevBufferView = -1
+        var mtlBuffer:MTLBuffer?
+        
+        var byteOffset = 0
+        var byteStride = 0
+        
+        
         for (key, accessorIndex) in attributes {
             if let accessor = self.accessors?[accessorIndex] {
                 
-                if let (data, byteStride, byteOffset) = loadAcessor(accessor) {
+                byteOffset = accessor.byteOffset
+                
+                if (mtlBuffer == nil || prevBufferView != accessor.bufferView!) {
+                    if let (data, _byteStride, _) = try loadAcessor(accessor) {
+                        
+                        let device = self.renderer?.device
+                        data.withUnsafeBytes { (unsafeBufferPointer:UnsafeRawBufferPointer) in
+                            let uint8Ptr = unsafeBufferPointer.bindMemory(to: Int8.self).baseAddress!
+                            mtlBuffer = device?.makeBuffer(bytes: uint8Ptr, length: data.count, options: .storageModeShared)
+                        }
+                        
+                        byteStride = _byteStride
+                    }
+                    prevBufferView = accessor.bufferView!
+                }
                     
-                    let count = accessor.count
-                    
-                    // convert string semantic to SceneKit semantic type 
-                    let semantic = self.sourceSemantic(name:key)
-                    
-                    let geometrySource = SCNGeometrySource.init(data: data, 
-                                                                semantic: semantic, 
-                                                                vectorCount: count, 
-                                                                usesFloatComponents: true, 
-                                                                componentsPerVector: accessor.components(), 
-                                                                bytesPerComponent: accessor.bytesPerElement(), 
-                                                                dataOffset: byteOffset, 
+                let count = accessor.count
+                
+                let vertexFormat:MTLVertexFormat = accessor.vertexFormat()
+                
+                // convert string semantic to SceneKit semantic type
+                let semantic = self.sourceSemantic(name:key)
+                
+                if let mtlB = mtlBuffer {
+                    let geometrySource = SCNGeometrySource.init(buffer: mtlB,
+                                                                vertexFormat: vertexFormat,
+                                                                semantic: semantic,
+                                                                vertexCount: count,
+                                                                dataOffset: byteOffset,
                                                                 dataStride: byteStride)
                     geometrySources.append(geometrySource)
+                } else {
+                    // TODO: implement fallback on init with data, which was deleted
+                    
+                    throw "Metal device failed to allocate MTLBuffer with accessor.bufferView = \(accessor.bufferView!)"
                 }
+            } else {
+                throw "Can't locate accessor at \(accessorIndex) index"
             }
         }
         return geometrySources
     }
     
     
-    func requestData(bufferView:Int) throws -> (GLTFBufferView, Data) {
+    func requestData(bufferView:Int) throws -> (GLTFBufferView, Data)? {
         if let bufferView = self.bufferViews?[bufferView] {  
-            let buffer = self.buffers![bufferView.buffer]
+            if let buffer = self.buffers?[bufferView.buffer] {
             
-            if let data = try self.loader.load(gltf:self, resource: buffer) {
-                return (bufferView, data)
+                if let data = try self.loader.load(gltf:self, resource: buffer) {
+                    return (bufferView, data)
+                }
+            } else {
+                throw "Can't load data! Can't find buffer at index \(bufferView.buffer)"
             }
-            throw "Can't load data!"
+        } else {
+            throw "Can't load data! Can't find bufferView at index \(bufferView)"
         }
-        throw "Can't load data! Can't find bufferView or buffer" 
+        return nil
     }
     
     
     // get data by accessor
-    func loadAcessor(_ accessor:GLTFAccessor) -> (Data, Int, Int)? {
+    func loadAcessor(_ accessor:GLTFAccessor) throws -> (Data, Int, Int)? {
         
         if accessor.bufferView == nil {
-            return nil
+            throw "Missing 'bufferView' for \(accessor.name ?? "") acessor"
         }
         
-        if let (bufferView, data) = try? requestData(bufferView: accessor.bufferView!) { 
+        if let (bufferView, data) = try requestData(bufferView: accessor.bufferView!) {
             
             var addAccessorOffset = false
             if (bufferView.byteStride == nil || accessor.components()*accessor.bytesPerElement() == bufferView.byteStride) {
@@ -599,7 +640,7 @@ extension GLTF {
             }
             
             let count = accessor.count
-            let byteStride = (bufferView.byteStride == nil) ? accessor.components()*accessor.bytesPerElement() : bufferView.byteStride!
+            let byteStride = (bufferView.byteStride == nil || bufferView.byteStride == 0) ? accessor.components()*accessor.bytesPerElement() : bufferView.byteStride!
             let bytesLength = byteStride*count
             
             let start = bufferView.byteOffset+((addAccessorOffset) ? accessor.byteOffset : 0)
@@ -682,6 +723,56 @@ extension GLTFAccessor {
             return 2
         default:
             return 4
+        }
+    }
+    
+    fileprivate func vertexFormat() -> MTLVertexFormat {
+        switch type {
+        case .SCALAR:
+            switch componentType {
+            case .UNSIGNED_SHORT, .SHORT, .UNSIGNED_BYTE, .BYTE:
+                fatalError("Unsupported")
+                
+            case .UNSIGNED_INT:
+                return .uint
+            case .FLOAT:
+                return .float
+            }
+            
+        case .VEC2:
+            switch componentType {
+            case .UNSIGNED_SHORT:
+                return .ushort2
+            case .SHORT:
+                return .short2
+            case .UNSIGNED_BYTE:
+                return .uchar2
+            case .BYTE:
+                return .char2
+            case .UNSIGNED_INT:
+                return .uint2
+            case .FLOAT:
+                return .float2
+            }
+            
+        case .VEC3:
+            switch componentType {
+            case .UNSIGNED_SHORT:
+                return .ushort3
+            case .SHORT:
+                return .short3
+            case .UNSIGNED_BYTE:
+                return .uchar3
+            case .BYTE:
+                return .char3
+            case .UNSIGNED_INT:
+                return .uint3
+            case .FLOAT:
+                return .float3
+            }
+        
+        default:
+            fatalError("Unsupported")
         }
     }
 }

@@ -46,18 +46,53 @@ extension GLTF {
                 sortedAttributes[pair.value] = pair.key
             }
             
+            var mtlBuffer:MTLBuffer?
+            let device = self.renderer?.device
+            verticies.withUnsafeBytes { (unsafeBufferPointer:UnsafeRawBufferPointer) in
+                let uint8Ptr = unsafeBufferPointer.bindMemory(to: Int8.self).baseAddress!
+                mtlBuffer = device?.makeBuffer(bytes: uint8Ptr, length: verticies.count, options: .storageModeShared)
+            }
+            
+            let createGeometrySource:(SCNGeometrySource.Semantic) -> (SCNGeometrySource)
+            if let mtlB = mtlBuffer {
+                createGeometrySource = { semantic in
+                    let vertexFormat:MTLVertexFormat
+                    switch semantic {
+                    case .texcoord:
+                        vertexFormat = .float2
+                    default:
+                        vertexFormat = .float3
+                    }
+                    
+                    let geometrySource = SCNGeometrySource.init(buffer: mtlB,
+                                                                vertexFormat: vertexFormat,
+                                                                semantic: semantic,
+                                                                vertexCount: count,
+                                                                dataOffset: byteOffset,
+                                                                dataStride: byteStride)
+                    return geometrySource
+                }
+                
+            } else {
+                createGeometrySource = { semantic in
+                    let geometrySource = SCNGeometrySource.init(data: verticies,
+                                                                semantic: semantic,
+                                                                vectorCount: count,
+                                                                usesFloatComponents: true,
+                                                                componentsPerVector: ((semantic == .texcoord) ? 2 : 3) ,
+                                                                bytesPerComponent: 4,
+                                                                dataOffset: byteOffset,
+                                                                dataStride: byteStride)
+                    return geometrySource
+                }
+            }
+            
             for key in sortedAttributes {
                 // convert string semantic to SceneKit enum type 
                 let semantic = self.sourceSemantic(name:key)
                 
-                let geometrySource = SCNGeometrySource.init(data: verticies, 
-                                                            semantic: semantic, 
-                                                            vectorCount: count, 
-                                                            usesFloatComponents: true, 
-                                                            componentsPerVector: ((semantic == .texcoord) ? 2 : 3) , 
-                                                            bytesPerComponent: 4, 
-                                                            dataOffset: byteOffset, 
-                                                            dataStride: byteStride)
+                let geometrySource = createGeometrySource(semantic)
+                
                 geometrySources.append(geometrySource)
                 
                 byteOffset = byteOffset + ((semantic == .texcoord) ? 8 : 12)

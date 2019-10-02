@@ -15,16 +15,12 @@ extension GLTF {
         set { objc_setAssociatedObject(self, &Keys.animation_duration, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
     
-    func parseAnimations() {
+    func parseAnimations() throws {
         if self.animations != nil {
             for animation in self.animations! {
                 for channel in animation.channels {
                     let sampler = animation.samplers[channel.sampler]
-                    do {
-                        try constructAnimation(sampler: sampler, target:channel.target)
-                    } catch {
-                        print(error)
-                    }
+                    try constructAnimation(sampler: sampler, target:channel.target)
                 }
             }
         }
@@ -39,13 +35,20 @@ extension GLTF {
     
     func constructAnimation(sampler:GLTFAnimationSampler, target:GLTFAnimationChannelTarget ) throws {
         
-        let node:SCNNode = self.cache_nodes![target.node!]!
+        let targetIndex = target.node!
+        guard let node:SCNNode = self.cache_nodes?[targetIndex] else {
+            throw "constructAnimation: Can't find target node with \(targetIndex), sampler:\(sampler) target:\(target)"
+        }
         
-        let accessorInput = self.accessors![sampler.input]
-        let accessorOutput = self.accessors![sampler.output]
+        guard let accessorInput = self.accessors?[sampler.input] else {
+            throw "Input accessor could not be found for sampler.input \(sampler.input)"
+        }
+        guard let accessorOutput = self.accessors?[sampler.output] else {
+            throw "Output accessor could not be found for sampler.output \(sampler.output)"
+        }
         
         var keyTimesFloat = [Float]()
-        if let (data, _, _) = loadAcessor(accessorInput) {
+        if let (data, _, _) = try loadAcessor(accessorInput) {
             keyTimesFloat = dataAsArray(data, accessorInput.componentType, accessorInput.type) as! [Float]
         }
         let duration = Double(keyTimesFloat.last!)
@@ -53,7 +56,7 @@ extension GLTF {
         let keyTimes: [NSNumber] = keyTimesFloat.map { NSNumber(value: $0 / f_duration ) }
         
         var values_ = [Any]()
-        if let (data, _, _) = loadAcessor(accessorOutput) {
+        if let (data, _, _) = try loadAcessor(accessorOutput) {
             values_ = dataAsArray(data, accessorOutput.componentType, accessorOutput.type)
         }
         
