@@ -14,7 +14,7 @@ extension GLTF {
     // MARK: - Material
     
     // load material by index
-    func loadMaterial(index:Int, textureChangedCallback: ((Any?)-> Void)? = nil, completionHandler: @escaping (SCNMaterial) -> Void) {
+    internal func loadMaterial(index:Int, textureChangedCallback: ((Any?)-> Void)? = nil, completionHandler: @escaping (SCNMaterial) -> Void) {
         
         if let material = self.materials?[index] {
             let scnMaterial = SCNMaterial()

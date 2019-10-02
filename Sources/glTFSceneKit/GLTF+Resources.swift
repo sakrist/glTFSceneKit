@@ -129,13 +129,9 @@ open class GLTFResourceLoaderDefault : GLTFResourceLoader {
                 }
             }
             
-            let filepath = [self.directoryPath, uri].joined(separator: "/") 
-            if FileManager.default.fileExists(atPath: filepath) {
-                let url = URL(fileURLWithPath: filepath)
-                data = try Data.init(contentsOf: url)
-            } else {
-                throw "Can't find file at \(filepath)"
-            }
+            let filepath = [self.directoryPath, uri].joined(separator: "/")
+            let url = URL(fileURLWithPath: filepath)
+            data = try Data.init(contentsOf: url)
         } else {
             return (data == nil) ? nil : Data([UInt8](data!))
         }

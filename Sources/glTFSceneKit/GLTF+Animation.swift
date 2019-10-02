@@ -37,14 +37,14 @@ extension GLTF {
         
         let targetIndex = target.node!
         guard let node:SCNNode = self.cache_nodes?[targetIndex] else {
-            throw "constructAnimation: Can't find target node with \(targetIndex), sampler:\(sampler) target:\(target)"
+            throw GLTFError("constructAnimation: Can't find target node with \(targetIndex), sampler:\(sampler) target:\(target)")
         }
         
         guard let accessorInput = self.accessors?[sampler.input] else {
-            throw "Input accessor could not be found for sampler.input \(sampler.input)"
+            throw GLTFError("Input accessor could not be found for sampler.input \(sampler.input)")
         }
         guard let accessorOutput = self.accessors?[sampler.output] else {
-            throw "Output accessor could not be found for sampler.output \(sampler.output)"
+            throw GLTFError("Output accessor could not be found for sampler.output \(sampler.output)")
         }
         
         var keyTimesFloat = [Float]()
@@ -80,7 +80,7 @@ extension GLTF {
             let step = keyAnimations.count
             let dataLength = values_.count / step
             guard dataLength == keyTimes.count else {
-                throw "data count mismatch: \(dataLength) != \(keyTimes.count)"
+                throw GLTFError("data count mismatch: \(dataLength) != \(keyTimes.count)")
             }
             
             for i in 0..<keyAnimations.count {

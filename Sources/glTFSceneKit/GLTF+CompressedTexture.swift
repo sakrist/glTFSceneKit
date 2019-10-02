@@ -21,14 +21,14 @@ extension GLTF {
         let height = descriptor.height
         
         if (width == 0 || height == 0) {
-            completionHandler(nil, "GLTF_3D4MCompressedTextureExtension: Failed to load texture, inappropriate texture size.")
+            completionHandler(nil, GLTFError("GLTF_3D4MCompressedTextureExtension: Failed to load texture, inappropriate texture size."))
             return
         }
         
         let (bytesPerRow, pixelFormat) = _get_bpp_pixelFormat(descriptor.compression)
             
         if (pixelFormat == .invalid ) {
-            completionHandler(nil, "GLTF_3D4MCompressedTextureExtension: Failed to load texture, unsupported compression format \(descriptor.compression).")
+            completionHandler(nil, GLTFError("GLTF_3D4MCompressedTextureExtension: Failed to load texture, unsupported compression format \(descriptor.compression)."))
             return
         }
         
@@ -79,7 +79,7 @@ extension GLTF {
                             error_ = error
                         }
                     } else {
-                        error_ = "Can't load data for \(buffer.uri ?? "")"
+                        error_ = GLTFError("Can't load data for \(buffer.uri ?? "")")
                     }
                     
                     completionHandler(textureResult, error_)
@@ -94,7 +94,7 @@ extension GLTF {
         let mipmapsCount = mipmaps.count
         
         if mipmapsCount == 0 {
-            throw "mipmaps array can't be empty."
+            throw GLTFError("mipmaps array can't be empty.")
         }
         
         let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat, 
@@ -103,22 +103,12 @@ extension GLTF {
                                                                          mipmapped: (mipmapsCount > 1))
         textureDescriptor.mipmapLevelCount = mipmapsCount
         
-        var device:MTLDevice?
-        #if os(macOS)
-        device = self.renderer?.device
-        #endif            
-        if (device == nil) {
-            device = MTLCreateSystemDefaultDevice()
+        guard let device = self.device() else {
+            throw GLTFError("View has Metal's render APi but can't get instance of MTLDevice.")
         }
         
-        if (device == nil) {
-            throw "View has Metal's render APi but can't get instance of MTLDevice."
-        }
-        
-        let texture = device?.makeTexture(descriptor: textureDescriptor)
-        
-        if (texture == nil) {
-            throw "Failed to create metal texture with descriptor \(textureDescriptor)"
+        guard let texture = device.makeTexture(descriptor: textureDescriptor) else {
+            throw GLTFError("Failed to create metal texture with descriptor \(textureDescriptor)")
         }
         
         for i in 0 ..< mipmapsCount {
@@ -126,7 +116,7 @@ extension GLTF {
             let bPr = bppBlock(width, height)
             data.withUnsafeBytes { (unsafeBufferPointer:UnsafeRawBufferPointer) in
                 if let unsafePointer = unsafeBufferPointer.bindMemory(to: UInt8.self).baseAddress {
-                    texture?.replace(region: MTLRegionMake2D(0, 0, width, height),
+                    texture.replace(region: MTLRegionMake2D(0, 0, width, height),
                                      mipmapLevel: i,
                                      withBytes: unsafePointer,
                                      bytesPerRow: bPr)
@@ -137,10 +127,10 @@ extension GLTF {
             height = max(height >> 1, 1);
         }
         
-        return texture!
+        return texture
     }
     
-    func _compress(image:OSImage) -> Any? {
+    internal func _compress(image:OSImage) -> Any? {
         #if (os(iOS) || os(tvOS)) && !targetEnvironment(simulator)
         if #available(iOS 11.0, tvOS 11.0, *) {
 //            if let cg = image.cgImage(forProposedRect: nil, context: nil, hints: nil) {

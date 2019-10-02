@@ -33,8 +33,24 @@ struct SCNVector2 {
     } 
 }
 
+class GLTFError : LocalizedError, CustomDebugStringConvertible {
+    var title: String?
+    var code: Int
+    var errorDescription: String? { return _description }
+    var failureReason: String? { return _description }
+    
+    private var _description: String
 
-extension String: Error {}
+    init(_ description: String) {
+        self.title = "GLTF Error"
+        self._description = description
+        self.code = -1000000
+    }
+    
+    var debugDescription: String {
+        return self.title! + ": " + self._description
+    }
+}
 
 extension SCNMatrix4 {
     init(array:[Double]) {
@@ -96,11 +112,11 @@ extension OSImage {
         #if os(macOS)
             var rect = CGRect(x: 0, y: 0, width: self.size.width, height: self.size.height)
             guard let cgImage = self.cgImage(forProposedRect: &rect, context: nil, hints: nil) else {
-                throw "Failed to create CGImage"
+                throw GLTFError("Failed to create CGImage")
             }
         #else
             guard let cgImage = self.cgImage else {
-                throw "failed to create CGImage"
+                throw GLTFError("failed to create CGImage")
             }
         #endif
         return try channels(from: cgImage)
@@ -121,7 +137,7 @@ extension OSImage {
         
         
         guard let context = CGContext(data: rawPtr, width: w, height: h, bitsPerComponent: bitsPerComponent, bytesPerRow: srcBytesPerPixel * w, space: colorSpace, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else {
-            throw "Failed to make textures"
+            throw GLTFError("Failed to make textures")
         }
         context.draw(image, in: rect)
         
@@ -162,10 +178,10 @@ extension OSImage {
             
             let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue)
             guard let imageData = CFDataCreate(nil, componentPtr, dstDataSize) else {
-                throw "Failed to create Data"
+                throw GLTFError("Failed to create Data")
             }
             guard let provider = CGDataProvider(data: imageData) else {
-                throw "Failed to create Provider"
+                throw GLTFError("Failed to create Provider")
             }
             guard let imageChannel = CGImage(
                 width: w, height: h,
@@ -178,7 +194,7 @@ extension OSImage {
                 decode: nil,
                 shouldInterpolate: false,
                 intent: CGColorRenderingIntent.defaultIntent) else {
-                    throw "Failed to create CGImage"
+                    throw GLTFError("Failed to create CGImage")
             }
             #if os(macOS)
                 let image_ = OSImage(cgImage: imageChannel, size: NSSize.init(width: w, height: h))

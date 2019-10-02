@@ -36,6 +36,7 @@ extension GLTF {
         static var animation_duration = "animation_duration"
         static var resource_loader = "resource_loader"
         static var load_canceled = "load_canceled"
+        static var load_error = "load_error"
         static var completion_handler = "completion_handler"
         static var scnview = "scnview"
         static var nodesDispatchGroup = "nodesDispatchGroup"
@@ -48,12 +49,17 @@ extension GLTF {
         set { objc_setAssociatedObject(self, &Keys.load_canceled, newValue, .OBJC_ASSOCIATION_ASSIGN) }
     }
     
-    var cache_nodes:[SCNNode?]? {
+    @objc open private(set) var errorMessage:Error? {
+        get { return (objc_getAssociatedObject(self, &Keys.load_error) as? Error) }
+        set { objc_setAssociatedObject(self, &Keys.load_error, newValue, .OBJC_ASSOCIATION_RETAIN) }
+    }
+    
+    internal private(set) var cache_nodes:[SCNNode?]? {
         get { return objc_getAssociatedObject(self, &Keys.cache_nodes) as? [SCNNode?] }
         set { objc_setAssociatedObject(self, &Keys.cache_nodes, newValue, .OBJC_ASSOCIATION_RETAIN) }
     }
     
-    var convertionProgressMask:ConvertionProgressMask {
+    internal var convertionProgressMask:ConvertionProgressMask {
         get {
             var p = objc_getAssociatedObject(self, &Keys.convertionProgress)
             if p == nil {
@@ -65,17 +71,17 @@ extension GLTF {
         set { objc_setAssociatedObject(self, &Keys.convertionProgress, newValue, .OBJC_ASSOCIATION_RETAIN) }
     }
     
-    var renderer:SCNSceneRenderer? {
+    internal var renderer:SCNSceneRenderer? {
         get { return objc_getAssociatedObject(self, &Keys.scnview) as? SCNSceneRenderer }
         set { objc_setAssociatedObject(self, &Keys.scnview, newValue, .OBJC_ASSOCIATION_ASSIGN) }
     }
     
-    var _completionHandler:((Error?) -> Void) {
+    internal var _completionHandler:((Error?) -> Void) {
         get { return (objc_getAssociatedObject(self, &Keys.completion_handler) as? ((Error?) -> Void) ?? {_ in }) }
         set { objc_setAssociatedObject(self, &Keys.completion_handler, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
     
-    var nodesDispatchGroup:DispatchGroup {
+    internal var nodesDispatchGroup:DispatchGroup {
         get { 
             if let d = objc_getAssociatedObject(self, &Keys.nodesDispatchGroup) {
                 return d as! DispatchGroup
@@ -117,7 +123,7 @@ extension GLTF {
         if (self.extensionsRequired != nil) {
             for key in self.extensionsRequired! {
                 if !supportedExtensions.contains(key) {
-                    completionHandler("Required `\(key)` extension is not supported!")
+                    completionHandler(GLTFError("Required `\(key)` extension is not supported!"))
                     return nil
                 }
             }
@@ -164,19 +170,25 @@ extension GLTF {
                     os_log("geometry loaded %d ms", log: log_scenekit, type: .debug, Int(start.timeIntervalSinceNow * -1000))
                     
                     DispatchQueue.main.async {
-                        self._nodesConverted()
+                        self._nodesConverted(self.errorMessage)
                     }
                 }
                 
                 convertGroup.leave()
             } else {
-                for nodeIndex in sceneGlTF.nodes! {
-                    let scnNode = self.buildNode(nodeIndex:nodeIndex)
-                    scnNode.isHidden = hidden
-                    scene.rootNode.addChildNode(scnNode)
+                var err:Error?
+                do {
+                    for nodeIndex in sceneGlTF.nodes! {
+                        if let scnNode = try self.buildNode(nodeIndex:nodeIndex) {
+                            scnNode.isHidden = hidden
+                            scene.rootNode.addChildNode(scnNode)
+                        }
+                    }
+                } catch {
+                    err = error
                 }
                 convertGroup.leave()
-                self._nodesConverted()
+                self._nodesConverted(err)
             }
         }
         
@@ -192,12 +204,19 @@ extension GLTF {
     open func cancel() {
         self.isCancelled = true
         self.loader.cancelAll()
+        TextureStorageManager.manager.clear(gltf: self);
     }
     
-    func _constructNodesTree(rootNode:SCNNode, nodes:[Int], group:DispatchGroup, hidden:Bool) {
+    internal func _constructNodesTree(rootNode:SCNNode, nodes:[Int], group:DispatchGroup, hidden:Bool) {
         var cache_nodes = self.cache_nodes
         for nodeIndex in nodes {
-            group.enter()
+            
+            if (self.isCancelled) {
+                return
+            }
+            
+            group.enter()                           // <=== enter group
+            
             let scnNode = SCNNode()
             scnNode.isHidden = hidden
             if let node = self.nodes?[nodeIndex] {
@@ -220,10 +239,18 @@ extension GLTF {
             self._preloadBuffersData(nodeIndex: nodeIndex) { error in
                 if error != nil {
                     print("Failed to load geometry node with error: \(error!)")
+                    self.errorMessage = error
+                    self.cancel()
                 } else {
-                    _ = self.buildNode(nodeIndex: nodeIndex, scnNode: scnNode)
+                    do {
+                        _ = try self.buildNode(nodeIndex: nodeIndex, scnNode: scnNode)
+                    } catch {
+                        print(error)
+                        self.errorMessage = error
+                        self.cancel()
+                    }
                 }
-                group.leave()
+                group.leave()                      // <=== leave group
             }
         }
     }
@@ -231,15 +258,27 @@ extension GLTF {
      
     /// Nodes converted, start parse and create animation. 
     /// And in case no textures required to load, complete convertion from glTF to SceneKit.
-    fileprivate func _nodesConverted() {
+    fileprivate func _nodesConverted(_ error:Error?) {
         self.convertionProgressMask.insert(.nodes)
-        do {
-            try self.parseAnimations()
-        } catch {
+        
+        if let e = error {
+            self.errorMessage = e
+            self.cancel()
             
+            // because we cancel, have to mark as pass progress
+            self.convertionProgressMask.insert(.textures)
+            self.convertionProgressMask.insert(.animations)
+        } else {
+        
+            do {
+                try self.parseAnimations()
+            } catch {
+                self.errorMessage = error
+                self.cancel()
+            }
+            // probably should be inserted some where else and call on completion of animation parse
+            self.convertionProgressMask.insert(.animations)
         }
-        // probably should be inserted some where else and call on completion of animation parse 
-        self.convertionProgressMask.insert(.animations)
         
         self.nodesDispatchGroup.wait()
         
@@ -248,21 +287,21 @@ extension GLTF {
         }
         
         if self.convertionProgressMask.rawValue == ConvertionProgressMask.all().rawValue {
-            self._converted(nil)
+            self._converted(self.errorMessage)
         }
     }
     
-    func _texturesLoaded() {
+    internal func _texturesLoaded() {
         self.convertionProgressMask.insert(.textures)
         TextureStorageManager.manager.clear(gltf: self)
         
         if self.convertionProgressMask.rawValue == ConvertionProgressMask.all().rawValue {
-            self._converted(nil)
+            self._converted(self.errorMessage)
         }
     }
     
     /// Completion function and cache cleaning.
-    func _converted(_ error:Error?) {
+    internal func _converted(_ error:Error?) {
         os_log("convert completed", log: log_scenekit, type: .debug)
         
         // clear cache
@@ -317,7 +356,7 @@ extension GLTF {
     
     // MARK: - Nodes
     
-    fileprivate func buildNode(nodeIndex:Int, scnNode:SCNNode = SCNNode()) -> SCNNode {
+    fileprivate func buildNode(nodeIndex:Int, scnNode:SCNNode = SCNNode()) throws  -> SCNNode? {
         
         if let node = self.nodes?[nodeIndex] {
             
@@ -325,11 +364,7 @@ extension GLTF {
             constructCamera(node, scnNode)
             
             // convert meshes if any exists in gltf node
-            do {
-                try geometryNode(node, scnNode)
-            } catch {
-                print(error)
-            }
+            try geometryNode(node, scnNode)
             
             // load skin if any reference exists
             if let skin = node.skin {
@@ -345,8 +380,9 @@ extension GLTF {
             
             if let children = node.children {
                 for i in children {     
-                    let subSCNNode = self.buildNode(nodeIndex:i)
-                    scnNode.addChildNode(subSCNNode)
+                    if let subSCNNode = try self.buildNode(nodeIndex:i) {
+                        scnNode.addChildNode(subSCNNode)
+                    }
                 }
             }
         }
@@ -487,6 +523,9 @@ extension GLTF {
                         primitiveNode.renderingOrder = 10
                     }
                     
+                    if self.isCancelled {
+                        return
+                    }
 
                     if let targets = primitive.targets {
                         let morpher = SCNMorpher()
@@ -541,7 +580,7 @@ extension GLTF {
                                                    bytesPerIndex: accessor.bytesPerElement())
                 }
             } else {
-                throw "Can't find indices acessor with index \(indicesIndex)"
+                throw GLTFError("Can't find indices acessor with index \(indicesIndex)")
             }
         }
         return nil
@@ -569,7 +608,7 @@ extension GLTF {
                 if (mtlBuffer == nil || prevBufferView != accessor.bufferView!) {
                     if let (data, _byteStride, _) = try loadAcessor(accessor) {
                         
-                        let device = self.renderer?.device
+                        let device = self.device()
                         data.withUnsafeBytes { (unsafeBufferPointer:UnsafeRawBufferPointer) in
                             let uint8Ptr = unsafeBufferPointer.bindMemory(to: Int8.self).baseAddress!
                             mtlBuffer = device?.makeBuffer(bytes: uint8Ptr, length: data.count, options: .storageModeShared)
@@ -598,17 +637,17 @@ extension GLTF {
                 } else {
                     // TODO: implement fallback on init with data, which was deleted
                     
-                    throw "Metal device failed to allocate MTLBuffer with accessor.bufferView = \(accessor.bufferView!)"
+                    throw GLTFError("Metal device failed to allocate MTLBuffer with accessor.bufferView = \(accessor.bufferView!)")
                 }
             } else {
-                throw "Can't locate accessor at \(accessorIndex) index"
+                throw GLTFError("Can't locate accessor at \(accessorIndex) index")
             }
         }
         return geometrySources
     }
     
     
-    func requestData(bufferView:Int) throws -> (GLTFBufferView, Data)? {
+    internal func requestData(bufferView:Int) throws -> (GLTFBufferView, Data)? {
         if let bufferView = self.bufferViews?[bufferView] {  
             if let buffer = self.buffers?[bufferView.buffer] {
             
@@ -616,20 +655,20 @@ extension GLTF {
                     return (bufferView, data)
                 }
             } else {
-                throw "Can't load data! Can't find buffer at index \(bufferView.buffer)"
+                throw GLTFError("Can't load data! Can't find buffer at index \(bufferView.buffer)")
             }
         } else {
-            throw "Can't load data! Can't find bufferView at index \(bufferView)"
+            throw GLTFError("Can't load data! Can't find bufferView at index \(bufferView)")
         }
         return nil
     }
     
     
     // get data by accessor
-    func loadAcessor(_ accessor:GLTFAccessor) throws -> (Data, Int, Int)? {
+    internal func loadAcessor(_ accessor:GLTFAccessor) throws -> (Data, Int, Int)? {
         
         if accessor.bufferView == nil {
-            throw "Missing 'bufferView' for \(accessor.name ?? "") acessor"
+            throw GLTFError("Missing 'bufferView' for \(accessor.name ?? "") acessor")
         }
         
         if let (bufferView, data) = try requestData(bufferView: accessor.bufferView!) {
@@ -660,7 +699,7 @@ extension GLTF {
     
     
     // convert attributes name to SceneKit semantic
-    func sourceSemantic(name:String) -> SCNGeometrySource.Semantic {
+    internal func sourceSemantic(name:String) -> SCNGeometrySource.Semantic {
         switch name {
         case "POSITION":
             return .vertex
@@ -681,7 +720,7 @@ extension GLTF {
         }
     }
     
-    func clearCache() {
+    internal func clearCache() {
         if self.buffers != nil {
             for buffer in self.buffers! {
                 buffer.data = nil
@@ -693,6 +732,17 @@ extension GLTF {
                 image.image = nil
             }
         }
+    }
+    
+    internal func device() -> MTLDevice? {
+        var device:MTLDevice?
+        #if os(macOS)
+        device = self.renderer?.device
+        #endif
+        if (device == nil) {
+            device = MTLCreateSystemDefaultDevice()
+        }
+        return device
     }
 }
 

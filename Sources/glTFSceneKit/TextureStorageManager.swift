@@ -129,7 +129,7 @@ class TextureStorageManager {
                 
                 gltf.loadSampler(sampler:texture.sampler, property: property)
                 
-                let device = MTLCreateSystemDefaultDevice()
+                let device = gltf.device()
                 let metalOn = (gltf.renderer?.renderingAPI == .metal || device != nil)
                 
                 if let descriptor = texture.extensions?[compressedTextureExtensionKey] as? GLTF_3D4MCompressedTextureExtension, metalOn {
