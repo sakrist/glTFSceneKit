@@ -8,7 +8,7 @@
 import SceneKit
 import os
 
-class GLTFConverter {
+public class GLTFConverter: TextureLoaderDelegate {
     
     /// Status will be true if `cancel` was call.
     @objc open private(set) var isCancelled: Bool = false
@@ -24,9 +24,11 @@ class GLTFConverter {
     internal var loadingScene: SCNScene?
     internal var loadingDelegate:SceneLoadingDelegate?
     
+    var animationDuration: Double = 0.0
+    
     internal var glTF: GLTF
     
-    init(glTF: GLTF) {
+    public init(glTF: GLTF) {
         self.glTF = glTF
     }
     
@@ -95,7 +97,7 @@ class GLTFConverter {
                 
                 // this enter is requered here in case materials has few textures
                 // which loaded very quickly even before all geometries submitted for load
-                let texturesGroup = TextureStorageManager.manager.group(gltf: glTF, true)
+                let texturesGroup = TextureStorageManager.manager.group(gltf: glTF, delegate: self, true)
                 
                 // construct nodes tree
                 _constructNodesTree(rootNode: scene.rootNode, nodes: sceneGlTF.nodes!, group: convertGroup, hidden: hidden)
@@ -177,7 +179,7 @@ class GLTFConverter {
             rootNode.addChildNode(scnNode)
             cache_nodes?[nodeIndex] = scnNode
             
-            glTF._preloadBuffersData(nodeIndex: nodeIndex) { error in
+            self._preloadBuffersData(nodeIndex: nodeIndex) { error in
                 if error != nil {
                     print("Failed to load geometry node with error: \(error!)")
                     self.errorMessage = error
@@ -212,7 +214,7 @@ class GLTFConverter {
         } else {
             
             do {
-                try glTF.parseAnimations()
+                try self.parseAnimations()
             } catch {
                 self.errorMessage = error
                 self.cancel()
@@ -232,7 +234,7 @@ class GLTFConverter {
         }
     }
     
-    internal func _texturesLoaded() {
+    internal func texturesLoaded() {
         self.convertionProgressMask.insert(.textures)
         TextureStorageManager.manager.clear(gltf: glTF)
         
@@ -269,11 +271,11 @@ class GLTFConverter {
             constructCamera(node, scnNode)
             
             // convert meshes if any exists in gltf node
-            try glTF.geometryNode(node, scnNode)
+            try self.geometryNode(node, scnNode)
             
             // load skin if any reference exists
             if let skin = node.skin {
-                glTF.loadSkin(skin, scnNode)
+                self.loadSkin(skin, scnNode)
             }
             
             // bake all transformations into one mtarix
@@ -333,17 +335,7 @@ class GLTFConverter {
     }
     
     internal func clearCache() {
-        if glTF.buffers != nil {
-            for buffer in glTF.buffers! {
-                buffer.data = nil
-            }
-        }
-        
-        if glTF.images != nil {
-            for image in glTF.images! {
-                image.image = nil
-            }
-        }
+        glTF.clearCache()
     }
     
     internal func device() -> MTLDevice? {

@@ -13,7 +13,7 @@ import SceneKit
 extension GLTF {
     
     func convertDracoMesh(_ dracoMesh:GLTFKHRDracoMeshCompressionExtension, triangleStrip:Bool = true) throws -> (SCNGeometryElement?, [SCNGeometrySource]?) {
-        if let (bufferView, data) = try requestData(bufferView: dracoMesh.bufferView) {
+        if let (bufferView, data) = try GLTF.requestData(glTF: self, bufferView: dracoMesh.bufferView) {
             var data = data
             let start = bufferView.byteOffset
             let end = start + bufferView.byteLength
@@ -47,7 +47,7 @@ extension GLTF {
             }
             
             var mtlBuffer:MTLBuffer?
-            let device = self.renderer?.device
+            let device = self.device()
             verticies.withUnsafeBytes { (unsafeBufferPointer:UnsafeRawBufferPointer) in
                 let uint8Ptr = unsafeBufferPointer.bindMemory(to: Int8.self).baseAddress!
                 mtlBuffer = device?.makeBuffer(bytes: uint8Ptr, length: verticies.count, options: .storageModeShared)
@@ -89,7 +89,7 @@ extension GLTF {
             
             for key in sortedAttributes {
                 // convert string semantic to SceneKit enum type 
-                let semantic = sourceSemantic(name:key)
+                let semantic = GLTF.sourceSemantic(name:key)
                 
                 let geometrySource = createGeometrySource(semantic)
                 

@@ -384,8 +384,8 @@
 			isa = PBXGroup;
 			children = (
 				49A51D22234601B7002B5D24 /* GLTFConverter.swift */,
-				49A51D182345E8BB002B5D24 /* GLTF+Geometry.swift */,
 				OBJ_9 /* GLTF+SceneKit.swift */,
+				49A51D182345E8BB002B5D24 /* GLTF+Geometry.swift */,
 				D287E3F4209602EB00EBCFD1 /* TextureStorageManager.swift */,
 				D2AFCFC2208F2A010048A9DA /* GLTF+Material.swift */,
 				D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */,

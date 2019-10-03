@@ -16,6 +16,12 @@ enum TextureStatus:Int {
     case loaded
 }
 
+protocol TextureLoaderDelegate {
+    var renderer: SCNSceneRenderer? { get }
+    var isCancelled: Bool { get }
+    func texturesLoaded()
+}
+
 class TextureAssociator {
     var status:TextureStatus = .no
     
@@ -77,11 +83,10 @@ class TextureStorageManager {
         return tStatus!
     }
     
-    func group(gltf: GLTF, _ enter:Bool = false) -> DispatchGroup {
+    func group(gltf: GLTF, delegate: TextureLoaderDelegate, _ enter:Bool = false) -> DispatchGroup {
         let index = gltf.hashValue
-        var group:DispatchGroup?
-
-        group = groups[index]
+        var group: DispatchGroup? = groups[index]
+        
         if group == nil {
             groups[index] = DispatchGroup()
             group = groups[index]
@@ -95,7 +100,7 @@ class TextureStorageManager {
                 
                 os_log("textures loaded %d ms", log: log_scenekit, type: .debug, Int(startLoadTextures.timeIntervalSinceNow * -1000))
                 
-                gltf._texturesLoaded()
+                delegate.texturesLoaded()
             }
             
         } else if enter {
@@ -110,11 +115,11 @@ class TextureStorageManager {
     /// - Parameters:
     ///   - index: index of GLTFTexture in textures
     ///   - property: material's property
-    static func loadTexture(gltf: GLTF, index: Int, property: SCNMaterialProperty, callback: ((Any?)-> Void)? = nil) {
-        self.manager._loadTexture(gltf: gltf, index: index, property: property, callback: callback)
+    static func loadTexture(gltf: GLTF, delegate: TextureLoaderDelegate, index: Int, property: SCNMaterialProperty, callback: ((Any?)-> Void)? = nil) {
+        self.manager._loadTexture(gltf: gltf, delegate: delegate, index: index, property: property, callback: callback)
     }
     
-    fileprivate func _loadTexture(gltf: GLTF, index: Int, property: SCNMaterialProperty, callback: ((Any?)-> Void)? = nil) {
+    fileprivate func _loadTexture(gltf: GLTF, delegate: TextureLoaderDelegate, index: Int, property: SCNMaterialProperty, callback: ((Any?)-> Void)? = nil) {
         guard let texture = gltf.textures?[index] else {
             print("Failed to find texture")
             return
@@ -130,23 +135,23 @@ class TextureStorageManager {
                 gltf.loadSampler(sampler:texture.sampler, property: property)
                 
                 let device = gltf.device()
-                let metalOn = (gltf.renderer?.renderingAPI == .metal || device != nil)
+                let metalOn = (delegate.renderer?.renderingAPI == .metal || device != nil)
                 
                 if let descriptor = texture.extensions?[compressedTextureExtensionKey] as? GLTF_3D4MCompressedTextureExtension, metalOn {
                     
-                    let group = self.group(gltf:gltf, true) 
+                    let group = self.group(gltf:gltf, delegate: delegate, true) 
                     
                     // load first level mipmap as texture
                     gltf.loadCompressedTexture(descriptor:descriptor, loadLevel: .first) { cTexture, error in        
                         
-                        if gltf.isCancelled {
+                        if delegate.isCancelled {
                             group.leave()
                             return
                         }
                         
                         if (error != nil) {
                             print("Failed to load comressed texture \(error.debugDescription). Fallback on image source.")
-                            self._loadImageTexture(gltf, texture, tStatus, callback)
+                            self._loadImageTexture(gltf, delegate, texture, tStatus, callback)
                             group.leave()
                         } else {
                             tStatus.content = cTexture as Any?
@@ -155,14 +160,14 @@ class TextureStorageManager {
                             // load all levels
                             gltf.loadCompressedTexture(descriptor:descriptor, loadLevel: .last) { (cTexture2, error) in
                                 
-                                if gltf.isCancelled {
+                                if delegate.isCancelled {
                                     group.leave()
                                     return
                                 }
                                 
                                 if (error != nil) {
                                     print("Failed to load comressed texture \(error.debugDescription). Fallback on image source.")
-                                    self._loadImageTexture(gltf, texture, tStatus, callback)
+                                    self._loadImageTexture(gltf, delegate, texture, tStatus, callback)
                                 } else {
                                     tStatus.content = cTexture2 as Any?
                                     callback?(cTexture2)
@@ -172,7 +177,7 @@ class TextureStorageManager {
                         }
                     }
                 } else {
-                    self._loadImageTexture(gltf, texture, tStatus, callback)
+                    self._loadImageTexture(gltf, delegate, texture, tStatus, callback)
                 }
             } else {
                 tStatus.associate(property: property)
@@ -181,12 +186,12 @@ class TextureStorageManager {
     }
     
     /// load original image source png or jpg
-    fileprivate func _loadImageTexture(_ gltf: GLTF, _ texture: GLTFTexture, _ tStatus: TextureAssociator, _ callback: ((Any?)-> Void)? = nil) {
+    fileprivate func _loadImageTexture(_ gltf: GLTF, _ delegate: TextureLoaderDelegate, _ texture: GLTFTexture, _ tStatus: TextureAssociator, _ callback: ((Any?)-> Void)? = nil) {
         self.worker.async {
-            if gltf.isCancelled {
+            if delegate.isCancelled {
                 return
             }
-            let group = self.group(gltf:gltf, true) 
+            let group = self.group(gltf:gltf, delegate: delegate, true)
             
             if let imageSourceIndex = texture.source {
                 if let gltf_image = gltf.images?[imageSourceIndex] {
