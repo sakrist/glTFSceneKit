@@ -22,7 +22,7 @@ public class GLTFConverter: TextureLoaderDelegate {
     
     internal var renderer: SCNSceneRenderer?
     internal var loadingScene: SCNScene?
-    internal var loadingDelegate:SceneLoadingDelegate?
+    internal weak var delegate: SceneLoadingDelegate?
     
     var animationDuration: Double = 0.0
     
@@ -42,7 +42,7 @@ public class GLTFConverter: TextureLoaderDelegate {
     /// - Parameter completionHandler: Execute completion block once model fully loaded. If multiThread parameter set to true, then scene will be returned soon as possible and completion block will be executed later, after all textures load.
     /// - Returns: instance of Scene
     @objc open func convert(to scene:SCNScene = SCNScene.init(),
-                            loadingDelegate: SceneLoadingDelegate? = nil,
+                            delegate: SceneLoadingDelegate? = nil,
                             renderer:SCNSceneRenderer? = nil,
                             directoryPath:String? = nil,
                             multiThread:Bool = true,
@@ -69,7 +69,7 @@ public class GLTFConverter: TextureLoaderDelegate {
         }
         
         self.loadingScene = scene
-        self.loadingDelegate = loadingDelegate
+        self.delegate = delegate
         
         self.renderer = renderer
         self._completionHandler = completionHandler
@@ -247,9 +247,9 @@ public class GLTFConverter: TextureLoaderDelegate {
     internal func _converted(_ error:Error?) {
         os_log("convert completed", log: log_scenekit, type: .debug)
         
-        loadingDelegate?.scene?(loadingScene!)
-        loadingDelegate = nil
-        loadingScene = SCNScene()
+        delegate?.scene?(loadingScene!)
+        delegate = nil
+        loadingScene = nil
         
         // clear cache
         _completionHandler(error)
@@ -328,7 +328,7 @@ public class GLTFConverter: TextureLoaderDelegate {
                     break
                 }
                 if let camera = scnNode.camera {
-                    loadingDelegate?.scene?(loadingScene!, didCreate: camera)
+                    delegate?.scene?(loadingScene!, didCreate: camera)
                 }
             }
         }

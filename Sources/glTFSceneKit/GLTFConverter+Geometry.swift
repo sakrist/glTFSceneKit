@@ -182,7 +182,7 @@ extension GLTFConverter {
                     
                     primitiveNode.name = mesh.name
                     
-                    loadingDelegate?.scene?(loadingScene!, didCreate: primitiveNode)
+                    delegate?.scene?(loadingScene!, didCreate: primitiveNode)
                     
                     if primitiveNode.geometry?.firstMaterial != nil {
                         // create empty SCNMaterial. Callbacks call later then materail will be download, so we must provide materail for selection
@@ -205,7 +205,7 @@ extension GLTFConverter {
                             }
                             
                         }) { [unowned self] scnMaterial in
-                            self.loadingDelegate?.scene?(self.loadingScene!, didCreate: scnMaterial, for: primitiveNode)
+                            self.delegate?.scene?(self.loadingScene!, didCreate: scnMaterial, for: primitiveNode)
                             
                             let emissionContent = primitiveNode.geometry?.firstMaterial?.emission.contents
                             scnMaterial.emission.contents = emissionContent
