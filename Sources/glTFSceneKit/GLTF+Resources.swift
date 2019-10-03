@@ -29,6 +29,10 @@ public protocol GLTFResourceLoader {
 } 
 
 extension GLTF {
+    struct Keys {
+        static var resource_loader = "resource_loader"
+    }
+        
     public var loader:GLTFResourceLoader {
         get {
             var loader_ = objc_getAssociatedObject(self, &Keys.resource_loader) as? GLTFResourceLoader

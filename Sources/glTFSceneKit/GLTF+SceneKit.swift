@@ -39,19 +39,7 @@ struct ConvertionProgressMask : OptionSet {
 
 extension GLTF {
     
-    struct Keys {
-        static var cache_nodes = "cache_nodes"
-        static var animation_duration = "animation_duration"
-        static var resource_loader = "resource_loader"
-        static var load_canceled = "load_canceled"
-        static var load_error = "load_error"
-        static var completion_handler = "completion_handler"
-        static var loading_delegate = "loading_delegate"
-        static var scnview = "scnview"
-        static var nodesDispatchGroup = "nodesDispatchGroup"
-        static var convertionProgress = "convertionProgressMask"
-    }
-    
+
     
     internal func clearCache() {
         if self.buffers != nil {
