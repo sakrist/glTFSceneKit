@@ -107,8 +107,12 @@ extension GLTFAccessor {
 
 fileprivate extension GLTF {
     //let buffer = glTF.buffers![glTF.bufferViews![bufferView].buffer]
-    func buffer(for bufferView: Int) -> GLTFBuffer {
-        return self.buffers![self.bufferViews![bufferView].buffer]
+    func buffer(for bufferView: Int) -> GLTFBuffer? {
+        if let bufferIndex = self.bufferViews?[bufferView].buffer {
+            return self.buffers?[bufferIndex]
+        }
+        
+        return nil
     }
 }
 
@@ -349,14 +353,17 @@ extension GLTFConverter {
         
         var buffers:Set = Set<GLTFBuffer>()
         
-        let insertBuffer: ( (Int?)->Void ) = { index in
+        let insertBuffer: ( (Int?)->Void ) = { [weak self] index in
             guard let index = index else {
                 return
             }
             
-            if let accessor = self.glTF.accessors?[index] {
-                if let bufferView = accessor.bufferView {
-                    buffers.insert(self.glTF.buffer(for: bufferView))
+            if let accessor = self?.glTF.accessors?[index] {
+                if let bufferView = accessor.bufferView,
+                    let buffer = self?.glTF.buffer(for: bufferView) {
+                    buffers.insert(buffer)
+                } else {
+                    self?.errorMessage = GLTFError("Problem with buffer in _preloadBuffersData")
                 }
             }
         }
@@ -368,8 +375,17 @@ extension GLTFConverter {
             for primitive in mesh.primitives {
                 // check on draco extension
                 if let dracoMesh = primitive.extensions?[dracoExtensionKey] {
-                    let dracoMesh = dracoMesh as! GLTFKHRDracoMeshCompressionExtension
-                    buffers.insert(glTF.buffer(for: dracoMesh.bufferView))
+                    if let dracoMesh = dracoMesh as? GLTFKHRDracoMeshCompressionExtension {
+                        if let buffer = glTF.buffer(for: dracoMesh.bufferView) {
+                            buffers.insert(buffer)
+                        } else {
+                            errorMessage = GLTFError("Problem with dracoMesh buffer in _preloadBuffersData")
+                        }
+                        
+                    } else {
+                        errorMessage = GLTFError("Problem with dracoMesh buffer cast")
+                    }
+                    
                 } else {
                     primitive.attributes.forEach { (_, index) in
                         insertBuffer(index)

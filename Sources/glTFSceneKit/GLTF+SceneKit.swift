@@ -38,9 +38,7 @@ struct ConvertionProgressMask : OptionSet {
 }
 
 extension GLTF {
-    
-
-    
+        
     internal func clearCache() {
         if self.buffers != nil {
             for buffer in self.buffers! {

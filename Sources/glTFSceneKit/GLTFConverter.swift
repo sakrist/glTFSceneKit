@@ -12,7 +12,7 @@ public class GLTFConverter: TextureLoaderDelegate {
     
     /// Status will be true if `cancel` was call.
     @objc open private(set) var isCancelled: Bool = false
-    @objc open private(set) var errorMessage: Error?
+    @objc internal var errorMessage: Error?
     
     internal private(set) var cache_nodes: [SCNNode?]?
     
