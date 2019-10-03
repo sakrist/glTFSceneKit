@@ -31,11 +31,10 @@ struct ConvertionProgressMask : OptionSet {
 
 
 @objc public protocol SceneLoadingDelegate {
-    @objc optional func didLoadScene()
-    @objc optional func didCreate(camera: SCNCamera?)
-    @objc optional func didCreate(node: SCNNode)
-    
-    @objc optional func didCreateMaterial(for node: SCNNode, material: SCNMaterial)
+    @objc optional func scene(_ didLoadScene: SCNScene )
+    @objc optional func scene(_ scene: SCNScene, didCreate camera: SCNCamera)
+    @objc optional func scene(_ scene: SCNScene, didCreate node: SCNNode)
+    @objc optional func scene(_ scene: SCNScene, didCreate material: SCNMaterial, for node: SCNNode)
 }
 
 extension GLTF {
@@ -48,6 +47,7 @@ extension GLTF {
         static var load_error = "load_error"
         static var completion_handler = "completion_handler"
         static var loading_delegate = "loading_delegate"
+        static var loading_scene = "loading_scene"
         static var scnview = "scnview"
         static var nodesDispatchGroup = "nodesDispatchGroup"
         static var convertionProgress = "convertionProgressMask"
@@ -103,6 +103,11 @@ extension GLTF {
         set { objc_setAssociatedObject(self, &Keys.nodesDispatchGroup, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
     
+    internal var loadingScene:SCNScene {
+        get { return (objc_getAssociatedObject(self, &Keys.loading_scene)) as! SCNScene }
+        set { objc_setAssociatedObject(self, &Keys.loading_scene, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    }
+    
     internal var loadingDelegate:SceneLoadingDelegate? {
         get { return (objc_getAssociatedObject(self, &Keys.loading_delegate)) as? SceneLoadingDelegate }
         set { objc_setAssociatedObject(self, &Keys.loading_delegate, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
@@ -118,12 +123,12 @@ extension GLTF {
     /// - Returns: instance of Scene
     @objc open func convert(to scene:SCNScene = SCNScene.init(),
                             loadingDelegate: SceneLoadingDelegate? = nil,
-                             renderer:SCNSceneRenderer? = nil, 
-                             directoryPath:String? = nil, 
-                             multiThread:Bool = true, 
-                             hidden:Bool = false,
-                             geometryCompletionHandler: @escaping ()->Void,
-                             completionHandler: @escaping ((Error?) -> Void) = {_ in } ) -> SCNScene? {
+                            renderer:SCNSceneRenderer? = nil,
+                            directoryPath:String? = nil,
+                            multiThread:Bool = true,
+                            hidden:Bool = false,
+                            geometryCompletionHandler: @escaping ()->Void,
+                            completionHandler: @escaping ((Error?) -> Void) = {_ in } ) -> SCNScene? {
 
         if (self.extensionsUsed != nil) {
 //            for key in self.extensionsUsed! {
@@ -143,7 +148,9 @@ extension GLTF {
             }
         }
         
+        self.loadingScene = scene
         self.loadingDelegate = loadingDelegate
+        
         self.renderer = renderer
         self._completionHandler = completionHandler
         
@@ -320,8 +327,9 @@ extension GLTF {
     internal func _converted(_ error:Error?) {
         os_log("convert completed", log: log_scenekit, type: .debug)
         
-        loadingDelegate?.didLoadScene?()
+        loadingDelegate?.scene?(loadingScene)
         loadingDelegate = nil
+        loadingScene = SCNScene()
         
         // clear cache
         _completionHandler(error)
@@ -439,7 +447,9 @@ extension GLTF {
                     scnNode.camera?.zFar = (camera.orthographic?.zfar)!
                     break
                 }
-                loadingDelegate?.didCreate?(camera: scnNode.camera)
+                if let camera = scnNode.camera {
+                    loadingDelegate?.scene?(loadingScene, didCreate: camera)
+                }
             }
         }
     }  

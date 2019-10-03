@@ -175,7 +175,7 @@ extension GLTF {
                     
                     primitiveNode.name = mesh.name
                     
-                    loadingDelegate?.didCreate?(node: primitiveNode)
+                    loadingDelegate?.scene?(loadingScene, didCreate: primitiveNode)
                     
                     if primitiveNode.geometry?.firstMaterial != nil {
                         // create empty SCNMaterial. Callbacks call later then materail will be download, so we must provide materail for selection
@@ -197,8 +197,8 @@ extension GLTF {
                                 }
                             }
                             
-                        }) { [weak self]  scnMaterial in
-                            self?.loadingDelegate?.didCreateMaterial?(for: primitiveNode, material: scnMaterial)
+                        }) { [unowned self] scnMaterial in
+                            self.loadingDelegate?.scene?(self.loadingScene, didCreate: scnMaterial, for: primitiveNode)
                             
                             let emissionContent = primitiveNode.geometry?.firstMaterial?.emission.contents
                             scnMaterial.emission.contents = emissionContent
