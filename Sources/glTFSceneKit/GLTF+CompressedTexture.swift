@@ -103,7 +103,7 @@ extension GLTF {
                                                                          mipmapped: (mipmapsCount > 1))
         textureDescriptor.mipmapLevelCount = mipmapsCount
         
-        guard let device = self.device() else {
+        guard let device = MTLCreateSystemDefaultDevice() else {
             throw GLTFError("View has Metal's render APi but can't get instance of MTLDevice.")
         }
         

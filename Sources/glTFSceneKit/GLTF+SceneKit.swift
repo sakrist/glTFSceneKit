@@ -53,17 +53,6 @@ extension GLTF {
         }
     }
     
-    internal func device() -> MTLDevice? {
-        var device:MTLDevice?
-        #if os(macOS)
-        device = self.renderer?.device
-        #endif
-        if (device == nil) {
-            device = MTLCreateSystemDefaultDevice()
-        }
-        return device
-    }
-    
     // convert attributes name to SceneKit semantic
     internal static func sourceSemantic(name:String) -> SCNGeometrySource.Semantic {
         switch name {
