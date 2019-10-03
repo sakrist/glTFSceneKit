@@ -363,7 +363,7 @@ extension GLTFConverter {
                     let buffer = self?.glTF.buffer(for: bufferView) {
                     buffers.insert(buffer)
                 } else {
-                    self?.errorMessage = GLTFError("Problem with buffer in _preloadBuffersData")
+                    self?.errorMessage = GLTFError("Can't locate buffer with accessor at \(index) index")
                 }
             }
         }
@@ -379,11 +379,11 @@ extension GLTFConverter {
                         if let buffer = glTF.buffer(for: dracoMesh.bufferView) {
                             buffers.insert(buffer)
                         } else {
-                            errorMessage = GLTFError("Problem with dracoMesh buffer in _preloadBuffersData")
+                            errorMessage = GLTFError("Can't locate draco buffer with bufferView at \(dracoMesh.bufferView) index")
                         }
                         
                     } else {
-                        errorMessage = GLTFError("Problem with dracoMesh buffer cast")
+                        errorMessage = GLTFError("Draco extension not compatible for mesh at \(meshIndex) index")
                     }
                     
                 } else {
