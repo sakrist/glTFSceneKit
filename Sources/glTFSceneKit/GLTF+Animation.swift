@@ -8,16 +8,11 @@
 import Foundation
 import SceneKit
 
-extension GLTF {
-    
-    var animationDuration:Double {
-        get { return (objc_getAssociatedObject(self, &Keys.animation_duration) as? Double ?? 0) }        
-        set { objc_setAssociatedObject(self, &Keys.animation_duration, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
-    }
-    
+extension GLTFConverter {
+
     func parseAnimations() throws {
-        if self.animations != nil {
-            for animation in self.animations! {
+        if let animations = glTF.animations {
+            for animation in animations {
                 for channel in animation.channels {
                     let sampler = animation.samplers[channel.sampler]
                     try constructAnimation(sampler: sampler, target:channel.target)
@@ -40,10 +35,10 @@ extension GLTF {
             throw GLTFError("constructAnimation: Can't find target node with \(targetIndex), sampler:\(sampler) target:\(target)")
         }
         
-        guard let accessorInput = self.accessors?[sampler.input] else {
+        guard let accessorInput = glTF.accessors?[sampler.input] else {
             throw GLTFError("Input accessor could not be found for sampler.input \(sampler.input)")
         }
-        guard let accessorOutput = self.accessors?[sampler.output] else {
+        guard let accessorOutput = glTF.accessors?[sampler.output] else {
             throw GLTFError("Output accessor could not be found for sampler.output \(sampler.output)")
         }
         

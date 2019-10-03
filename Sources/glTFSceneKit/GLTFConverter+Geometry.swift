@@ -105,8 +105,19 @@ extension GLTFAccessor {
     }
 }
 
+fileprivate extension GLTF {
+    //let buffer = glTF.buffers![glTF.bufferViews![bufferView].buffer]
+    func buffer(for bufferView: Int) -> GLTFBuffer? {
+        if let bufferIndex = self.bufferViews?[bufferView].buffer {
+            return self.buffers?[bufferIndex]
+        }
+        
+        return nil
+    }
+}
 
-extension GLTF {
+
+extension GLTFConverter {
     
     
     /// convert glTF mesh into SCNGeometry
@@ -124,7 +135,7 @@ extension GLTF {
             
             var weightPaths = [String]()
             
-            if let mesh = self.meshes?[meshIndex] {
+            if let mesh = glTF.meshes?[meshIndex] {
                 
                 var primitiveIndex = 0
                 
@@ -145,7 +156,7 @@ extension GLTF {
                     
                     // check on draco extension
                     if let dracoMesh = primitive.extensions?[dracoExtensionKey] {
-                        let (dElement, dSources) = try self.convertDracoMesh(dracoMesh as! GLTFKHRDracoMeshCompressionExtension)
+                        let (dElement, dSources) = try glTF.convertDracoMesh(dracoMesh as! GLTFKHRDracoMeshCompressionExtension)
                         
                         if (dElement != nil) {
                             elements.append(dElement!)
@@ -175,7 +186,7 @@ extension GLTF {
                     
                     primitiveNode.name = mesh.name
                     
-                    loadingDelegate?.scene?(loadingScene, didCreate: primitiveNode)
+                    delegate?.scene?(loadingScene!, didCreate: primitiveNode)
                     
                     if primitiveNode.geometry?.firstMaterial != nil {
                         // create empty SCNMaterial. Callbacks call later then materail will be download, so we must provide materail for selection
@@ -188,7 +199,7 @@ extension GLTF {
                     
                     
                     if let materialIndex = primitive.material {
-                        self.loadMaterial(index:materialIndex, textureChangedCallback: { _ in
+                        glTF.loadMaterial(index:materialIndex, delegate: self, textureChangedCallback: { _ in
                             if let material = primitiveNode.geometry?.firstMaterial {
                                 if let texture = material.diffuse.contents as? MTLTexture {
                                     if texture.pixelFormat.hasAlpha() {
@@ -198,7 +209,7 @@ extension GLTF {
                             }
                             
                         }) { [unowned self] scnMaterial in
-                            self.loadingDelegate?.scene?(self.loadingScene, didCreate: scnMaterial, for: primitiveNode)
+                            self.delegate?.scene?(self.loadingScene!, didCreate: scnMaterial, for: primitiveNode)
                             
                             let emissionContent = primitiveNode.geometry?.firstMaterial?.emission.contents
                             scnMaterial.emission.contents = emissionContent
@@ -244,7 +255,7 @@ extension GLTF {
     
     fileprivate func geometryElement(_ primitive: GLTFMeshPrimitive) throws -> SCNGeometryElement? {
         if let indicesIndex = primitive.indices {
-            if let accessor = self.accessors?[indicesIndex] {
+            if let accessor = glTF.accessors?[indicesIndex] {
                 
                 if let (indicesData, _, _) = try loadAcessor(accessor) {
                     
@@ -291,7 +302,7 @@ extension GLTF {
         
         
         for (key, accessorIndex) in attributes {
-            if let accessor = self.accessors?[accessorIndex] {
+            if let accessor = glTF.accessors?[accessorIndex] {
                 
                 byteOffset = accessor.byteOffset
                 
@@ -314,7 +325,7 @@ extension GLTF {
                 let vertexFormat:MTLVertexFormat = accessor.vertexFormat()
                 
                 // convert string semantic to SceneKit semantic type
-                let semantic = self.sourceSemantic(name:key)
+                let semantic = GLTF.sourceSemantic(name:key)
                 
                 if let mtlB = mtlBuffer {
                     let geometrySource = SCNGeometrySource.init(buffer: mtlB,
@@ -336,21 +347,55 @@ extension GLTF {
         return geometrySources
     }
     
-    
-    internal func requestData(bufferView:Int) throws -> (GLTFBufferView, Data)? {
-        if let bufferView = self.bufferViews?[bufferView] {
-            if let buffer = self.buffers?[bufferView.buffer] {
-                
-                if let data = try self.loader.load(gltf:self, resource: buffer) {
-                    return (bufferView, data)
-                }
-            } else {
-                throw GLTFError("Can't load data! Can't find buffer at index \(bufferView.buffer)")
+
+    // TODO: Collect associated buffers for node into a Set on Decode time.
+    internal func _preloadBuffersData(nodeIndex:Int, completionHandler: @escaping (Error?) -> Void ) {
+        
+        var buffers:Set = Set<GLTFBuffer>()
+        
+        let insertBuffer: ( (Int?)->Void ) = { [weak self] index in
+            guard let index = index else {
+                return
             }
-        } else {
-            throw GLTFError("Can't load data! Can't find bufferView at index \(bufferView)")
+            
+            if let accessor = self?.glTF.accessors?[index] {
+                if let bufferView = accessor.bufferView,
+                    let buffer = self?.glTF.buffer(for: bufferView) {
+                    buffers.insert(buffer)
+                } else {
+                    self?.errorMessage = GLTFError("Can't locate buffer with accessor at \(index) index")
+                }
+            }
         }
-        return nil
+        
+        if let node = glTF.nodes?[nodeIndex],
+            let meshIndex = node.mesh,
+            let mesh = glTF.meshes?[meshIndex] {
+            
+            for primitive in mesh.primitives {
+                // check on draco extension
+                if let dracoMesh = primitive.extensions?[dracoExtensionKey] {
+                    if let dracoMesh = dracoMesh as? GLTFKHRDracoMeshCompressionExtension {
+                        if let buffer = glTF.buffer(for: dracoMesh.bufferView) {
+                            buffers.insert(buffer)
+                        } else {
+                            errorMessage = GLTFError("Can't locate draco buffer with bufferView at \(dracoMesh.bufferView) index")
+                        }
+                        
+                    } else {
+                        errorMessage = GLTFError("Draco extension not compatible for mesh at \(meshIndex) index")
+                    }
+                    
+                } else {
+                    primitive.attributes.forEach { (_, index) in
+                        insertBuffer(index)
+                    }
+                    insertBuffer(primitive.indices)
+                }
+            }
+        }
+        
+        glTF.loader.load(gltf:glTF, resources: buffers, completionHandler:completionHandler)
     }
     
     
@@ -361,7 +406,7 @@ extension GLTF {
             throw GLTFError("Missing 'bufferView' for \(accessor.name ?? "") acessor")
         }
         
-        if let (bufferView, data) = try requestData(bufferView: accessor.bufferView!) {
+        if let (bufferView, data) = try GLTF.requestData(glTF: glTF, bufferView: accessor.bufferView!) {
             
             var addAccessorOffset = false
             if (bufferView.byteStride == nil || accessor.components()*accessor.bytesPerElement() == bufferView.byteStride) {
@@ -388,25 +433,5 @@ extension GLTF {
     }
     
     
-    // convert attributes name to SceneKit semantic
-    internal func sourceSemantic(name:String) -> SCNGeometrySource.Semantic {
-        switch name {
-        case "POSITION":
-            return .vertex
-        case "NORMAL":
-            return .normal
-        case "TANGENT":
-            return .tangent
-        case "COLOR", "COLOR_0", "COLOR_1", "COLOR_2":
-            return .color
-        case "TEXCOORD_0", "TEXCOORD_1", "TEXCOORD_2", "TEXCOORD_3", "TEXCOORD_4":
-            return .texcoord
-        case "JOINTS_0":
-            return .boneIndices
-        case "WEIGHTS_0":
-            return .boneWeights
-        default:
-            return .vertex
-        }
-    }
+   
 }
