@@ -105,6 +105,13 @@ extension GLTFAccessor {
     }
 }
 
+fileprivate extension GLTF {
+    //let buffer = glTF.buffers![glTF.bufferViews![bufferView].buffer]
+    func buffer(for bufferView: Int) -> GLTFBuffer {
+        return self.buffers![self.bufferViews![bufferView].buffer]
+    }
+}
+
 
 extension GLTFConverter {
     
@@ -336,39 +343,38 @@ extension GLTFConverter {
         return geometrySources
     }
     
+
     // TODO: Collect associated buffers for node into a Set on Decode time.
     internal func _preloadBuffersData(nodeIndex:Int, completionHandler: @escaping (Error?) -> Void ) {
         
         var buffers:Set = Set<GLTFBuffer>()
         
-        if let node = glTF.nodes?[nodeIndex] {
-            if node.mesh != nil {
-                if let mesh = glTF.meshes?[node.mesh!] {
-                    for primitive in mesh.primitives {
-                        // check on draco extension
-                        if let dracoMesh = primitive.extensions?[dracoExtensionKey] {
-                            let dracoMesh = dracoMesh as! GLTFKHRDracoMeshCompressionExtension
-                            let buffer = glTF.buffers![glTF.bufferViews![dracoMesh.bufferView].buffer]
-                            buffers.insert(buffer)
-                        } else {
-                            for (_,index) in primitive.attributes {
-                                if let accessor = glTF.accessors?[index] {
-                                    if let bufferView = accessor.bufferView {
-                                        let buffer = glTF.buffers![glTF.bufferViews![bufferView].buffer]
-                                        buffers.insert(buffer)
-                                    }
-                                }
-                            }
-                            if primitive.indices != nil {
-                                if let accessor = glTF.accessors?[primitive.indices!] {
-                                    if let bufferView = accessor.bufferView {
-                                        let buffer = glTF.buffers![glTF.bufferViews![bufferView].buffer]
-                                        buffers.insert(buffer)
-                                    }
-                                }
-                            }
-                        }
+        let insertBuffer: ( (Int?)->Void ) = { index in
+            guard let index = index else {
+                return
+            }
+            
+            if let accessor = self.glTF.accessors?[index] {
+                if let bufferView = accessor.bufferView {
+                    buffers.insert(self.glTF.buffer(for: bufferView))
+                }
+            }
+        }
+        
+        if let node = glTF.nodes?[nodeIndex],
+            let meshIndex = node.mesh,
+            let mesh = glTF.meshes?[meshIndex] {
+            
+            for primitive in mesh.primitives {
+                // check on draco extension
+                if let dracoMesh = primitive.extensions?[dracoExtensionKey] {
+                    let dracoMesh = dracoMesh as! GLTFKHRDracoMeshCompressionExtension
+                    buffers.insert(glTF.buffer(for: dracoMesh.bufferView))
+                } else {
+                    primitive.attributes.forEach { (_, index) in
+                        insertBuffer(index)
                     }
+                    insertBuffer(primitive.indices)
                 }
             }
         }
