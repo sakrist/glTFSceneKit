@@ -16,12 +16,18 @@ class gltf_scenekitTests: XCTestCase {
         let jsonData = jsonString.data(using: .utf8)
         let decoder = JSONDecoder()
         
+        
+        
         self.measure {
             let glTF = try? decoder.decode(GLTF.self, from: jsonData!)
+            let converter = GLTFConverter()
             
-            _ = glTF?.convert(renderer:view, directoryPath:nil, multiThread:false, geometryCompletionHandler: {
+            _ = converter.convert(renderer:view, directoryPath:nil, multiThread:false, geometryCompletionHandler: {
                 
             })
+//            _ = glTF?.convert(renderer:view, directoryPath:nil, multiThread:false, geometryCompletionHandler: {
+//
+//            })
             
         }
         

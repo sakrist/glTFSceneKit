@@ -354,6 +354,47 @@ extension GLTF {
     }
     
     
+    // TODO: Collect associated buffers for node into a Set on Decode time.
+    internal func _preloadBuffersData(nodeIndex:Int, completionHandler: @escaping (Error?) -> Void ) {
+        
+        var buffers:Set = Set<GLTFBuffer>()
+        
+        if let node = self.nodes?[nodeIndex] {
+            if node.mesh != nil {
+                if let mesh = self.meshes?[node.mesh!] {
+                    for primitive in mesh.primitives {
+                        // check on draco extension
+                        if let dracoMesh = primitive.extensions?[dracoExtensionKey] {
+                            let dracoMesh = dracoMesh as! GLTFKHRDracoMeshCompressionExtension
+                            let buffer = self.buffers![self.bufferViews![dracoMesh.bufferView].buffer]
+                            buffers.insert(buffer)
+                        } else {
+                            for (_,index) in primitive.attributes {
+                                if let accessor = self.accessors?[index] {
+                                    if let bufferView = accessor.bufferView {
+                                        let buffer = self.buffers![self.bufferViews![bufferView].buffer]
+                                        buffers.insert(buffer)
+                                    }
+                                }
+                            }
+                            if primitive.indices != nil {
+                                if let accessor = self.accessors?[primitive.indices!] {
+                                    if let bufferView = accessor.bufferView {
+                                        let buffer = self.buffers![self.bufferViews![bufferView].buffer]
+                                        buffers.insert(buffer)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        self.loader.load(gltf:self, resources: buffers, completionHandler:completionHandler)
+    }
+    
+    
     // get data by accessor
     internal func loadAcessor(_ accessor:GLTFAccessor) throws -> (Data, Int, Int)? {
         

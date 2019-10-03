@@ -89,7 +89,7 @@ extension GLTF {
             
             for key in sortedAttributes {
                 // convert string semantic to SceneKit enum type 
-                let semantic = self.sourceSemantic(name:key)
+                let semantic = sourceSemantic(name:key)
                 
                 let geometrySource = createGeometrySource(semantic)
                 
