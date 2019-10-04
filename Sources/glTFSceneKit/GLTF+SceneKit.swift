@@ -44,6 +44,19 @@ extension GLTF {
         static var load_canceled = "load_canceled"
     }
     
+    public var loader:GLTFResourceLoader {
+        get {
+            var loader_ = objc_getAssociatedObject(self, &Keys.resource_loader) as? GLTFResourceLoader
+            if loader_ != nil {
+                return loader_!
+            }
+            loader_ = GLTFResourceLoaderDefault()
+            self.loader = loader_!
+            return loader_!
+        }
+        set { objc_setAssociatedObject(self, &Keys.resource_loader, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    }
+    
     /// Status set to true if `cancel` been call.
     @objc open private(set) var isCancelled:Bool {
         get { return (objc_getAssociatedObject(self, &Keys.load_canceled) as? Bool) ?? false }
@@ -114,4 +127,24 @@ extension GLTF {
         return nil
     }
     
+}
+
+extension GLTFBuffer {
+    
+    static var data_associate_key = "data_associate_key"
+    
+    public var data:Data? {
+        get { return objc_getAssociatedObject(self, &GLTFBuffer.data_associate_key) as? Data }
+        set { objc_setAssociatedObject(self, &GLTFBuffer.data_associate_key, newValue, .OBJC_ASSOCIATION_RETAIN) }
+    }
+}
+
+extension GLTFImage {
+    
+    static var image_associate_key = "image_associate_key"
+    
+    public var image:OSImage? {
+        get { return objc_getAssociatedObject(self, &GLTFImage.image_associate_key) as? OSImage }
+        set { objc_setAssociatedObject(self, &GLTFImage.image_associate_key, newValue, .OBJC_ASSOCIATION_RETAIN) }
+    }
 }
