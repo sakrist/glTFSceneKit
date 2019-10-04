@@ -19,9 +19,9 @@ public class GLTFConverter: TextureLoaderDelegate {
     internal var nodesDispatchGroup: DispatchGroup = DispatchGroup()
     internal var convertionProgressMask: ConvertionProgressMask = ConvertionProgressMask(rawValue: 0)
     
-    internal var renderer: SCNSceneRenderer?
+    public weak var renderer: SCNSceneRenderer?
     internal var loadingScene: SCNScene?
-    internal weak var delegate: SceneLoadingDelegate?
+    public weak var delegate: SceneLoadingDelegate?
     
     var animationDuration: Double = 0.0
     
@@ -41,12 +41,10 @@ public class GLTFConverter: TextureLoaderDelegate {
     /// - Parameter completionHandler: Execute completion block once model fully loaded. If multiThread parameter set to true, then scene will be returned soon as possible and completion block will be executed later, after all textures load.
     /// - Returns: instance of Scene
     @objc open func convert(to scene:SCNScene = SCNScene.init(),
-                            delegate: SceneLoadingDelegate? = nil,
-                            renderer:SCNSceneRenderer? = nil,
                             directoryPath:String? = nil,
                             multiThread:Bool = true,
                             hidden:Bool = false,
-                            geometryCompletionHandler: @escaping ()->Void,
+                            geometryCompletionHandler: @escaping ()->Void = { },
                             completionHandler: @escaping ((Error?) -> Void) = {_ in } ) -> SCNScene? {
         
         if (glTF.extensionsUsed != nil) {
@@ -68,9 +66,6 @@ public class GLTFConverter: TextureLoaderDelegate {
         }
         
         self.loadingScene = scene
-        self.delegate = delegate
-        
-        self.renderer = renderer
         self._completionHandler = completionHandler
         
         if directoryPath != nil {
@@ -169,10 +164,12 @@ public class GLTFConverter: TextureLoaderDelegate {
                 }
                 
                 // create nodes up front to avoid deadlocks in multithreading
-                let primitivesCount = glTF.meshes?[node.mesh!].primitives.count ?? 0
-                for _ in 0..<primitivesCount {
-                    let scnNodePrimitiveNode = SCNNode()
-                    scnNode.addChildNode(scnNodePrimitiveNode)
+                if let meshIndex = node.mesh {
+                    let primitivesCount = glTF.meshes?[meshIndex].primitives.count ?? 0
+                    for _ in 0..<primitivesCount {
+                        let scnNodePrimitiveNode = SCNNode()
+                        scnNode.addChildNode(scnNodePrimitiveNode)
+                    }
                 }
             }
             rootNode.addChildNode(scnNode)
