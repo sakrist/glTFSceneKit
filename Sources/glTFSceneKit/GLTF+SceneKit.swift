@@ -39,6 +39,22 @@ struct ConvertionProgressMask : OptionSet {
 
 extension GLTF {
         
+    struct Keys {
+        static var resource_loader = "resource_loader"
+        static var load_canceled = "load_canceled"
+    }
+    
+    /// Status set to true if `cancel` been call.
+    @objc open private(set) var isCancelled:Bool {
+        get { return (objc_getAssociatedObject(self, &Keys.load_canceled) as? Bool) ?? false }
+        set { objc_setAssociatedObject(self, &Keys.load_canceled, newValue, .OBJC_ASSOCIATION_ASSIGN) }
+    }
+    
+    internal func cancel() {
+        self.isCancelled = true
+        self.loader.cancelAll()
+    }
+    
     internal func clearCache() {
         if self.buffers != nil {
             for buffer in self.buffers! {

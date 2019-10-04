@@ -18,7 +18,6 @@ enum TextureStatus:Int {
 
 protocol TextureLoaderDelegate {
     var renderer: SCNSceneRenderer? { get }
-    var isCancelled: Bool { get }
     func texturesLoaded()
 }
 
@@ -144,7 +143,7 @@ class TextureStorageManager {
                     // load first level mipmap as texture
                     gltf.loadCompressedTexture(descriptor:descriptor, loadLevel: .first) { cTexture, error in        
                         
-                        if delegate.isCancelled {
+                        if gltf.isCancelled {
                             group.leave()
                             return
                         }
@@ -160,7 +159,7 @@ class TextureStorageManager {
                             // load all levels
                             gltf.loadCompressedTexture(descriptor:descriptor, loadLevel: .last) { (cTexture2, error) in
                                 
-                                if delegate.isCancelled {
+                                if gltf.isCancelled {
                                     group.leave()
                                     return
                                 }
@@ -188,7 +187,7 @@ class TextureStorageManager {
     /// load original image source png or jpg
     fileprivate func _loadImageTexture(_ gltf: GLTF, _ delegate: TextureLoaderDelegate, _ texture: GLTFTexture, _ tStatus: TextureAssociator, _ callback: ((Any?)-> Void)? = nil) {
         self.worker.async {
-            if delegate.isCancelled {
+            if gltf.isCancelled {
                 return
             }
             let group = self.group(gltf:gltf, delegate: delegate, true)

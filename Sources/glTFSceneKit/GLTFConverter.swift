@@ -11,7 +11,6 @@ import os
 public class GLTFConverter: TextureLoaderDelegate {
     
     /// Status will be true if `cancel` was call.
-    @objc open private(set) var isCancelled: Bool = false
     @objc internal var errorMessage: Error?
     
     internal private(set) var cache_nodes: [SCNNode?]?
@@ -135,7 +134,7 @@ public class GLTFConverter: TextureLoaderDelegate {
         }
         
         
-        if self.isCancelled {
+        if glTF.isCancelled {
             return nil
         }
         
@@ -144,8 +143,7 @@ public class GLTFConverter: TextureLoaderDelegate {
     
     @objc
     open func cancel() {
-        self.isCancelled = true
-        glTF.loader.cancelAll()
+        glTF.cancel()
         TextureStorageManager.manager.clear(gltf: glTF);
     }
     
@@ -153,7 +151,7 @@ public class GLTFConverter: TextureLoaderDelegate {
         var cache_nodes = self.cache_nodes
         for nodeIndex in nodes {
             
-            if (self.isCancelled) {
+            if (glTF.isCancelled) {
                 return
             }
             
@@ -183,14 +181,12 @@ public class GLTFConverter: TextureLoaderDelegate {
                 if error != nil {
                     print("Failed to load geometry node with error: \(error!)")
                     self.errorMessage = error
-                    self.cancel()
                 } else {
                     do {
                         _ = try self.buildNode(nodeIndex: nodeIndex, scnNode: scnNode)
                     } catch {
                         print(error)
                         self.errorMessage = error
-                        self.cancel()
                     }
                 }
                 group.leave()                      // <=== leave group
@@ -206,22 +202,15 @@ public class GLTFConverter: TextureLoaderDelegate {
         
         if let e = error {
             self.errorMessage = e
-            self.cancel()
-            
-            // because we cancel, have to mark as pass progress
-            self.convertionProgressMask.insert(.textures)
-            self.convertionProgressMask.insert(.animations)
-        } else {
-            
-            do {
-                try self.parseAnimations()
-            } catch {
-                self.errorMessage = error
-                self.cancel()
-            }
-            // probably should be inserted some where else and call on completion of animation parse
-            self.convertionProgressMask.insert(.animations)
         }
+            
+        do {
+            try self.parseAnimations()
+        } catch {
+            self.errorMessage = error
+        }
+        // probably should be inserted some where else and call on completion of animation parse
+        self.convertionProgressMask.insert(.animations)
         
         self.nodesDispatchGroup.wait()
         
@@ -281,7 +270,7 @@ public class GLTFConverter: TextureLoaderDelegate {
             // bake all transformations into one mtarix
             scnNode.transform = bakeTransformationMatrix(node)
             
-            if self.isCancelled {
+            if glTF.isCancelled {
                 return scnNode
             }
             

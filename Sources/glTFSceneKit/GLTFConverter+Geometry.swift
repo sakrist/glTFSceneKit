@@ -98,6 +98,22 @@ extension GLTFAccessor {
             case .FLOAT:
                 return .float3
             }
+        
+        case .VEC4:
+            switch componentType {
+            case .UNSIGNED_SHORT:
+                return .ushort4
+            case .SHORT:
+                return .short4
+            case .UNSIGNED_BYTE:
+                return .uchar4
+            case .BYTE:
+                return .char4
+            case .UNSIGNED_INT:
+                return .uint4
+            case .FLOAT:
+                return .float4
+            }
             
         default:
             fatalError("Unsupported")
@@ -127,7 +143,7 @@ extension GLTFConverter {
     ///   - scnNode: SceneKit node, which is going to be parent node
     internal func geometryNode(_ node:GLTFNode, _ scnNode:SCNNode) throws {
         
-        if self.isCancelled {
+        if glTF.isCancelled {
             return
         }
         
@@ -167,7 +183,7 @@ extension GLTFConverter {
                         }
                     }
                     
-                    if self.isCancelled {
+                    if glTF.isCancelled {
                         return
                     }
                     
@@ -224,7 +240,7 @@ extension GLTFConverter {
                         primitiveNode.renderingOrder = 10
                     }
                     
-                    if self.isCancelled {
+                    if glTF.isCancelled {
                         return
                     }
                     

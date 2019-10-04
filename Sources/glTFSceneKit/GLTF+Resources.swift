@@ -29,9 +29,6 @@ public protocol GLTFResourceLoader {
 } 
 
 extension GLTF {
-    struct Keys {
-        static var resource_loader = "resource_loader"
-    }
         
     public var loader:GLTFResourceLoader {
         get {
