@@ -43,7 +43,8 @@ extension GLTFConverter {
         }
         
         var keyTimesFloat = [Float]()
-        if let (data, _, _) = try loadAcessor(accessorInput) {
+        if let (bufferView, interleaved) = try determineAcessor(accessorInput),
+            let data = try loadAcessor(accessorInput, bufferView, interleaved) {
             keyTimesFloat = dataAsArray(data, accessorInput.componentType, accessorInput.type) as! [Float]
         }
         let duration = Double(keyTimesFloat.last!)
@@ -51,7 +52,8 @@ extension GLTFConverter {
         let keyTimes: [NSNumber] = keyTimesFloat.map { NSNumber(value: $0 / f_duration ) }
         
         var values_ = [Any]()
-        if let (data, _, _) = try loadAcessor(accessorOutput) {
+        if let (bufferView, interleaved) = try determineAcessor(accessorOutput),
+        let data = try loadAcessor(accessorInput, bufferView, interleaved) {
             values_ = dataAsArray(data, accessorOutput.componentType, accessorOutput.type)
         }
         

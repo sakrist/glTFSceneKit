@@ -129,6 +129,7 @@ public class GLTFConverter: TextureLoaderDelegate {
                     err = error
                 }
                 convertGroup.leave()
+                geometryCompletionHandler()
                 self._nodesConverted(err)
             }
         }
