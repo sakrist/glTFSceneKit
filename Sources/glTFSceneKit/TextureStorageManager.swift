@@ -124,6 +124,8 @@ class TextureStorageManager {
             return
         } 
         
+        let group = self.group(gltf:gltf, delegate: delegate, true)
+        
         worker.async {
             let tStatus = self.textureAssociator(gltf:gltf, at:index)
             
@@ -137,8 +139,6 @@ class TextureStorageManager {
                 let metalOn = (delegate.renderer?.renderingAPI == .metal || device != nil)
                 
                 if let descriptor = texture.extensions?[compressedTextureExtensionKey] as? GLTF_3D4MCompressedTextureExtension, metalOn {
-                    
-                    let group = self.group(gltf:gltf, delegate: delegate, true) 
                     
                     // load first level mipmap as texture
                     gltf.loadCompressedTexture(descriptor:descriptor, loadLevel: .first) { cTexture, error in        
@@ -176,9 +176,11 @@ class TextureStorageManager {
                         }
                     }
                 } else {
+                    group.leave()
                     self._loadImageTexture(gltf, delegate, texture, tStatus, callback)
                 }
             } else {
+                group.leave()
                 tStatus.associate(property: property)
             }
         }
