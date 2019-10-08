@@ -95,7 +95,7 @@ class TextureStorageManager {
             
             // notify when all textures are loaded
             // this is last operation.
-            group?.notify(queue: DispatchQueue.main) {
+            group?.notify(queue: DispatchQueue.global(qos: .userInteractive)) {
                 
                 os_log("textures loaded %d ms", log: log_scenekit, type: .debug, Int(startLoadTextures.timeIntervalSinceNow * -1000))
                 
