@@ -57,7 +57,7 @@ class TextureStorageManager {
     
     static let manager = TextureStorageManager()
     
-    private var worker = DispatchQueue(label: "textures_loader")
+    private var worker = DispatchQueue(label: "textures_loader", qos: .userInteractive)
     private var groups:[Int : DispatchGroup] = [Int : DispatchGroup]()
     
     lazy private var _associators:[Int : [Int : TextureAssociator]] = [Int : [Int : TextureAssociator]]()

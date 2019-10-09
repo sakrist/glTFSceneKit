@@ -210,29 +210,33 @@ extension GLTFConverter {
                         emptyMaterial.name = "empty"
                         emptyMaterial.isDoubleSided = true
                         
+                        emptyMaterial.diffuse.contents = OSColor.systemPurple
+                        
                         primitiveNode.geometry!.firstMaterial = emptyMaterial
                     }
                     
-                    
-                    if let materialIndex = primitive.material {
-                        glTF.loadMaterial(index:materialIndex, delegate: self, textureChangedCallback: { _ in
-                            if let material = primitiveNode.geometry?.firstMaterial {
-                                if let texture = material.diffuse.contents as? MTLTexture {
-                                    if texture.pixelFormat.hasAlpha() {
-                                        primitiveNode.renderingOrder = 10
+                    DispatchQueue.global(qos: .userInteractive).async {
+                        if let materialIndex = primitive.material {
+                            self.glTF.loadMaterial(index:materialIndex, delegate: self, textureChangedCallback: { _ in
+                                if let material = primitiveNode.geometry?.firstMaterial {
+                                    if let texture = material.diffuse.contents as? MTLTexture {
+                                        if texture.pixelFormat.hasAlpha() {
+                                            primitiveNode.renderingOrder = 10
+                                        }
                                     }
                                 }
+
+                            }) { [unowned self] scnMaterial in
+                                self.delegate?.scene?(self.loadingScene!, didCreate: scnMaterial, for: primitiveNode)
+
+                                let emissionContent = primitiveNode.geometry?.firstMaterial?.emission.contents
+                                scnMaterial.emission.contents = emissionContent
+                                geometry.materials = [scnMaterial]
                             }
-                            
-                        }) { [unowned self] scnMaterial in
-                            self.delegate?.scene?(self.loadingScene!, didCreate: scnMaterial, for: primitiveNode)
-                            
-                            let emissionContent = primitiveNode.geometry?.firstMaterial?.emission.contents
-                            scnMaterial.emission.contents = emissionContent
-                            geometry.materials = [scnMaterial]
                         }
                     }
-                    
+
+
                     
                     
                     if let transparency = primitiveNode.geometry?.firstMaterial?.transparency,
