@@ -47,7 +47,7 @@ extension GLTF {
             }
             
             var mtlBuffer:MTLBuffer?
-            let device = MTLCreateSystemDefaultDevice()
+            let device = MetalDevice.device
             verticies.withUnsafeBytes { (unsafeBufferPointer:UnsafeRawBufferPointer) in
                 let uint8Ptr = unsafeBufferPointer.bindMemory(to: Int8.self).baseAddress!
                 mtlBuffer = device?.makeBuffer(bytes: uint8Ptr, length: verticies.count, options: .storageModeShared)

@@ -214,31 +214,25 @@ extension GLTFConverter {
                         
                         primitiveNode.geometry!.firstMaterial = emptyMaterial
                     }
-                    
-                    DispatchQueue.global(qos: .userInteractive).async {
-                        if let materialIndex = primitive.material {
-                            self.glTF.loadMaterial(index:materialIndex, delegate: self, textureChangedCallback: { _ in
-                                if let material = primitiveNode.geometry?.firstMaterial {
-                                    if let texture = material.diffuse.contents as? MTLTexture {
-                                        if texture.pixelFormat.hasAlpha() {
-                                            primitiveNode.renderingOrder = 10
-                                        }
+                
+                    if let materialIndex = primitive.material {
+                        self.glTF.loadMaterial(index:materialIndex, delegate: self, textureChangedCallback: { _ in
+                            if let material = primitiveNode.geometry?.firstMaterial {
+                                if let texture = material.diffuse.contents as? MTLTexture {
+                                    if texture.pixelFormat.hasAlpha() {
+                                        primitiveNode.renderingOrder = 10
                                     }
                                 }
-
-                            }) { [unowned self] scnMaterial in
-                                self.delegate?.scene?(self.loadingScene!, didCreate: scnMaterial, for: primitiveNode)
-
-                                let emissionContent = primitiveNode.geometry?.firstMaterial?.emission.contents
-                                scnMaterial.emission.contents = emissionContent
-                                geometry.materials = [scnMaterial]
                             }
+                        }) { [unowned self] scnMaterial in
+                            self.delegate?.scene?(self.loadingScene!, didCreate: scnMaterial, for: primitiveNode)
+
+                            let emissionContent = primitiveNode.geometry?.firstMaterial?.emission.contents
+                            scnMaterial.emission.contents = emissionContent
+                            geometry.materials = [scnMaterial]
                         }
                     }
 
-
-                    
-                    
                     if let transparency = primitiveNode.geometry?.firstMaterial?.transparency,
                         transparency < 1.0 {
                         primitiveNode.renderingOrder = 10

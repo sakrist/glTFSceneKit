@@ -236,5 +236,9 @@ extension SCNMaterial {
     }
 }
 
-
+class MetalDevice {
+    static var device = {
+        return MTLCreateSystemDefaultDevice()
+    }()
+}
 

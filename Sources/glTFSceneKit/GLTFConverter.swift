@@ -326,13 +326,6 @@ public class GLTFConverter: TextureLoaderDelegate {
     }
     
     internal func device() -> MTLDevice? {
-        var device:MTLDevice?
-        #if os(macOS)
-        device = self.renderer?.device
-        #endif
-        if (device == nil) {
-            device = MTLCreateSystemDefaultDevice()
-        }
-        return device
+        return MetalDevice.device
     }
 }
