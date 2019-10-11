@@ -412,7 +412,7 @@ extension GLTFConverter {
             }
         }
         
-        glTF.loader.load(gltf:glTF, resources: buffers, completionHandler:completionHandler)
+        glTF.loader.load(gltf:glTF, resources: buffers, options: ResourceType.buffer, completionHandler:completionHandler)
     }
     
     

@@ -39,7 +39,7 @@ extension GLTF {
                 buffers.append(buffer)
             }
                             
-            self.loader.load(gltf:self, resources: Set(buffers)) { (error) in
+            self.loader.load(gltf:self, resources: Set(buffers), options: ResourceType.texture) { (error) in
                 var error_ = error
                 var textureResult:Any?
                 
@@ -69,7 +69,7 @@ extension GLTF {
             
             if let bView = self.bufferViews?[index] {
                 let buffer_ = self.buffers![bView.buffer]
-                self.loader.load(gltf:self, resource: buffer_) { (buffer, error) in
+                self.loader.load(gltf:self, resource: buffer_, options: ResourceType.texture) { (buffer, error) in
                     var error_ = error
                     var textureResult:Any?
                     var datas = [Data]()

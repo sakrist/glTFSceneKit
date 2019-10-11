@@ -7,6 +7,12 @@
 
 import Foundation
 
+public enum ResourceType {
+    case buffer
+    case texture
+    case image
+}
+
 
 /// Description for resources delivery by request from general GLTF converter. 
 /// - Simple implementation is GLTFResourceLoaderDefault and utilised as default resource delivery instrument.
@@ -18,8 +24,8 @@ public protocol GLTFResourceLoader {
     var directoryPath: String { get set }
     
     func load(gltf: GLTF, resource: GLTFBuffer) throws -> Data?
-    func load(gltf: GLTF, resource: GLTFBuffer, completionHandler: @escaping (GLTFBuffer, Error?) -> Void )
-    func load(gltf: GLTF, resources: Set<GLTFBuffer>, completionHandler: @escaping (Error?) -> Void )
+    func load(gltf: GLTF, resource: GLTFBuffer, options: Any?, completionHandler: @escaping (GLTFBuffer, Error?) -> Void )
+    func load(gltf: GLTF, resources: Set<GLTFBuffer>, options: Any?, completionHandler: @escaping (Error?) -> Void )
     
     func load(gltf: GLTF, resource: GLTFImage) throws -> OSImage?
     func load(gltf: GLTF, resource: GLTFImage, completionHandler: @escaping (GLTFImage, Error?) -> Void )
@@ -42,7 +48,7 @@ open class GLTFResourceLoaderDefault : GLTFResourceLoader {
         return resource.data
     }
     
-    open func load(gltf: GLTF, resource: GLTFBuffer, completionHandler: @escaping (GLTFBuffer, Error?) -> Void) {
+    open func load(gltf: GLTF, resource: GLTFBuffer, options: Any?, completionHandler: @escaping (GLTFBuffer, Error?) -> Void) {
         var error_:Error?
         do {
             if resource.data == nil && resource.uri != nil {
@@ -56,7 +62,7 @@ open class GLTFResourceLoaderDefault : GLTFResourceLoader {
         completionHandler(resource, error_)
     }
     
-    open func load(gltf: GLTF, resources: Set<GLTFBuffer>, completionHandler: @escaping (Error?) -> Void) {
+    open func load(gltf: GLTF, resources: Set<GLTFBuffer>, options: Any?, completionHandler: @escaping (Error?) -> Void) {
         var error_:Error?
         do {
             for resource in resources {
