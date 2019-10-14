@@ -210,8 +210,6 @@ extension GLTFConverter {
                         emptyMaterial.name = "empty"
                         emptyMaterial.isDoubleSided = true
                         
-                        emptyMaterial.diffuse.contents = OSColor.systemPurple
-                        
                         primitiveNode.geometry!.firstMaterial = emptyMaterial
                     }
                 
