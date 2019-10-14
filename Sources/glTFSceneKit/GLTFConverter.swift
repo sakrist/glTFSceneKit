@@ -105,9 +105,7 @@ public class GLTFConverter: TextureLoaderDelegate {
                     geometryCompletionHandler()
                     os_log("geometry loaded %d ms", log: log_scenekit, type: .debug, Int(start.timeIntervalSinceNow * -1000))
                     
-                    DispatchQueue.main.async {
-                        self._nodesConverted(self.errorMessage)
-                    }
+                    self._nodesConverted(self.errorMessage)
                 }
                 
                 convertGroup.leave()
@@ -326,13 +324,6 @@ public class GLTFConverter: TextureLoaderDelegate {
     }
     
     internal func device() -> MTLDevice? {
-        var device:MTLDevice?
-        #if os(macOS)
-        device = self.renderer?.device
-        #endif
-        if (device == nil) {
-            device = MTLCreateSystemDefaultDevice()
-        }
-        return device
+        return MetalDevice.device
     }
 }

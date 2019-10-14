@@ -212,10 +212,9 @@ extension GLTFConverter {
                         
                         primitiveNode.geometry!.firstMaterial = emptyMaterial
                     }
-                    
-                    
+                
                     if let materialIndex = primitive.material {
-                        glTF.loadMaterial(index:materialIndex, delegate: self, textureChangedCallback: { _ in
+                        self.glTF.loadMaterial(index:materialIndex, delegate: self, textureChangedCallback: { _ in
                             if let material = primitiveNode.geometry?.firstMaterial {
                                 if let texture = material.diffuse.contents as? MTLTexture {
                                     if texture.pixelFormat.hasAlpha() {
@@ -223,18 +222,15 @@ extension GLTFConverter {
                                     }
                                 }
                             }
-                            
                         }) { [unowned self] scnMaterial in
                             self.delegate?.scene?(self.loadingScene!, didCreate: scnMaterial, for: primitiveNode)
-                            
+
                             let emissionContent = primitiveNode.geometry?.firstMaterial?.emission.contents
                             scnMaterial.emission.contents = emissionContent
                             geometry.materials = [scnMaterial]
                         }
                     }
-                    
-                    
-                    
+
                     if let transparency = primitiveNode.geometry?.firstMaterial?.transparency,
                         transparency < 1.0 {
                         primitiveNode.renderingOrder = 10
@@ -414,7 +410,7 @@ extension GLTFConverter {
             }
         }
         
-        glTF.loader.load(gltf:glTF, resources: buffers, completionHandler:completionHandler)
+        glTF.loader.load(gltf:glTF, resources: buffers, options: ResourceType.buffer, completionHandler:completionHandler)
     }
     
     

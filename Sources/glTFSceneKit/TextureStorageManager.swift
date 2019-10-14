@@ -57,7 +57,7 @@ class TextureStorageManager {
     
     static let manager = TextureStorageManager()
     
-    private var worker = DispatchQueue(label: "textures_loader")
+    private var worker = DispatchQueue(label: "textures_loader", qos: .userInteractive)
     private var groups:[Int : DispatchGroup] = [Int : DispatchGroup]()
     
     lazy private var _associators:[Int : [Int : TextureAssociator]] = [Int : [Int : TextureAssociator]]()
@@ -95,7 +95,7 @@ class TextureStorageManager {
             
             // notify when all textures are loaded
             // this is last operation.
-            group?.notify(queue: DispatchQueue.main) {
+            group?.notify(queue: DispatchQueue.global(qos: .userInteractive)) {
                 
                 os_log("textures loaded %d ms", log: log_scenekit, type: .debug, Int(startLoadTextures.timeIntervalSinceNow * -1000))
                 
@@ -124,6 +124,8 @@ class TextureStorageManager {
             return
         } 
         
+        let group = self.group(gltf:gltf, delegate: delegate, true)
+        
         worker.async {
             let tStatus = self.textureAssociator(gltf:gltf, at:index)
             
@@ -133,12 +135,10 @@ class TextureStorageManager {
                 
                 gltf.loadSampler(sampler:texture.sampler, property: property)
                 
-                let device = MTLCreateSystemDefaultDevice()
+                let device = MetalDevice.device
                 let metalOn = (delegate.renderer?.renderingAPI == .metal || device != nil)
                 
                 if let descriptor = texture.extensions?[compressedTextureExtensionKey] as? GLTF_3D4MCompressedTextureExtension, metalOn {
-                    
-                    let group = self.group(gltf:gltf, delegate: delegate, true) 
                     
                     // load first level mipmap as texture
                     gltf.loadCompressedTexture(descriptor:descriptor, loadLevel: .first) { cTexture, error in        
@@ -176,9 +176,11 @@ class TextureStorageManager {
                         }
                     }
                 } else {
+                    group.leave()
                     self._loadImageTexture(gltf, delegate, texture, tStatus, callback)
                 }
             } else {
+                group.leave()
                 tStatus.associate(property: property)
             }
         }
