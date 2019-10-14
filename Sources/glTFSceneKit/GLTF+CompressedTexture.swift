@@ -35,7 +35,7 @@ extension GLTF {
         if loadLevel == .all {
             var buffers = [GLTFBuffer]()
             for bView in descriptor.sources {
-                let buffer = self.buffers![bView.buffer]
+                let buffer = bView.buffer
                 buffers.append(buffer)
             }
                             
@@ -67,7 +67,7 @@ extension GLTF {
             let sizeHeight = (loadLevel == .first) ? 32 : descriptor.height
             let bufferView = (loadLevel == .first) ? descriptor.sources.last! : descriptor.sources.first!
             
-            let buffer_ = self.buffers![bufferView.buffer]
+            let buffer_ = bufferView.buffer
             self.loader.load(gltf:self, resource: buffer_, options: ResourceType.texture) { (buffer, error) in
                 var error_ = error
                 var textureResult:Any?

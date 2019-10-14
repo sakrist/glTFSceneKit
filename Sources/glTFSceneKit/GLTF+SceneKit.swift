@@ -137,14 +137,14 @@ extension GLTF {
 //        }
 //        return nil
           
-        if let buffer = glTF.buffers?[bufferView.buffer] {
-            if let data = try glTF.loader.load(gltf:glTF, resource: buffer) {
-                return (bufferView, data)
-            }
-          } else {
+        let buffer = bufferView.buffer
+        if let data = try glTF.loader.load(gltf:glTF, resource: buffer) {
+            return (bufferView, data)
+        }
+        else {
             throw GLTFError("Can't load data! Can't find buffer at index \(bufferView.buffer)")
         }
-        return nil
+
     }
     
 }

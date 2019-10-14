@@ -40,7 +40,7 @@ import Foundation
 @objcMembers
 open class GLTFBufferView : NSObject, Codable {
     /// The index of the buffer.
-    public var buffer:Int
+    public var buffer:GLTFBuffer
 
     /// The length of the bufferView in bytes.
     public var byteLength:Int
@@ -74,7 +74,7 @@ open class GLTFBufferView : NSObject, Codable {
         case target
     }
 
-    public init(buffer b:Int, byteLength bl:Int, byteOffset bo:Int) {
+    public init(buffer b:GLTFBuffer, byteLength bl:Int, byteOffset bo:Int) {
         buffer = b
         byteLength = bl
         byteOffset = bo
@@ -82,7 +82,7 @@ open class GLTFBufferView : NSObject, Codable {
     
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        buffer = try container.decode(Int.self, forKey: .buffer)
+        buffer = try container.decode(GLTFBuffer.self, forKey: .buffer)
         byteLength = try container.decode(Int.self, forKey: .byteLength)
         do {
             byteOffset = try container.decode(Int.self, forKey: .byteOffset)

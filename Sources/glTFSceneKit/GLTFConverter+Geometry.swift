@@ -124,10 +124,7 @@ extension GLTFAccessor {
 fileprivate extension GLTF {
     //let buffer = glTF.buffers![glTF.bufferViews![bufferView].buffer]
     func buffer(for bufferView: GLTFBufferView) -> GLTFBuffer? {
-        let bufferIndex = bufferView.buffer
-        return self.buffers?[bufferIndex]
-        
-//        return nil
+        return bufferView.buffer
     }
 }
 
