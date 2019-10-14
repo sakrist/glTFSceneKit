@@ -14,9 +14,9 @@ extension GLTF {
     // MARK: - Material
     
     // load material by index
-    internal func loadMaterial(index:Int, delegate: TextureLoaderDelegate, textureChangedCallback: ((Any?)-> Void)? = nil, completionHandler: @escaping (SCNMaterial) -> Void) {
+    internal func loadMaterial(_ material:GLTFMaterial?, delegate: TextureLoaderDelegate, textureChangedCallback: ((Any?)-> Void)? = nil, completionHandler: @escaping (SCNMaterial) -> Void) {
         
-        if let material = self.materials?[index] {
+        if let material = material {
             let scnMaterial = SCNMaterial()
             scnMaterial.name = material.name
             scnMaterial.isDoubleSided = material.doubleSided

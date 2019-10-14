@@ -80,7 +80,7 @@ open class GLTFMeshPrimitive : NSObject, Codable {
     public var indices:Int?
 
     /// The index of the material to apply to this primitive when rendering.
-    public var material:Int?
+    public var material:GLTFMaterial?
 
     /// The type of primitives to render.
     public var mode:GLTFMeshPrimitiveMode
@@ -109,7 +109,7 @@ open class GLTFMeshPrimitive : NSObject, Codable {
         extensions = try? container.decode([String: GLTFKHRDracoMeshCompressionExtension].self, forKey: .extensions)
         extras = try? container.decode([String: Any].self, forKey: .extras)
         indices = try? container.decode(Int.self, forKey: .indices)
-        material = try? container.decode(Int.self, forKey: .material)
+        material = try? container.decode(GLTFMaterial.self, forKey: .material)
         do {
             mode = try container.decode(GLTFMeshPrimitiveMode.self, forKey: .mode)
         } catch {

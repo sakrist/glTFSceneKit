@@ -209,8 +209,8 @@ extension GLTFConverter {
                         primitiveNode.geometry!.firstMaterial = emptyMaterial
                     }
                 
-                    if let materialIndex = primitive.material {
-                        self.glTF.loadMaterial(index:materialIndex, delegate: self, textureChangedCallback: { _ in
+                    if let material = primitive.material {
+                        self.glTF.loadMaterial(material, delegate: self, textureChangedCallback: { _ in
                             if let material = primitiveNode.geometry?.firstMaterial {
                                 if let texture = material.diffuse.contents as? MTLTexture {
                                     if texture.pixelFormat.hasAlpha() {
