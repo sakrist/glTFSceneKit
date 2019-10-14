@@ -111,7 +111,7 @@ import Foundation
 @objcMembers
 open class GLTFAccessor : NSObject, Codable {
     /// The index of the bufferView.
-    public var bufferView:Int?
+    public var bufferView:GLTFBufferView?
 
     /// The offset relative to the start of the bufferView in bytes.
     public var byteOffset:Int
@@ -163,7 +163,7 @@ open class GLTFAccessor : NSObject, Codable {
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        bufferView = try? container.decode(Int.self, forKey: .bufferView)
+        bufferView = try? container.decode(GLTFBufferView.self, forKey: .bufferView)
         do {
             byteOffset = try container.decode(Int.self, forKey: .byteOffset)
         } catch {

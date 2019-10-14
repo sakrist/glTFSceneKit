@@ -34,8 +34,8 @@ extension GLTF {
         
         if loadLevel == .all {
             var buffers = [GLTFBuffer]()
-            for bViewIndex in descriptor.sources {
-                let buffer = self.buffers![self.bufferViews![bViewIndex].buffer]
+            for bView in descriptor.sources {
+                let buffer = self.buffers![bView.buffer]
                 buffers.append(buffer)
             }
                             
@@ -65,28 +65,27 @@ extension GLTF {
         } else {
             let sizeWidth = (loadLevel == .first) ? 32 : descriptor.width
             let sizeHeight = (loadLevel == .first) ? 32 : descriptor.height
-            let index = (loadLevel == .first) ? descriptor.sources.last! : descriptor.sources.first!  
+            let bufferView = (loadLevel == .first) ? descriptor.sources.last! : descriptor.sources.first!
             
-            if let bView = self.bufferViews?[index] {
-                let buffer_ = self.buffers![bView.buffer]
-                self.loader.load(gltf:self, resource: buffer_, options: ResourceType.texture) { (buffer, error) in
-                    var error_ = error
-                    var textureResult:Any?
-                    var datas = [Data]()
-                    if buffer.data != nil {
-                        datas.append(buffer.data!)
-                        do {
-                            textureResult = try self._createMetalTexture(sizeWidth, sizeHeight, pixelFormat, datas, bytesPerRow)
-                        } catch {
-                            error_ = error
-                        }
-                    } else {
-                        error_ = GLTFError("Can't load data for \(buffer.uri ?? "")")
+            let buffer_ = self.buffers![bufferView.buffer]
+            self.loader.load(gltf:self, resource: buffer_, options: ResourceType.texture) { (buffer, error) in
+                var error_ = error
+                var textureResult:Any?
+                var datas = [Data]()
+                if buffer.data != nil {
+                    datas.append(buffer.data!)
+                    do {
+                        textureResult = try self._createMetalTexture(sizeWidth, sizeHeight, pixelFormat, datas, bytesPerRow)
+                    } catch {
+                        error_ = error
                     }
-                    
-                    completionHandler(textureResult, error_)
-                }     
-            }
+                } else {
+                    error_ = GLTFError("Can't load data for \(buffer.uri ?? "")")
+                }
+                
+                completionHandler(textureResult, error_)
+            }     
+        
         }
     }
     

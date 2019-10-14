@@ -104,25 +104,45 @@ extension GLTF {
         }
     }
     
-    internal static func requestData(glTF: GLTF, bufferView:GLTFBufferView) throws -> Data? {
-        if let buffer = glTF.buffers?[bufferView.buffer] {
-            
-            if let data = try glTF.loader.load(gltf:glTF, resource: buffer) {
-                return data
-            }
-        } else {
-            throw GLTFError("Can't load data! Can't find buffer at index \(bufferView.buffer)")
-        }
-        return nil
-    }
+//    internal static func requestData(glTF: GLTF, bufferView:GLTFBufferView) throws -> Data? {
+//        if let buffer = glTF.buffers?[bufferView.buffer] {
+//            
+//            if let data = try glTF.loader.load(gltf:glTF, resource: buffer) {
+//                return data
+//            }
+//        } else {
+//            throw GLTFError("Can't load data! Can't find buffer at index \(bufferView.buffer)")
+//        }
+//        return nil
+//    }
     
-    internal static func requestData(glTF: GLTF, bufferView:Int) throws -> (GLTFBufferView, Data)? {
-        if let bufferView = glTF.bufferViews?[bufferView] {
-            if let data = try requestData(glTF: glTF, bufferView: bufferView) {
+//    internal static func requestData(glTF: GLTF, bufferView:Int) throws -> (GLTFBufferView, Data)? {
+//        if let bufferView = glTF.bufferViews?[bufferView] {
+//            if let data = try requestData(glTF: glTF, bufferView: bufferView) {
+//                return (bufferView, data)
+//            }
+//        } else {
+//            throw GLTFError("Can't load data! Can't find bufferView at index \(bufferView)")
+//        }
+//        return nil
+//    }
+    
+    internal static func requestData(glTF: GLTF, bufferView:GLTFBufferView) throws -> (GLTFBufferView, Data)? {
+//        if let bufferView = glTF.bufferViews?[bufferView] {
+//            if let data = try requestData(glTF: glTF, bufferView: bufferView) {
+//                return (bufferView, data)
+//            }
+//        } else {
+//            throw GLTFError("Can't load data! Can't find bufferView at index \(bufferView)")
+//        }
+//        return nil
+          
+        if let buffer = glTF.buffers?[bufferView.buffer] {
+            if let data = try glTF.loader.load(gltf:glTF, resource: buffer) {
                 return (bufferView, data)
             }
-        } else {
-            throw GLTFError("Can't load data! Can't find bufferView at index \(bufferView)")
+          } else {
+            throw GLTFError("Can't load data! Can't find buffer at index \(bufferView.buffer)")
         }
         return nil
     }

@@ -40,7 +40,7 @@ import Foundation
 @objcMembers
 open class GLTFImage : NSObject, Codable {
     /// The index of the bufferView that contains the image. Use this instead of the image's uri property.
-    public var bufferView:Int?
+    public var bufferView:GLTFBufferView?
 
     /// Dictionary object with extension-specific objects.
     public var extensions:[String: Any]?
@@ -70,7 +70,7 @@ open class GLTFImage : NSObject, Codable {
     
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        bufferView = try? container.decode(Int.self, forKey: .bufferView)
+        bufferView = try? container.decode(GLTFBufferView.self, forKey: .bufferView)
         extensions = try? container.decode([String: Any].self, forKey: .extensions)
         extras = try? container.decode([String: Any].self, forKey: .extras)
         mimeType = try? container.decode(GLTFImageMimeType.self, forKey: .mimeType)

@@ -123,12 +123,11 @@ extension GLTFAccessor {
 
 fileprivate extension GLTF {
     //let buffer = glTF.buffers![glTF.bufferViews![bufferView].buffer]
-    func buffer(for bufferView: Int) -> GLTFBuffer? {
-        if let bufferIndex = self.bufferViews?[bufferView].buffer {
-            return self.buffers?[bufferIndex]
-        }
+    func buffer(for bufferView: GLTFBufferView) -> GLTFBuffer? {
+        let bufferIndex = bufferView.buffer
+        return self.buffers?[bufferIndex]
         
-        return nil
+//        return nil
     }
 }
 
@@ -268,8 +267,7 @@ extension GLTFConverter {
     fileprivate func geometryElement(_ primitive: GLTFMeshPrimitive) throws -> SCNGeometryElement? {
         if let indicesIndex = primitive.indices {
             if let accessor = glTF.accessors?[indicesIndex],
-                let bufferViewIndex = accessor.bufferView,
-                let bufferView = glTF.bufferViews?[bufferViewIndex] {
+                let bufferView = accessor.bufferView {
                 
                 if let indicesData = try loadAcessor(accessor, bufferView, false) {
                     
@@ -309,7 +307,7 @@ extension GLTFConverter {
         var geometrySources = [SCNGeometrySource]()
         
         // accessors can point to different buffers. We cache last one.
-        var previousBufferView = -1
+        var previousBufferView: GLTFBufferView?
         var mtlBuffer:MTLBuffer?
         
         var byteOffset = 0
@@ -417,11 +415,11 @@ extension GLTFConverter {
     // determine where an accessor and a bufferView link are interleaved or not
     internal func determineAcessor(_ accessor:GLTFAccessor) throws -> (GLTFBufferView, Bool)? {
         
-        guard let index =  accessor.bufferView else {
+        guard let bufferView = accessor.bufferView else {
             throw GLTFError("Missing 'bufferView' for \(accessor.name ?? "") acessor")
         }
         
-        if let bufferView = glTF.bufferViews?[index] {
+//        if let bufferView = glTF.bufferViews?[index] {
             
             // Interleaved data usualy has bytesStride as correct value.
             // Some times non-interleaved data also has bytesStride, and in some cases don't. It's up to exporter
@@ -431,15 +429,15 @@ extension GLTFConverter {
             
             let interleaved = (byteStride != accessorByteStride)
             return (bufferView, interleaved)
-        }
-        return nil
+//        }
+//        return nil
     }
     
     
     // get data by accessor
     internal func loadAcessor(_ accessor:GLTFAccessor, _ bufferView:GLTFBufferView, _ interleaved:Bool) throws -> Data? {
         
-        if let data = try GLTF.requestData(glTF: glTF, bufferView: bufferView) {
+        if let (bufferView, data) = try GLTF.requestData(glTF: glTF, bufferView: bufferView) {
             
             var byteStride:Int = bufferView.byteStride ?? 0
             if (byteStride == 0) {

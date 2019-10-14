@@ -17,14 +17,14 @@ open class GLTFKHRDracoMeshCompressionExtension : NSObject, Codable {
     public var attributes:[String: Int]
 
     /// The index of the bufferView.
-    public var bufferView:Int
+    public var bufferView:GLTFBufferView
 
     private enum CodingKeys: String, CodingKey {
         case attributes
         case bufferView
     }
 
-    public init(attributes a:[String: Int], bufferView bv:Int) {
+    public init(attributes a:[String: Int], bufferView bv:GLTFBufferView) {
         attributes = a
         bufferView = bv
     }
@@ -32,7 +32,7 @@ open class GLTFKHRDracoMeshCompressionExtension : NSObject, Codable {
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         attributes = try container.decode([String: Int].self, forKey: .attributes)
-        bufferView = try container.decode(Int.self, forKey: .bufferView)
+        bufferView = try container.decode(GLTFBufferView.self, forKey: .bufferView)
     }
 
     public func encode(to encoder: Encoder) throws {

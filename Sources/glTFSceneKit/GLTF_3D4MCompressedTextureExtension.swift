@@ -357,7 +357,7 @@ open class GLTF_3D4MCompressedTextureExtension : Codable {
     public var height:Int
 
     /// Texture index of bufferView used for each level of texture. First source representing level 0. Each next is divide by 2 of previous texture size. For example 0 level is 1024, next is 512 and next 256 ans so on.
-    public var sources:[Int]
+    public var sources:[GLTFBufferView]
 
     /// Texture 2D target.
     public var target:GLTF_3D4MCompressedTextureExtensionTarget
@@ -373,7 +373,7 @@ open class GLTF_3D4MCompressedTextureExtension : Codable {
     public init(compression c:GLTF_3D4MCompressedTextureExtensionCompression, 
                 width w:Int,
                 height h:Int,
-                sources s:[Int],
+                sources s:[GLTFBufferView],
                 target t:GLTF_3D4MCompressedTextureExtensionTarget) {
         compression = c 
         width = w
@@ -390,7 +390,7 @@ open class GLTF_3D4MCompressedTextureExtension : Codable {
         } catch {
             height = 0
         }
-        sources = try container.decode([Int].self, forKey: .sources)
+        sources = try container.decode([GLTFBufferView].self, forKey: .sources)
         do {
             target = try container.decode(GLTF_3D4MCompressedTextureExtensionTarget.self, forKey: .target)
         } catch {
