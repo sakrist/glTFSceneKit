@@ -14,7 +14,8 @@ let log_scenekit = OSLog(subsystem: "org.glTFSceneKit", category: "scene")
 
 let dracoExtensionKey = "KHR_draco_mesh_compression"
 let compressedTextureExtensionKey = "3D4M_compressed_texture"
-let supportedExtensions = [dracoExtensionKey, compressedTextureExtensionKey]
+let meshExtensionKey = "3D4M_mesh"
+let supportedExtensions = [dracoExtensionKey, compressedTextureExtensionKey, meshExtensionKey]
 
 
 struct ConvertionProgressMask : OptionSet {
