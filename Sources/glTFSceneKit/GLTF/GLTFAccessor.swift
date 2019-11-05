@@ -138,7 +138,7 @@ open class GLTFAccessor : NSObject, Codable {
     public var name:String?
 
     /// Specifies whether integer data values should be normalized.
-    public var normalized:Bool
+    public var normalized:Bool = false
 
     /// Sparse storage of attributes that deviate from their initialization value.
     public var sparse:GLTFAccessorSparse?
@@ -159,6 +159,19 @@ open class GLTFAccessor : NSObject, Codable {
         case normalized
         case sparse
         case type
+    }
+    
+    
+    public init (bufferView:Int?,
+                 byteOffset:Int,
+                 componentType:GLTFAccessorComponentType,
+                 count:Int,
+                 type:GLTFAccessorType) {
+        self.bufferView = bufferView
+        self.byteOffset = byteOffset
+        self.componentType = componentType
+        self.count = count
+        self.type = type
     }
 
     required public init(from decoder: Decoder) throws {

@@ -156,106 +156,210 @@ extension GLTFConverter {
                 var primitiveIndex = 0
                 
                 for primitive in mesh.primitives {
-                    
+                    // It must be in callback
+
                     var sources:[SCNGeometrySource] = [SCNGeometrySource]()
                     var elements:[SCNGeometryElement] = [SCNGeometryElement]()
                     
+//                    // get indices
+//                    if let element = try self.geometryElement(primitive) {
+//                        elements.append(element)
+//                    }
+//
+//                    // get sources from attributes information
+//                    if let geometrySources = try self.geometrySources(primitive.attributes) {
+//                        sources.append(contentsOf: geometrySources)
+//                    }
                     // get indices
-                    if let element = try self.geometryElement(primitive) {
+                    try self.geometryElement(primitive, callback: { element in
                         elements.append(element)
-                    }
-                    
-                    // get sources from attributes information
-                    if let geometrySources = try self.geometrySources(primitive.attributes) {
-                        sources.append(contentsOf: geometrySources)
-                    }
-                    
-                    // check on draco extension
-                    if let dracoMesh = primitive.extensions?[dracoExtensionKey] {
-                        let (dElement, dSources) = try glTF.convertDracoMesh(dracoMesh as! GLTFKHRDracoMeshCompressionExtension)
+                        // get sources from attributes information
                         
-                        if (dElement != nil) {
-                            elements.append(dElement!)
-                        }
-                        
-                        if (dSources != nil) {
-                            sources.append(contentsOf: dSources!)
-                        }
-                    }
-                    
-                    if glTF.isCancelled {
-                        return
-                    }
-                    
-                    
-                    let primitiveNode:SCNNode
-                    // create geometry
-                    let geometry = SCNGeometry.init(sources: sources, elements: elements)
-                    
-                    if primitiveIndex < scnNode.childNodes.count  {
-                        primitiveNode = scnNode.childNodes[primitiveIndex]
-                        primitiveNode.geometry = geometry
-                    } else {
-                        primitiveNode = SCNNode.init(geometry: geometry)
-                        scnNode.addChildNode(primitiveNode)
-                    }
-                    
-                    primitiveNode.name = mesh.name
-                    
-                    delegate?.scene?(loadingScene!, didCreate: primitiveNode)
-                    
-                    if primitiveNode.geometry?.firstMaterial != nil {
-                        // create empty SCNMaterial. Callbacks call later then materail will be download, so we must provide materail for selection
-                        let emptyMaterial = SCNMaterial()
-                        emptyMaterial.name = "empty"
-                        emptyMaterial.isDoubleSided = true
-                        
-                        primitiveNode.geometry!.firstMaterial = emptyMaterial
-                    }
-                
-                    if let materialIndex = primitive.material {
-                        self.glTF.loadMaterial(index:materialIndex, delegate: self, textureChangedCallback: { _ in
-                            if let material = primitiveNode.geometry?.firstMaterial {
-                                if let texture = material.diffuse.contents as? MTLTexture {
-                                    if texture.pixelFormat.hasAlpha() {
-                                        primitiveNode.renderingOrder = 10
+                        try self.geometrySources(primitive.attributes, callback: { s in
+                            sources.append(contentsOf: s)
+                            
+                            if glTF.isCancelled {
+                                return
+                            }
+                            
+                            
+                            let primitiveNode:SCNNode
+                            // create geometry
+                            let geometry = SCNGeometry.init(sources: sources, elements: elements)
+                            
+                            if primitiveIndex < scnNode.childNodes.count  {
+                                primitiveNode = scnNode.childNodes[primitiveIndex]
+                                primitiveNode.geometry = geometry
+                            } else {
+                                primitiveNode = SCNNode.init(geometry: geometry)
+                                scnNode.addChildNode(primitiveNode)
+                            }
+                            
+                            primitiveNode.name = mesh.name
+                            
+                            delegate?.scene?(loadingScene!, didCreate: primitiveNode)
+                            
+                            if primitiveNode.geometry?.firstMaterial != nil {
+                                // create empty SCNMaterial. Callbacks call later then materail will be download, so we must provide materail for selection
+                                let emptyMaterial = SCNMaterial()
+                                emptyMaterial.name = "empty"
+                                emptyMaterial.isDoubleSided = true
+                                
+                                primitiveNode.geometry!.firstMaterial = emptyMaterial
+                            }
+                            
+                            if let materialIndex = primitive.material {
+                                self.glTF.loadMaterial(index:materialIndex, delegate: self, textureChangedCallback: { _ in
+                                    if let material = primitiveNode.geometry?.firstMaterial {
+                                        if let texture = material.diffuse.contents as? MTLTexture {
+                                            if texture.pixelFormat.hasAlpha() {
+                                                primitiveNode.renderingOrder = 10
+                                            }
+                                        }
                                     }
+                                }) { [unowned self] scnMaterial in
+                                    self.delegate?.scene?(self.loadingScene!, didCreate: scnMaterial, for: primitiveNode)
+                                    
+                                    let emissionContent = primitiveNode.geometry?.firstMaterial?.emission.contents
+                                    scnMaterial.emission.contents = emissionContent
+                                    geometry.materials = [scnMaterial]
                                 }
                             }
-                        }) { [unowned self] scnMaterial in
-                            self.delegate?.scene?(self.loadingScene!, didCreate: scnMaterial, for: primitiveNode)
-
-                            let emissionContent = primitiveNode.geometry?.firstMaterial?.emission.contents
-                            scnMaterial.emission.contents = emissionContent
-                            geometry.materials = [scnMaterial]
-                        }
-                    }
-
-                    if let transparency = primitiveNode.geometry?.firstMaterial?.transparency,
-                        transparency < 1.0 {
-                        primitiveNode.renderingOrder = 10
-                    }
-                    
-                    if glTF.isCancelled {
-                        return
-                    }
-                    
-                    if let targets = primitive.targets {
-                        let morpher = SCNMorpher()
-                        let targetsCount = targets.count
-                        for targetIndex in 0..<targetsCount {
-                            let target = targets[targetIndex]
-                            if let sourcesMorph = try geometrySources(target) {
-                                let geometryMorph = SCNGeometry(sources: sourcesMorph, elements: nil)
-                                morpher.targets.append(geometryMorph)
-                                
-                                let path = "childNodes[\(primitiveIndex)].morpher.weights[\(targetIndex)]"
-                                weightPaths.append(path)
+                            
+                            if let transparency = primitiveNode.geometry?.firstMaterial?.transparency,
+                                transparency < 1.0 {
+                                primitiveNode.renderingOrder = 10
                             }
-                        }
-                        morpher.calculationMode = .additive
-                        primitiveNode.morpher = morpher
-                    }
+                            
+                            if glTF.isCancelled {
+                                return
+                            }
+                            
+                            if let targets = primitive.targets {
+                                let morpher = SCNMorpher()
+                                let targetsCount = targets.count
+                                let dg = DispatchGroup()
+                                
+                                for targetIndex in 0..<targetsCount {
+                                    let target = targets[targetIndex]
+                                    dg.enter()
+                                    try geometrySources(target, callback: { sourcesMorph in
+                                        if let sourcesMorph = sourcesMorph {
+                                            let geometryMorph = SCNGeometry(sources: sourcesMorph, elements: nil)
+                                            morpher.targets.append(geometryMorph)
+                                            
+                                            let path = "childNodes[\(primitiveIndex)].morpher.weights[\(targetIndex)]"
+                                            weightPaths.append(path)
+                                            dg.leave()
+                                        }
+                                        
+                                    })
+//                                    if let sourcesMorph = try geometrySources(target) {
+//                                        let geometryMorph = SCNGeometry(sources: sourcesMorph, elements: nil)
+//                                        morpher.targets.append(geometryMorph)
+//
+//                                        let path = "childNodes[\(primitiveIndex)].morpher.weights[\(targetIndex)]"
+//                                        weightPaths.append(path)
+//                                    }
+                                }
+                                dg.notify(queue: DispatchQueue.global()) {
+                                    morpher.calculationMode = .additive
+                                    primitiveNode.morpher = morpher
+                                }
+                                
+                            }
+                            
+                        })
+                    })
+                    
+//                    // check on draco extension
+//                    if let dracoMesh = primitive.extensions?[dracoExtensionKey] {
+//                        let (dElement, dSources) = try glTF.convertDracoMesh(dracoMesh as! GLTFKHRDracoMeshCompressionExtension)
+//
+//                        if (dElement != nil) {
+//                            elements.append(dElement!)
+//                        }
+//
+//                        if (dSources != nil) {
+//                            sources.append(contentsOf: dSources!)
+//                        }
+//                    }
+                    
+//                    if glTF.isCancelled {
+//                        return
+//                    }
+//
+//
+//                    let primitiveNode:SCNNode
+//                    // create geometry
+//                    let geometry = SCNGeometry.init(sources: sources, elements: elements)
+//
+//                    if primitiveIndex < scnNode.childNodes.count  {
+//                        primitiveNode = scnNode.childNodes[primitiveIndex]
+//                        primitiveNode.geometry = geometry
+//                    } else {
+//                        primitiveNode = SCNNode.init(geometry: geometry)
+//                        scnNode.addChildNode(primitiveNode)
+//                    }
+//
+//                    primitiveNode.name = mesh.name
+//
+//                    delegate?.scene?(loadingScene!, didCreate: primitiveNode)
+//
+//                    if primitiveNode.geometry?.firstMaterial != nil {
+//                        // create empty SCNMaterial. Callbacks call later then materail will be download, so we must provide materail for selection
+//                        let emptyMaterial = SCNMaterial()
+//                        emptyMaterial.name = "empty"
+//                        emptyMaterial.isDoubleSided = true
+//
+//                        primitiveNode.geometry!.firstMaterial = emptyMaterial
+//                    }
+//
+//                    if let materialIndex = primitive.material {
+//                        self.glTF.loadMaterial(index:materialIndex, delegate: self, textureChangedCallback: { _ in
+//                            if let material = primitiveNode.geometry?.firstMaterial {
+//                                if let texture = material.diffuse.contents as? MTLTexture {
+//                                    if texture.pixelFormat.hasAlpha() {
+//                                        primitiveNode.renderingOrder = 10
+//                                    }
+//                                }
+//                            }
+//                        }) { [unowned self] scnMaterial in
+//                            self.delegate?.scene?(self.loadingScene!, didCreate: scnMaterial, for: primitiveNode)
+//
+//                            let emissionContent = primitiveNode.geometry?.firstMaterial?.emission.contents
+//                            scnMaterial.emission.contents = emissionContent
+//                            geometry.materials = [scnMaterial]
+//                        }
+//                    }
+//
+//                    if let transparency = primitiveNode.geometry?.firstMaterial?.transparency,
+//                        transparency < 1.0 {
+//                        primitiveNode.renderingOrder = 10
+//                    }
+//
+//                    if glTF.isCancelled {
+//                        return
+//                    }
+//
+//                    if let targets = primitive.targets {
+//                        let morpher = SCNMorpher()
+//                        let targetsCount = targets.count
+//                        for targetIndex in 0..<targetsCount {
+//                            let target = targets[targetIndex]
+//                            if let sourcesMorph = try geometrySources(target) {
+//                                let geometryMorph = SCNGeometry(sources: sourcesMorph, elements: nil)
+//                                morpher.targets.append(geometryMorph)
+//
+//                                let path = "childNodes[\(primitiveIndex)].morpher.weights[\(targetIndex)]"
+//                                weightPaths.append(path)
+//                            }
+//                        }
+//                        morpher.calculationMode = .additive
+//                        primitiveNode.morpher = morpher
+//                    }
+//
+                    ///
                     
                     primitiveIndex += 1
                 }
@@ -265,7 +369,7 @@ extension GLTFConverter {
         }
     }
     
-    fileprivate func geometryElement(_ primitive: GLTFMeshPrimitive) throws -> SCNGeometryElement? {
+    fileprivate func geometryElement(_ primitive: GLTFMeshPrimitive, callback: (SCNGeometryElement) throws-> Void) throws {
         if let indicesIndex = primitive.indices {
             if let accessor = glTF.accessors?[indicesIndex],
                 let bufferViewIndex = accessor.bufferView,
@@ -289,23 +393,27 @@ extension GLTFConverter {
                         break
                     }
                     
-                    return SCNGeometryElement.init(data: indicesData,
-                                                   primitiveType: primitiveType,
-                                                   primitiveCount: count,
-                                                   bytesPerIndex: accessor.bytesPerElement())
+                    do {
+                        try callback(SCNGeometryElement.init(data: indicesData,
+                                                             primitiveType: primitiveType,
+                                                             primitiveCount: count,
+                                                             bytesPerIndex: accessor.bytesPerElement()))
+                    }
+                    
+                
                 }
             } else {
                 throw GLTFError("Can't find indices acessor with index \(indicesIndex)")
             }
         }
-        return nil
+//        return nil
     }
     
     /// Convert mesh/animation attributes into SCNGeometrySource
     ///
     /// - Parameter attributes: dictionary of accessors
     /// - Returns: array of SCNGeometrySource objects
-    fileprivate func geometrySources(_ attributes:[String:Int]) throws -> [SCNGeometrySource]?  {
+    fileprivate func geometrySources(_ attributes:[String:Int], callback: ([SCNGeometrySource]?) throws -> Void) throws {
         var geometrySources = [SCNGeometrySource]()
         
         // accessors can point to different buffers. We cache last one.
@@ -359,7 +467,7 @@ extension GLTFConverter {
                 throw GLTFError("Can't locate accessor at \(accessorIndex) index")
             }
         }
-        return geometrySources
+        try callback(geometrySources)
     }
     
 

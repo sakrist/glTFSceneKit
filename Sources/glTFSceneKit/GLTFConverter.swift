@@ -65,6 +65,8 @@ public class GLTFConverter: TextureLoaderDelegate {
             }
         }
         
+        assert(delegate != nil)
+        
         self.loadingScene = scene
         self._completionHandler = completionHandler
         

@@ -75,7 +75,7 @@ open class GLTFResourceLoaderDefault : GLTFResourceLoader {
         } catch {
             error_ = error
         }
-        DispatchQueue.global().async {
+        DispatchQueue.global(qos: .userInteractive).async {
             completionHandler(error_)   
         }
         
