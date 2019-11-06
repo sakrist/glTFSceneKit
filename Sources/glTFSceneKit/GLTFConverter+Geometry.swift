@@ -176,9 +176,11 @@ extension GLTFConverter {
                         // get sources from attributes information
                         
                         try self.geometrySources(primitive.attributes, callback: { s in
-                            sources.append(contentsOf: s)
+                            if let s = s {
+                                sources.append(contentsOf: s)
+                            }
                             
-                            if glTF.isCancelled {
+                            if self.glTF.isCancelled {
                                 return
                             }
                             
@@ -197,7 +199,7 @@ extension GLTFConverter {
                             
                             primitiveNode.name = mesh.name
                             
-                            delegate?.scene?(loadingScene!, didCreate: primitiveNode)
+                            self.delegate?.scene?(self.loadingScene!, didCreate: primitiveNode)
                             
                             if primitiveNode.geometry?.firstMaterial != nil {
                                 // create empty SCNMaterial. Callbacks call later then materail will be download, so we must provide materail for selection
@@ -231,7 +233,7 @@ extension GLTFConverter {
                                 primitiveNode.renderingOrder = 10
                             }
                             
-                            if glTF.isCancelled {
+                            if self.glTF.isCancelled {
                                 return
                             }
                             
@@ -243,7 +245,7 @@ extension GLTFConverter {
                                 for targetIndex in 0..<targetsCount {
                                     let target = targets[targetIndex]
                                     dg.enter()
-                                    try geometrySources(target, callback: { sourcesMorph in
+                                    try self.geometrySources(target, callback: { sourcesMorph in
                                         if let sourcesMorph = sourcesMorph {
                                             let geometryMorph = SCNGeometry(sources: sourcesMorph, elements: nil)
                                             morpher.targets.append(geometryMorph)
@@ -252,8 +254,8 @@ extension GLTFConverter {
                                             weightPaths.append(path)
                                             dg.leave()
                                         }
-                                        
                                     })
+                                    
 //                                    if let sourcesMorph = try geometrySources(target) {
 //                                        let geometryMorph = SCNGeometry(sources: sourcesMorph, elements: nil)
 //                                        morpher.targets.append(geometryMorph)
@@ -266,9 +268,7 @@ extension GLTFConverter {
                                     morpher.calculationMode = .additive
                                     primitiveNode.morpher = morpher
                                 }
-                                
                             }
-                            
                         })
                     })
                     
@@ -369,14 +369,15 @@ extension GLTFConverter {
         }
     }
     
-    fileprivate func geometryElement(_ primitive: GLTFMeshPrimitive, callback: (SCNGeometryElement) throws-> Void) throws {
+    fileprivate func geometryElement(_ primitive: GLTFMeshPrimitive, callback: @escaping (SCNGeometryElement) throws-> Void) throws {
         if let indicesIndex = primitive.indices {
             if let accessor = glTF.accessors?[indicesIndex],
                 let bufferViewIndex = accessor.bufferView,
                 let bufferView = glTF.bufferViews?[bufferViewIndex] {
                 
-                if let indicesData = try loadAcessor(accessor, bufferView, false) {
-                    
+                // it must be async
+                try loadAcessor(accessor, bufferView, false, callback: { indicesData in
+                   
                     var count = accessor.count
                     
                     let primitiveType = primitive.mode.scn()
@@ -399,9 +400,7 @@ extension GLTFConverter {
                                                              primitiveCount: count,
                                                              bytesPerIndex: accessor.bytesPerElement()))
                     }
-                    
-                
-                }
+                })
             } else {
                 throw GLTFError("Can't find indices acessor with index \(indicesIndex)")
             }
@@ -432,37 +431,43 @@ extension GLTFConverter {
                 byteStride = bufferView.byteStride ?? 0
                 
                 if (mtlBuffer == nil || previousBufferView != accessor.bufferView!) {
-                    if let data = try loadAcessor(accessor, bufferView, interleaved) {
+                    try loadAcessor(accessor, bufferView, interleaved, callback: { data in
+                        if data!.count == 0 {
+                            print("problem")
+                            return
+                        }
                         
                         let device = self.device()
-                        data.withUnsafeBytes { (unsafeBufferPointer:UnsafeRawBufferPointer) in
+                        try data?.withUnsafeBytes { (unsafeBufferPointer:UnsafeRawBufferPointer) in
                             let uint8Ptr = unsafeBufferPointer.bindMemory(to: Int8.self).baseAddress!
-                            mtlBuffer = device?.makeBuffer(bytes: uint8Ptr, length: data.count, options: .storageModeShared)
+                            mtlBuffer = device?.makeBuffer(bytes: uint8Ptr, length: data!.count, options: .storageModeShared)
+                            
+
+                            let count = accessor.count
+                            
+                            let vertexFormat:MTLVertexFormat = accessor.vertexFormat()
+                            
+                            // convert string semantic to SceneKit semantic type
+                            let semantic = GLTF.sourceSemantic(name:key)
+                            
+                            if let mtlB = mtlBuffer {
+                                let geometrySource = SCNGeometrySource.init(buffer: mtlB,
+                                                                            vertexFormat: vertexFormat,
+                                                                            semantic: semantic,
+                                                                            vertexCount: count,
+                                                                            dataOffset: byteOffset,
+                                                                            dataStride: byteStride)
+                                geometrySources.append(geometrySource)
+                            } else {
+                                // TODO: implement fallback on init with data, which was deleted
+                                
+                                throw GLTFError("Metal device failed to allocate MTLBuffer with accessor.bufferView = \(accessor.bufferView!)")
+                            }
                         }
-                    }
+                    })
                     previousBufferView = accessor.bufferView!
                 }
                 
-                let count = accessor.count
-                
-                let vertexFormat:MTLVertexFormat = accessor.vertexFormat()
-                
-                // convert string semantic to SceneKit semantic type
-                let semantic = GLTF.sourceSemantic(name:key)
-                
-                if let mtlB = mtlBuffer {
-                    let geometrySource = SCNGeometrySource.init(buffer: mtlB,
-                                                                vertexFormat: vertexFormat,
-                                                                semantic: semantic,
-                                                                vertexCount: count,
-                                                                dataOffset: byteOffset,
-                                                                dataStride: byteStride)
-                    geometrySources.append(geometrySource)
-                } else {
-                    // TODO: implement fallback on init with data, which was deleted
-                    
-                    throw GLTFError("Metal device failed to allocate MTLBuffer with accessor.bufferView = \(accessor.bufferView!)")
-                }
             } else {
                 throw GLTFError("Can't locate accessor at \(accessorIndex) index")
             }
@@ -545,10 +550,9 @@ extension GLTFConverter {
     
     
     // get data by accessor
-    internal func loadAcessor(_ accessor:GLTFAccessor, _ bufferView:GLTFBufferView, _ interleaved:Bool) throws -> Data? {
+    internal func loadAcessor(_ accessor:GLTFAccessor, _ bufferView:GLTFBufferView, _ interleaved:Bool, callback: @escaping (Data?) throws -> Void) throws {
         
-        if let data = try GLTF.requestData(glTF: glTF, bufferView: bufferView) {
-            
+        try GLTF.requestData(glTF: glTF, bufferView: bufferView) { (bv, data) in
             var byteStride:Int = bufferView.byteStride ?? 0
             if (byteStride == 0) {
                 byteStride = accessor.components()*accessor.bytesPerElement()
@@ -565,10 +569,32 @@ extension GLTFConverter {
                 subdata = data.subdata(in: start..<end)
             }
             
-            return subdata
+            try callback(subdata)
+//                   return subdata
         }
-        
-        return nil
+//        if let data = try GLTF.requestData(glTF: glTF, bufferView: bufferView) {
+//
+//            var byteStride:Int = bufferView.byteStride ?? 0
+//            if (byteStride == 0) {
+//                byteStride = accessor.components()*accessor.bytesPerElement()
+//            }
+//            // calculate length
+//            let bytesLength = byteStride * accessor.count
+//
+//            // calculate range
+//            let start = bufferView.byteOffset + ((!interleaved) ? accessor.byteOffset : 0)
+//            let end = start + bytesLength
+//
+//            var subdata = data
+//            if start != 0 || end != data.count {
+//                subdata = data.subdata(in: start..<end)
+//            }
+//
+//            return subdata
+//        }
+//
+////        glTF.loader.load(gltf:glTF, resources: buffers, options: ResourceType.buffer, completionHandler:completionHandler)
+//        return nil
     }
     
     

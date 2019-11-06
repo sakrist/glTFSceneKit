@@ -76,7 +76,13 @@ extension GLTF {
                     if buffer.data != nil {
                         datas.append(buffer.data!)
                         do {
-                            textureResult = try self._createMetalTexture(sizeWidth, sizeHeight, pixelFormat, datas, bytesPerRow)
+                            if (!buffer_.uri!.contains("lacrimal")
+                                && !buffer_.uri!.contains("Bursa")) {
+//                                print(buffer_.uri)
+                                textureResult = try self._createMetalTexture(sizeWidth, sizeHeight, pixelFormat, datas, bytesPerRow)
+                            } else {
+                                
+                            }
                         } catch {
                             error_ = error
                         }
@@ -112,6 +118,7 @@ extension GLTF {
         guard let texture = device.makeTexture(descriptor: textureDescriptor) else {
             throw GLTFError("Failed to create metal texture with descriptor \(textureDescriptor)")
         }
+        
         
         for i in 0 ..< mipmapsCount {
             let data = mipmaps[i]
