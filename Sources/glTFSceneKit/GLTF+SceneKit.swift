@@ -127,36 +127,6 @@ extension GLTF {
         }
         return nil
     }
-//
-//    internal static func requestData(glTF: GLTF, bufferView:GLTFBufferView, callback: (Data)->Void) throws {
-//        if let buffer = glTF.buffers?[bufferView.buffer] {
-//            if let data = try glTF.loader.load(gltf:glTF, resource: buffer) {
-//                return callback(data)
-//            }
-//        } else {
-//            throw GLTFError("Can't load data! Can't find buffer at index \(bufferView.buffer)")
-//        }
-////        return nil
-//    }
-    
-    internal static func requestData(glTF: GLTF, bufferView:GLTFBufferView, callback: @escaping (GLTFBufferView, Data) throws -> Void) throws {
-//        if let bufferView = glTF.bufferViews?[bufferViewIndex],
-            if let buffer = glTF.buffers?[bufferView.buffer] {
-            glTF.loader.load(gltf: glTF, resource: buffer, options: nil) { (buffer, error) in
-                if let data = buffer.data {
-                    do {
-                        try callback(bufferView, data)
-                    } catch {
-                        
-                    }
-                } else {
-                    print("Data is nil for bufferView at index \(bufferView)")
-                }
-            }
-        } else {
-            throw GLTFError("Can't load data! Can't find bufferView")
-        }
-    }
     
 }
 
