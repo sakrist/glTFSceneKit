@@ -41,6 +41,7 @@ public class GLTFConverter: TextureLoaderDelegate {
     /// - Parameter completionHandler: Execute completion block once model fully loaded. If multiThread parameter set to true, then scene will be returned soon as possible and completion block will be executed later, after all textures load.
     /// - Returns: instance of Scene
     @objc open func convert(to scene:SCNScene = SCNScene.init(),
+                            rootNode: SCNNode? = nil,
                             directoryPath:String? = nil,
                             multiThread:Bool = true,
                             hidden:Bool = false,
@@ -48,12 +49,12 @@ public class GLTFConverter: TextureLoaderDelegate {
                             completionHandler: @escaping ((Error?) -> Void) = {_ in } ) -> SCNScene? {
         
         if (glTF.extensionsUsed != nil) {
-            //            for key in self.extensionsUsed! {
-            //                if !supportedExtensions.contains(key) {
-            //                    completionHandler("Used `\(key)` extension is not supported!")
-            //                    return nil
-            //                }
-            //            }
+//            for key in self.extensionsUsed! {
+//                if !supportedExtensions.contains(key) {
+//                    completionHandler("Used `\(key)` extension is not supported!")
+//                    return nil
+//                }
+//            }
         }
         
         if (glTF.extensionsRequired != nil) {
@@ -96,7 +97,8 @@ public class GLTFConverter: TextureLoaderDelegate {
                 let texturesGroup = TextureStorageManager.manager.group(gltf: glTF, delegate: self, true)
                 
                 // construct nodes tree
-                _constructNodesTree(rootNode: scene.rootNode, nodes: sceneGlTF.nodes!, group: convertGroup, hidden: hidden)
+            
+                _constructNodesTree(rootNode: rootNode ?? scene.rootNode, nodes: sceneGlTF.nodes!, group: convertGroup, hidden: hidden)
                 
                 os_log("submit data to download %d ms", log: log_scenekit, type: .debug, Int(start.timeIntervalSinceNow * -1000))
                 
@@ -117,6 +119,7 @@ public class GLTFConverter: TextureLoaderDelegate {
                     for nodeIndex in sceneGlTF.nodes! {
                         if let scnNode = try self.buildNode(nodeIndex:nodeIndex) {
                             scnNode.isHidden = hidden
+                            
                             scene.rootNode.addChildNode(scnNode)
                         }
                     }

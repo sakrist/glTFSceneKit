@@ -227,6 +227,7 @@ extension GLTFConverter {
 
                             let emissionContent = primitiveNode.geometry?.firstMaterial?.emission.contents
                             scnMaterial.emission.contents = emissionContent
+                            
                             geometry.materials = [scnMaterial]
                         }
                     }

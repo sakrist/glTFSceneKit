@@ -24,7 +24,7 @@ protocol TextureLoaderDelegate {
 class TextureAssociator {
     var status:TextureStatus = .no
     
-    private var content_:Any?
+    private var content_:Any? = OSColor.white
     var content:Any? {
         set { 
             content_ = newValue
@@ -57,7 +57,7 @@ class TextureStorageManager {
     
     static let manager = TextureStorageManager()
     
-    private var worker = DispatchQueue(label: "textures_loader", qos: .userInteractive)
+    private var worker = DispatchQueue(label: "textures_loader")
     private var groups:[Int : DispatchGroup] = [Int : DispatchGroup]()
     
     lazy private var _associators:[Int : [Int : TextureAssociator]] = [Int : [Int : TextureAssociator]]()
@@ -114,11 +114,11 @@ class TextureStorageManager {
     /// - Parameters:
     ///   - index: index of GLTFTexture in textures
     ///   - property: material's property
-    static func loadTexture(gltf: GLTF, delegate: TextureLoaderDelegate, index: Int, property: SCNMaterialProperty, callback: ((Any?)-> Void)? = nil) {
-        self.manager._loadTexture(gltf: gltf, delegate: delegate, index: index, property: property, callback: callback)
+    static func loadTexture(gltf: GLTF, delegate: TextureLoaderDelegate, index: Int, property: SCNMaterialProperty) {
+        self.manager._loadTexture(gltf: gltf, delegate: delegate, index: index, property: property)
     }
     
-    fileprivate func _loadTexture(gltf: GLTF, delegate: TextureLoaderDelegate, index: Int, property: SCNMaterialProperty, callback: ((Any?)-> Void)? = nil) {
+    fileprivate func _loadTexture(gltf: GLTF, delegate: TextureLoaderDelegate, index: Int, property: SCNMaterialProperty) {
         guard let texture = gltf.textures?[index] else {
             print("Failed to find texture")
             return
@@ -137,28 +137,27 @@ class TextureStorageManager {
                 
                 let device = MetalDevice.device
                 let metalOn = (delegate.renderer?.renderingAPI == .metal || device != nil)
-                
                 if let descriptor = texture.extensions?[compressedTextureExtensionKey] as? GLTF_3D4MCompressedTextureExtension, metalOn {
                     
                     // load first level mipmap as texture
-                    gltf.loadCompressedTexture(descriptor:descriptor, loadLevel: .first) { cTexture, error in        
-                        
+                    gltf.loadCompressedTexture(descriptor:descriptor, loadLevel: .first) { cTexture, error in
+                        tStatus.content = cTexture
+
                         if gltf.isCancelled {
                             group.leave()
                             return
                         }
-                        
+
                         if (error != nil) {
                             print("Failed to load comressed texture \(error.debugDescription). Fallback on image source.")
-                            self._loadImageTexture(gltf, delegate, texture, tStatus, callback)
+                            self._loadImageTexture(gltf, delegate, texture, tStatus)
                             group.leave()
                         } else {
-                            tStatus.content = cTexture as Any?
-                            callback?(cTexture)
-                            
+                            tStatus.content = cTexture
+
                             // load all levels
                             gltf.loadCompressedTexture(descriptor:descriptor, loadLevel: .last) { (cTexture2, error) in
-                                
+
                                 if gltf.isCancelled {
                                     group.leave()
                                     return
@@ -166,28 +165,29 @@ class TextureStorageManager {
                                 
                                 if (error != nil) {
                                     print("Failed to load comressed texture \(error.debugDescription). Fallback on image source.")
-                                    self._loadImageTexture(gltf, delegate, texture, tStatus, callback)
+                                    self._loadImageTexture(gltf, delegate, texture, tStatus)
                                 } else {
-                                    tStatus.content = cTexture2 as Any?
-                                    callback?(cTexture2)
+                                    tStatus.content = cTexture2
                                 }
                                 group.leave()
                             }
                         }
                     }
                 } else {
+                    
+                    self._loadImageTexture(gltf, delegate, texture, tStatus)
                     group.leave()
-                    self._loadImageTexture(gltf, delegate, texture, tStatus, callback)
                 }
             } else {
-                group.leave()
+                
                 tStatus.associate(property: property)
+                group.leave()
             }
         }
     }
     
     /// load original image source png or jpg
-    fileprivate func _loadImageTexture(_ gltf: GLTF, _ delegate: TextureLoaderDelegate, _ texture: GLTFTexture, _ tStatus: TextureAssociator, _ callback: ((Any?)-> Void)? = nil) {
+    fileprivate func _loadImageTexture(_ gltf: GLTF, _ delegate: TextureLoaderDelegate, _ texture: GLTFTexture, _ tStatus: TextureAssociator) {
         self.worker.async {
             if gltf.isCancelled {
                 return
@@ -200,7 +200,6 @@ class TextureStorageManager {
                     gltf.loader.load(gltf:gltf, resource: gltf_image) { resource, error in
                         if resource.image != nil {
                             tStatus.content = gltf._compress(image:resource.image!)
-                            callback?(tStatus.content)
                         }
                         group.leave()
                     }
