@@ -26,7 +26,7 @@ extension GLTFMeshPrimitiveMode {
 }
 
 extension GLTFAccessor {
-    fileprivate func components() -> Int {
+    public func components() -> Int {
         switch type {
         case .SCALAR:
             return 1
@@ -43,7 +43,7 @@ extension GLTFAccessor {
         }
     }
     
-    fileprivate func bytesPerElement() -> Int {
+    public func bytesPerElement() -> Int {
         switch componentType {
         case .UNSIGNED_BYTE, .BYTE:
             return 1
@@ -54,7 +54,7 @@ extension GLTFAccessor {
         }
     }
     
-    fileprivate func vertexFormat() -> MTLVertexFormat {
+    public func vertexFormat() -> MTLVertexFormat {
         switch type {
         case .SCALAR:
             switch componentType {

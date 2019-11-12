@@ -63,6 +63,26 @@ import Foundation
     case MAT2
     case MAT3
     case MAT4
+    
+    
+    public var rawIntValue: Int {
+        switch self {
+        case .SCALAR:
+            return 0
+        case .VEC2:
+            return 1
+        case .VEC3:
+            return 2
+        case .VEC4:
+            return 3
+        case .MAT2:
+            return 4
+        case .MAT3:
+            return 5
+        case .MAT4:
+            return 6
+        }
+    }
 
     public var rawValue: String {
         switch self {
