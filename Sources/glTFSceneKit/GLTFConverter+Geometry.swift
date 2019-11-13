@@ -9,7 +9,7 @@ import SceneKit
 
 
 extension GLTFMeshPrimitiveMode {
-    fileprivate func scn() -> SCNGeometryPrimitiveType {
+    public func scn() -> SCNGeometryPrimitiveType {
         switch self {
         case .POINTS:
             return .point
