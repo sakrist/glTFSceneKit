@@ -32,10 +32,10 @@ struct ConvertionProgressMask : OptionSet {
 
 
 @objc public protocol SceneLoadingDelegate {
-    @objc optional func scene(_ didLoadScene: SCNScene )
-    @objc optional func scene(_ scene: SCNScene, didCreate camera: SCNCamera)
-    @objc optional func scene(_ scene: SCNScene, didCreate node: SCNNode)
-    @objc optional func scene(_ scene: SCNScene, didCreate material: SCNMaterial, for node: SCNNode)
+    @objc optional func scene(_ didLoadScene: SCNScene? )
+    @objc optional func scene(_ scene: SCNScene?, didCreate camera: SCNCamera)
+    @objc optional func scene(_ scene: SCNScene?, didCreate node: SCNNode)
+    @objc optional func scene(_ scene: SCNScene?, didCreate material: SCNMaterial, for node: SCNNode)
 }
 
 extension GLTF {
