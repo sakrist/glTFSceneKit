@@ -153,12 +153,19 @@ public class GLTFConverter: TextureLoaderDelegate {
             if (glTF.isCancelled) {
                 return
             }
-            
-            group.enter()                           // <=== enter group
-            
-            let scnNode = SCNNode()
-            scnNode.isHidden = hidden
+  
             if let node = glTF.nodes?[nodeIndex] {
+                
+                group.enter()                           // <=== enter group
+                
+                let scnNode: SCNNode
+                if let name = node.name,
+                    let existedNode = rootNode.childNode(withName: name, recursively: false) {
+                    scnNode = existedNode
+                } else {
+                    scnNode = SCNNode()
+                }
+                scnNode.isHidden = hidden
                 scnNode.name = node.name
                 
                 let haveChilds = node.children != nil && node.children?.count != 0
@@ -174,24 +181,28 @@ public class GLTFConverter: TextureLoaderDelegate {
                         scnNode.addChildNode(scnNodePrimitiveNode)
                     }
                 }
-            }
-            rootNode.addChildNode(scnNode)
-            cache_nodes?[nodeIndex] = scnNode
-            
-            self._preloadBuffersData(nodeIndex: nodeIndex) { error in
-                if error != nil {
-                    print("Failed to load geometry node with error: \(error!)")
-                    self.errorMessage = error
-                } else {
-                    do {
-                        _ = try self.buildNode(nodeIndex: nodeIndex, scnNode: scnNode)
-                    } catch {
-                        print(error)
+                rootNode.addChildNode(scnNode)
+                cache_nodes?[nodeIndex] = scnNode
+                
+                self._preloadBuffersData(nodeIndex: nodeIndex) { error in
+                    if error != nil {
+                        print("Failed to load geometry node with error: \(error!)")
                         self.errorMessage = error
+                    } else {
+                        do {
+                            _ = try self.buildNode(nodeIndex: nodeIndex, scnNode: scnNode)
+                        } catch {
+                            print(error)
+                            self.errorMessage = error
+                        }
                     }
+                    group.leave()                      // <=== leave group
                 }
-                group.leave()                      // <=== leave group
+                
             }
+            
+            
+           
         }
     }
     
