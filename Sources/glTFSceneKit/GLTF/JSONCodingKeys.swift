@@ -69,7 +69,8 @@ public extension UnkeyedDecodingContainer {
                 array.append(value)
             } else if let nestedDictionary = try? decode(Dictionary<String, Any>.self) {
                 array.append(nestedDictionary)
-            } else if let nestedArray = try? decode(Array<Any>.self) {
+            } else if var nestedContainer = try? nestedUnkeyedContainer(),
+                let nestedArray = try? nestedContainer.decode(Array<Any>.self) {
                 array.append(nestedArray)
             }
         }
