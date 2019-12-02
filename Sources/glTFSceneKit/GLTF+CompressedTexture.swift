@@ -58,7 +58,7 @@ extension GLTF {
                         error_ = error
                     }
                 } else {
-                    print(error)
+                    error_ = error
                 }
                 completionHandler(textureResult, error_)
             }
