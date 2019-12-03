@@ -166,6 +166,7 @@ extension GLTFConverter {
                         sources.append(contentsOf: geometrySources)
                     }
 
+                    #if DRACO
                     // check on draco extension
                     if let dracoMesh = primitive.extensions?[dracoExtensionKey] {
                         let (dElement, dSources) = try glTF.convertDracoMesh(dracoMesh as! GLTFKHRDracoMeshCompressionExtension)
@@ -178,6 +179,7 @@ extension GLTFConverter {
                             sources.append(contentsOf: dSources!)
                         }
                     }
+                    #endif
 
                     if glTF.isCancelled {
                         return
@@ -381,6 +383,7 @@ extension GLTFConverter {
 
             for primitive in mesh.primitives {
                 // check on draco extension
+                #if DRACO
                 if let dracoMesh = primitive.extensions?[dracoExtensionKey] {
                     if let dracoMesh = dracoMesh as? GLTFKHRDracoMeshCompressionExtension {
                         if let buffer = glTF.buffer(for: dracoMesh.bufferView) {
@@ -399,6 +402,13 @@ extension GLTFConverter {
                     }
                     insertBuffer(primitive.indices)
                 }
+                #else
+                primitive.attributes.forEach { (_, index) in
+                    insertBuffer(index)
+                }
+                insertBuffer(primitive.indices)
+
+                #endif
             }
         }
 

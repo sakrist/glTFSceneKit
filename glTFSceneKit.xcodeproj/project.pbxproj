@@ -16,8 +16,6 @@
 		49A51D25234601B7002B5D24 /* GLTFConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A51D22234601B7002B5D24 /* GLTFConverter.swift */; };
 		49A51D26234601B7002B5D24 /* GLTFConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A51D22234601B7002B5D24 /* GLTFConverter.swift */; };
 		D2157142204035E3009E9D16 /* JSONCodingKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = D215713A20402611009E9D16 /* JSONCodingKeys.swift */; };
-		D2180CDF208745A6005353CF /* GLTF+Draco.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2180CDD2087457D005353CF /* GLTF+Draco.swift */; };
-		D2180CE0208745A7005353CF /* GLTF+Draco.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2180CDD2087457D005353CF /* GLTF+Draco.swift */; };
 		D256CD0620B2B9F1002E841E /* glTFSceneKit-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = D2A67C0B20ADB9D0007523AF /* glTFSceneKit-Bridging-Header.h */; };
 		D256CD0720B2B9F2002E841E /* glTFSceneKit-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = D2A67C0B20ADB9D0007523AF /* glTFSceneKit-Bridging-Header.h */; };
 		D2750CED2077B7AC00F6198D /* GLTF+SceneKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* GLTF+SceneKit.swift */; };
@@ -58,8 +56,6 @@
 		D287556E2077CB1B009B7FA9 /* GLTF+CompressedTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */; };
 		D287E3F5209602EB00EBCFD1 /* TextureStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287E3F4209602EB00EBCFD1 /* TextureStorageManager.swift */; };
 		D287E3F6209602EB00EBCFD1 /* TextureStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287E3F4209602EB00EBCFD1 /* TextureStorageManager.swift */; };
-		D2A67C0020ADB91B007523AF /* Draco.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2A67BFF20ADB91B007523AF /* Draco.swift */; };
-		D2A67C0120ADB91B007523AF /* Draco.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2A67BFF20ADB91B007523AF /* Draco.swift */; };
 		D2A67C0320ADB92F007523AF /* libdraco.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2A67C0220ADB92F007523AF /* libdraco.a */; };
 		D2A67C0520ADB93E007523AF /* libdraco_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2A67C0420ADB93E007523AF /* libdraco_ios.a */; };
 		D2AC651E205D578B0091D5E0 /* GLTF_3D4MCompressedTextureExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AC651D205D578A0091D5E0 /* GLTF_3D4MCompressedTextureExtension.swift */; };
@@ -84,7 +80,6 @@
 		D2B064E9214FE0CC00309D6F /* GLTF+Material.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AFCFC2208F2A010048A9DA /* GLTF+Material.swift */; };
 		D2B064EA214FE0CC00309D6F /* GLTFAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* GLTFAsset.swift */; };
 		D2B064EB214FE0CC00309D6F /* GLTFBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* GLTFBuffer.swift */; };
-		D2B064EC214FE0CC00309D6F /* Draco.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2A67BFF20ADB91B007523AF /* Draco.swift */; };
 		D2B064ED214FE0CC00309D6F /* GLTFBufferView.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_22 /* GLTFBufferView.swift */; };
 		D2B064EE214FE0CC00309D6F /* GLTFCamera.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* GLTFCamera.swift */; };
 		D2B064EF214FE0CC00309D6F /* GLTFResourceLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AFCFD1208F6F010048A9DA /* GLTFResourceLoader.swift */; };
@@ -103,7 +98,6 @@
 		D2B064FC214FE0CC00309D6F /* JSONCodingKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = D215713A20402611009E9D16 /* JSONCodingKeys.swift */; };
 		D2B064FD214FE0CC00309D6F /* GLTFSampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_34 /* GLTFSampler.swift */; };
 		D2B064FE214FE0CC00309D6F /* GLTFScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_35 /* GLTFScene.swift */; };
-		D2B064FF214FE0CC00309D6F /* GLTF+Draco.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2180CDD2087457D005353CF /* GLTF+Draco.swift */; };
 		D2B06500214FE0CC00309D6F /* GLTFSkin.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_36 /* GLTFSkin.swift */; };
 		D2B06501214FE0CC00309D6F /* TextureStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287E3F4209602EB00EBCFD1 /* TextureStorageManager.swift */; };
 		D2B06502214FE0CC00309D6F /* GLTFTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_37 /* GLTFTexture.swift */; };
@@ -609,7 +603,6 @@
 				D2AFCFC4208F2A010048A9DA /* GLTF+Material.swift in Sources */,
 				D2750CF82077B7AC00F6198D /* GLTFAsset.swift in Sources */,
 				D2750CF92077B7AC00F6198D /* GLTFBuffer.swift in Sources */,
-				D2A67C0120ADB91B007523AF /* Draco.swift in Sources */,
 				D2750CFA2077B7AC00F6198D /* GLTFBufferView.swift in Sources */,
 				D2750CFB2077B7AC00F6198D /* GLTFCamera.swift in Sources */,
 				D2AFCFD3208F6F010048A9DA /* GLTFResourceLoader.swift in Sources */,
@@ -629,7 +622,6 @@
 				D2750D072077B7AC00F6198D /* JSONCodingKeys.swift in Sources */,
 				D2750D082077B7AC00F6198D /* GLTFSampler.swift in Sources */,
 				D2750D092077B7AC00F6198D /* GLTFScene.swift in Sources */,
-				D2180CE0208745A7005353CF /* GLTF+Draco.swift in Sources */,
 				D2750D0A2077B7AC00F6198D /* GLTFSkin.swift in Sources */,
 				D287E3F6209602EB00EBCFD1 /* TextureStorageManager.swift in Sources */,
 				D2750D0B2077B7AC00F6198D /* GLTFTexture.swift in Sources */,
@@ -658,7 +650,6 @@
 				D2B064E9214FE0CC00309D6F /* GLTF+Material.swift in Sources */,
 				D2B064EA214FE0CC00309D6F /* GLTFAsset.swift in Sources */,
 				D2B064EB214FE0CC00309D6F /* GLTFBuffer.swift in Sources */,
-				D2B064EC214FE0CC00309D6F /* Draco.swift in Sources */,
 				D2B064ED214FE0CC00309D6F /* GLTFBufferView.swift in Sources */,
 				D2B064EE214FE0CC00309D6F /* GLTFCamera.swift in Sources */,
 				D2B064EF214FE0CC00309D6F /* GLTFResourceLoader.swift in Sources */,
@@ -678,7 +669,6 @@
 				D2B064FC214FE0CC00309D6F /* JSONCodingKeys.swift in Sources */,
 				D2B064FD214FE0CC00309D6F /* GLTFSampler.swift in Sources */,
 				D2B064FE214FE0CC00309D6F /* GLTFScene.swift in Sources */,
-				D2B064FF214FE0CC00309D6F /* GLTF+Draco.swift in Sources */,
 				D2B06500214FE0CC00309D6F /* GLTFSkin.swift in Sources */,
 				D2B06501214FE0CC00309D6F /* TextureStorageManager.swift in Sources */,
 				D2B06502214FE0CC00309D6F /* GLTFTexture.swift in Sources */,
@@ -717,7 +707,6 @@
 				D2AFCFC3208F2A010048A9DA /* GLTF+Material.swift in Sources */,
 				OBJ_77 /* GLTFAsset.swift in Sources */,
 				OBJ_78 /* GLTFBuffer.swift in Sources */,
-				D2A67C0020ADB91B007523AF /* Draco.swift in Sources */,
 				OBJ_79 /* GLTFBufferView.swift in Sources */,
 				OBJ_80 /* GLTFCamera.swift in Sources */,
 				D2AFCFD2208F6F010048A9DA /* GLTFResourceLoader.swift in Sources */,
@@ -737,7 +726,6 @@
 				D2157142204035E3009E9D16 /* JSONCodingKeys.swift in Sources */,
 				OBJ_91 /* GLTFSampler.swift in Sources */,
 				OBJ_92 /* GLTFScene.swift in Sources */,
-				D2180CDF208745A6005353CF /* GLTF+Draco.swift in Sources */,
 				OBJ_93 /* GLTFSkin.swift in Sources */,
 				D287E3F5209602EB00EBCFD1 /* TextureStorageManager.swift in Sources */,
 				OBJ_94 /* GLTFTexture.swift in Sources */,

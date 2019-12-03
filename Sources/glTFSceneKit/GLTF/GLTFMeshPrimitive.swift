@@ -105,7 +105,9 @@ open class GLTFMeshPrimitive: NSObject, Codable {
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         attributes = (try? container.decode([String: Int].self, forKey: .attributes)) ?? [String: Int]()
+        #if DRACO
         extensions = try? container.decode([String: GLTFKHRDracoMeshCompressionExtension].self, forKey: .extensions)
+        #endif
         extras = try? container.decode([String: Any].self, forKey: .extras)
         indices = try? container.decode(Int.self, forKey: .indices)
         material = try? container.decode(Int.self, forKey: .material)
@@ -120,7 +122,9 @@ open class GLTFMeshPrimitive: NSObject, Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(attributes, forKey: .attributes)
+        #if DRACO
         try? container.encode(extensions as? [String: GLTFKHRDracoMeshCompressionExtension], forKey: .extensions)
+        #endif
         try container.encode(extras, forKey: .extras)
         try container.encode(indices, forKey: .indices)
         try container.encode(material, forKey: .material)

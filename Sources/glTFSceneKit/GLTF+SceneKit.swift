@@ -12,10 +12,14 @@ import os
 
 let log_scenekit = OSLog(subsystem: "org.glTFSceneKit", category: "scene")
 
-let dracoExtensionKey = "KHR_draco_mesh_compression"
 let compressedTextureExtensionKey = "3D4M_compressed_texture"
 let meshExtensionKey = "3D4M_mesh"
+#if DRACO
+let dracoExtensionKey = "KHR_draco_mesh_compression"
 let supportedExtensions = [dracoExtensionKey, compressedTextureExtensionKey, meshExtensionKey]
+#else
+let supportedExtensions = [compressedTextureExtensionKey, meshExtensionKey]
+#endif
 
 struct ConvertionProgressMask: OptionSet {
     let rawValue: Int
