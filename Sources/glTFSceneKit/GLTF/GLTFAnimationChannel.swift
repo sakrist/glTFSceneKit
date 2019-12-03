@@ -9,21 +9,20 @@
 
 import Foundation
 
-
 /// Targets an animation's sampler at a node's property.
 @objcMembers
-open class GLTFAnimationChannel : NSObject, Codable {
+open class GLTFAnimationChannel: NSObject, Codable {
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The index of a sampler in this animation used to compute the value for the target.
-    public var sampler:Int
+    public var sampler: Int
 
     /// The index of the node and TRS property that an animation channel targets.
-    public var target:GLTFAnimationChannelTarget
+    public var target: GLTFAnimationChannelTarget
 
     private enum CodingKeys: String, CodingKey {
         case extensions

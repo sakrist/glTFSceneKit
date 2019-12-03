@@ -8,50 +8,49 @@
 import Foundation
 import SceneKit
 
-
 extension GLTF {
-    
+
     // MARK: - Material
-    
+
     // load material by index
-    internal func loadMaterial(index:Int, delegate: TextureLoaderDelegate, textureChangedCallback: ((Any?)-> Void)? = nil, completionHandler: @escaping (SCNMaterial) -> Void) {
-        
+    internal func loadMaterial(index: Int, delegate: TextureLoaderDelegate, textureChangedCallback: ((Any?) -> Void)? = nil, completionHandler: @escaping (SCNMaterial) -> Void) {
+
         if let material = self.materials?[index] {
             let scnMaterial = SCNMaterial()
             scnMaterial.name = material.name
             scnMaterial.isDoubleSided = material.doubleSided
-            
+
             if let pbr = material.pbrMetallicRoughness {
-                
+
                 // set PBR type
                 scnMaterial.lightingModel = .physicallyBased
-                
+
                 if let baseTextureInfo = pbr.baseColorTexture {
-                    TextureStorageManager.loadTexture(gltf:self, delegate: delegate, index:baseTextureInfo.index, property: scnMaterial.diffuse)
+                    TextureStorageManager.loadTexture(gltf: self, delegate: delegate, index: baseTextureInfo.index, property: scnMaterial.diffuse)
                 } else {
                     let color = (pbr.baseColorFactor.count < 4) ? [1, 1, 1, 1] : (pbr.baseColorFactor)
                     scnMaterial.diffuse.contents = OSColor(red: CGFloat(color[0]), green: CGFloat(color[1]), blue: CGFloat(color[2]), alpha: CGFloat(color[3]))
                 }
-               
+
                 // transparency/opacity
                 scnMaterial.transparency = CGFloat(pbr.baseColorFactor[3])
-                
+
                 if let metallicRoughnessTextureInfo = pbr.metallicRoughnessTexture {
                     if #available(OSX 10.13, iOS 11.0, tvOS 11.0, *) {
                         scnMaterial.metalness.textureComponents = .blue
                         scnMaterial.roughness.textureComponents = .green
-                        TextureStorageManager.loadTexture(gltf:self, delegate: delegate, index:metallicRoughnessTextureInfo.index, property: scnMaterial.metalness)
-                        TextureStorageManager.loadTexture(gltf:self, delegate: delegate, index:metallicRoughnessTextureInfo.index, property: scnMaterial.roughness)
+                        TextureStorageManager.loadTexture(gltf: self, delegate: delegate, index: metallicRoughnessTextureInfo.index, property: scnMaterial.metalness)
+                        TextureStorageManager.loadTexture(gltf: self, delegate: delegate, index: metallicRoughnessTextureInfo.index, property: scnMaterial.roughness)
                     } else {
                         // Fallback on earlier versions
                         if let texture = self.textures?[metallicRoughnessTextureInfo.index] {
-                            
+
                             if texture.source != nil {
-                                
-                                loadSampler(sampler:texture.sampler, property: scnMaterial.roughness)
-                                loadSampler(sampler:texture.sampler, property: scnMaterial.metalness)
-                                
-                                let image = self.image(byIndex:texture.source!)
+
+                                loadSampler(sampler: texture.sampler, property: scnMaterial.roughness)
+                                loadSampler(sampler: texture.sampler, property: scnMaterial.metalness)
+
+                                let image = self.image(byIndex: texture.source!)
                                 if let images = ((try? image?.channels()) as [OSImage]??) {
                                     scnMaterial.roughness.contents = images?[1]
                                     scnMaterial.metalness.contents = images?[2]
@@ -59,47 +58,47 @@ extension GLTF {
                             }
                         }
                     }
-                    
+
                 } else {
                     scnMaterial.metalness.contents = pbr.metallicFactor
                     scnMaterial.roughness.contents = pbr.roughnessFactor
                     scnMaterial.fresnelExponent = 0.04
                 }
             }
-            
+
             if let normalTextureInfo = material.normalTexture {
-                TextureStorageManager.loadTexture(gltf:self, delegate: delegate, index: normalTextureInfo.index!, property: scnMaterial.normal)
+                TextureStorageManager.loadTexture(gltf: self, delegate: delegate, index: normalTextureInfo.index!, property: scnMaterial.normal)
             }
-            
+
             if let occlusionTextureInfo = material.occlusionTexture {
-                TextureStorageManager.loadTexture(gltf:self, delegate: delegate, index: occlusionTextureInfo.index!, property: scnMaterial.ambientOcclusion)
+                TextureStorageManager.loadTexture(gltf: self, delegate: delegate, index: occlusionTextureInfo.index!, property: scnMaterial.ambientOcclusion)
                 scnMaterial.ambientOcclusion.intensity = CGFloat(occlusionTextureInfo.strength)
             }
-            
+
             if let emissiveTextureInfo = material.emissiveTexture {
-                TextureStorageManager.loadTexture(gltf:self, delegate: delegate, index: emissiveTextureInfo.index, property: scnMaterial.emission)
+                TextureStorageManager.loadTexture(gltf: self, delegate: delegate, index: emissiveTextureInfo.index, property: scnMaterial.emission)
             } else {
                 let color = (material.emissiveFactor.count < 3) ? [1, 1, 1] : (material.emissiveFactor)
                 scnMaterial.emission.contents = SCNVector4Make(SCNFloat(color[0]), SCNFloat(color[1]), SCNFloat(color[2]), 1.0)
             }
-            
+
             completionHandler(scnMaterial)
         } else {
             completionHandler(SCNMaterial())
-        }        
+        }
     }
-    
+
     // get image by index
-    fileprivate func image(byIndex index:Int) -> OSImage? {
+    fileprivate func image(byIndex index: Int) -> OSImage? {
         if let gltf_image = self.images?[index] {
-            if let image = ((try? self.loader.load(gltf:self, resource: gltf_image)) as OSImage??) {
+            if let image = ((try? self.loader.load(gltf: self, resource: gltf_image)) as OSImage??) {
                 return image
             }
         }
         return nil
     }
-        
-    func loadSampler(sampler samplerIndex:Int?, property:SCNMaterialProperty) {
+
+    func loadSampler(sampler samplerIndex: Int?, property: SCNMaterialProperty) {
         if let sampler = self.samplers?[samplerIndex!] {
             property.wrapS = sampler.wrapS.scn()
             property.wrapT = sampler.wrapT.scn()
@@ -109,7 +108,6 @@ extension GLTF {
     }
 }
 
-
 extension GLTFSampler {
     fileprivate func magFilterScene() -> SCNFilterMode {
         if self.magFilter != nil {
@@ -117,7 +115,7 @@ extension GLTFSampler {
         }
         return .none
     }
-    
+
     fileprivate func minFilterScene() -> (SCNFilterMode, SCNFilterMode) {
         if self.minFilter != nil {
             return (self.minFilter?.scn())!
@@ -181,4 +179,3 @@ extension GLTFSamplerWrapT {
         }
     }
 }
-

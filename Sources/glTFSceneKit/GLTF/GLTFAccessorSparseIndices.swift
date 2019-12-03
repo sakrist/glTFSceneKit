@@ -40,24 +40,23 @@ import Foundation
 
 }
 
-
 /// Indices of those attributes that deviate from their initialization value.
 @objcMembers
-open class GLTFAccessorSparseIndices : NSObject, Codable {
+open class GLTFAccessorSparseIndices: NSObject, Codable {
     /// The index of the bufferView with sparse indices. Referenced bufferView can't have ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER target.
-    public var bufferView:Int
+    public var bufferView: Int
 
     /// The offset relative to the start of the bufferView in bytes. Must be aligned.
-    public var byteOffset:Int
+    public var byteOffset: Int
 
     /// The indices data type.
-    public var componentType:GLTFAccessorSparseIndicesComponentType
+    public var componentType: GLTFAccessorSparseIndicesComponentType
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     private enum CodingKeys: String, CodingKey {
         case bufferView

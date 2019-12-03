@@ -9,24 +9,23 @@
 
 import Foundation
 
-
 /// The occlusion map texture.
 @objcMembers
-open class GLTFMaterialOcclusionTextureInfo : NSObject, Codable {
+open class GLTFMaterialOcclusionTextureInfo: NSObject, Codable {
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The index of the texture.
-    public var index:Int?
+    public var index: Int?
 
     /// A scalar multiplier controlling the amount of occlusion applied.
-    public var strength:Double
+    public var strength: Double
 
     /// The set index of texture's TEXCOORD attribute used for texture coordinate mapping.
-    public var texCoord:Int
+    public var texCoord: Int
 
     private enum CodingKeys: String, CodingKey {
         case extensions

@@ -63,8 +63,7 @@ import Foundation
     case MAT2
     case MAT3
     case MAT4
-    
-    
+
     public var rawIntValue: Int {
         switch self {
         case .SCALAR:
@@ -126,45 +125,44 @@ import Foundation
 
 }
 
-
 /// A typed view into a bufferView.  A bufferView contains raw binary data.  An accessor provides a typed view into a bufferView or a subset of a bufferView similar to how WebGL's `vertexAttribPointer()` defines an attribute in a buffer.
 @objcMembers
-open class GLTFAccessor : NSObject, Codable {
+open class GLTFAccessor: NSObject, Codable {
     /// The index of the bufferView.
-    public var bufferView:Int?
+    public var bufferView: Int?
 
     /// The offset relative to the start of the bufferView in bytes.
-    public var byteOffset:Int
+    public var byteOffset: Int
 
     /// The datatype of components in the attribute.
-    public var componentType:GLTFAccessorComponentType
+    public var componentType: GLTFAccessorComponentType
 
     /// The number of attributes referenced by this accessor.
-    public var count:Int
+    public var count: Int
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// Maximum value of each component in this attribute.
-    public var max:[Double]?
+    public var max: [Double]?
 
     /// Minimum value of each component in this attribute.
-    public var min:[Double]?
+    public var min: [Double]?
 
     /// The user-defined name of this object.
-    public var name:String?
+    public var name: String?
 
     /// Specifies whether integer data values should be normalized.
-    public var normalized:Bool = false
+    public var normalized: Bool = false
 
     /// Sparse storage of attributes that deviate from their initialization value.
-    public var sparse:GLTFAccessorSparse?
+    public var sparse: GLTFAccessorSparse?
 
     /// Specifies if the attribute is a scalar, vector, or matrix.
-    public var type:GLTFAccessorType
+    public var type: GLTFAccessorType
 
     private enum CodingKeys: String, CodingKey {
         case bufferView
@@ -180,13 +178,12 @@ open class GLTFAccessor : NSObject, Codable {
         case sparse
         case type
     }
-    
-    
-    public init (bufferView:Int?,
-                 byteOffset:Int,
-                 componentType:GLTFAccessorComponentType,
-                 count:Int,
-                 type:GLTFAccessorType) {
+
+    public init (bufferView: Int?,
+                 byteOffset: Int,
+                 componentType: GLTFAccessorComponentType,
+                 count: Int,
+                 type: GLTFAccessorType) {
         self.bufferView = bufferView
         self.byteOffset = byteOffset
         self.componentType = componentType

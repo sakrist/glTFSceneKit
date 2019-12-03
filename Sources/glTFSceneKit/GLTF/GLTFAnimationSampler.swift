@@ -43,24 +43,23 @@ import Foundation
     }
 }
 
-
 /// Combines input and output accessors with an interpolation algorithm to define a keyframe graph (but not its target).
 @objcMembers
-open class GLTFAnimationSampler : NSObject, Codable {
+open class GLTFAnimationSampler: NSObject, Codable {
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The index of an accessor containing keyframe input values, e.g., time.
-    public var input:Int
+    public var input: Int
 
     /// Interpolation algorithm.
-    public var interpolation:GLTFAnimationSamplerInterpolation
+    public var interpolation: GLTFAnimationSamplerInterpolation
 
     /// The index of an accessor, containing keyframe output values.
-    public var output:Int
+    public var output: Int
 
     private enum CodingKeys: String, CodingKey {
         case extensions

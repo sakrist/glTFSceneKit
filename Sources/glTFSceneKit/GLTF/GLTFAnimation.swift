@@ -9,24 +9,23 @@
 
 import Foundation
 
-
 /// A keyframe animation.
 @objcMembers
-open class GLTFAnimation : NSObject, Codable {
+open class GLTFAnimation: NSObject, Codable {
     /// An array of channels, each of which targets an animation's sampler at a node's property. Different channels of the same animation can't have equal targets.
-    public var channels:[GLTFAnimationChannel]
+    public var channels: [GLTFAnimationChannel]
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The user-defined name of this object.
-    public var name:String?
+    public var name: String?
 
     /// An array of samplers that combines input and output accessors with an interpolation algorithm to define a keyframe graph (but not its target).
-    public var samplers:[GLTFAnimationSampler]
+    public var samplers: [GLTFAnimationSampler]
 
     private enum CodingKeys: String, CodingKey {
         case channels

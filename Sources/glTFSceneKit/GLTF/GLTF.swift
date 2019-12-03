@@ -9,66 +9,65 @@
 
 import Foundation
 
-
 /// The root object for a glTF asset.
 @objcMembers
-open class GLTF : NSObject, Codable {
+open class GLTF: NSObject, Codable {
     /// An array of accessors.
-    public var accessors:[GLTFAccessor]?
+    public var accessors: [GLTFAccessor]?
 
     /// An array of keyframe animations.
-    public var animations:[GLTFAnimation]?
+    public var animations: [GLTFAnimation]?
 
     /// Metadata about the glTF asset.
-    public var asset:GLTFAsset
+    public var asset: GLTFAsset
 
     /// An array of bufferViews.
-    public var bufferViews:[GLTFBufferView]?
+    public var bufferViews: [GLTFBufferView]?
 
     /// An array of buffers.
-    public var buffers:[GLTFBuffer]?
+    public var buffers: [GLTFBuffer]?
 
     /// An array of cameras.
-    public var cameras:[GLTFCamera]?
+    public var cameras: [GLTFCamera]?
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Names of glTF extensions required to properly load this asset.
-    public var extensionsRequired:[String]?
+    public var extensionsRequired: [String]?
 
     /// Names of glTF extensions used somewhere in this asset.
-    public var extensionsUsed:[String]?
+    public var extensionsUsed: [String]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// An array of images.
-    public var images:[GLTFImage]?
+    public var images: [GLTFImage]?
 
     /// An array of materials.
-    public var materials:[GLTFMaterial]?
+    public var materials: [GLTFMaterial]?
 
     /// An array of meshes.
-    public var meshes:[GLTFMesh]?
+    public var meshes: [GLTFMesh]?
 
     /// An array of nodes.
-    public var nodes:[GLTFNode]?
+    public var nodes: [GLTFNode]?
 
     /// An array of samplers.
-    public var samplers:[GLTFSampler]?
+    public var samplers: [GLTFSampler]?
 
     /// The index of the default scene.
-    public var scene:Int?
+    public var scene: Int?
 
     /// An array of scenes.
-    public var scenes:[GLTFScene]?
+    public var scenes: [GLTFScene]?
 
     /// An array of skins.
-    public var skins:[GLTFSkin]?
+    public var skins: [GLTFSkin]?
 
     /// An array of textures.
-    public var textures:[GLTFTexture]?
+    public var textures: [GLTFTexture]?
 
     private enum CodingKeys: String, CodingKey {
         case accessors
@@ -91,8 +90,8 @@ open class GLTF : NSObject, Codable {
         case skins
         case textures
     }
-    
-    public init(asset a:GLTFAsset) {
+
+    public init(asset a: GLTFAsset) {
         asset = a
     }
 

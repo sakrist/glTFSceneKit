@@ -19,7 +19,6 @@ import SceneKit
     typealias SCNFloat = CGFloat
 #endif
 
-
 struct SCNVector2 {
     public var x: SCNFloat
     public var y: SCNFloat
@@ -29,16 +28,16 @@ struct SCNVector2 {
     }
     public init(x: SCNFloat, y: SCNFloat) {
         self.x = x
-        self.y = y  
-    } 
+        self.y = y
+    }
 }
 
-class GLTFError : LocalizedError, CustomDebugStringConvertible {
+class GLTFError: LocalizedError, CustomDebugStringConvertible {
     var title: String?
     var code: Int
     var errorDescription: String? { return _description }
     var failureReason: String? { return _description }
-    
+
     private var _description: String
 
     init(_ description: String) {
@@ -46,14 +45,14 @@ class GLTFError : LocalizedError, CustomDebugStringConvertible {
         self._description = description
         self.code = -1000000
     }
-    
+
     var debugDescription: String {
         return self.title! + ": " + self._description
     }
 }
 
 extension SCNMatrix4 {
-    init(array:[Double]) {
+    init(array: [Double]) {
         self.init()
         self.m11 = SCNFloat(array[0])
         self.m12 = SCNFloat(array[1])
@@ -82,7 +81,7 @@ extension String {
         }
         return nil
     }
-    
+
     //: ### Base64 decoding a string
     func base64Decoded() -> Data? {
         if self.contains("base64") {
@@ -97,7 +96,7 @@ extension String {
 
 extension Data {
     func array<Type>() -> [Type] {
-        return withUnsafeBytes { (unsafeBufferPointer:UnsafeRawBufferPointer) -> [Type] in
+        return withUnsafeBytes { (unsafeBufferPointer: UnsafeRawBufferPointer) -> [Type] in
             Array(UnsafeBufferPointer<Type>(start: unsafeBufferPointer.bindMemory(to: Type.self).baseAddress, count: self.count/MemoryLayout<Type>.size))
         }
     }
@@ -107,7 +106,7 @@ extension Data {
 // https://github.com/magicien/GLTFSceneKit/blob/master/Source/Common/GLTFFunctions.swift
 
 extension OSImage {
-    
+
     func channels() throws -> [OSImage] {
         #if os(macOS)
             var rect = CGRect(x: 0, y: 0, width: self.size.width, height: self.size.height)
@@ -121,8 +120,7 @@ extension OSImage {
         #endif
         return try channels(from: cgImage)
     }
-    
-    
+
     func channels(from image: CGImage) throws -> [OSImage] {
         let w = image.width
         let h = image.height
@@ -134,29 +132,28 @@ extension OSImage {
         let srcDataSize = w * h * srcBytesPerPixel
         let rawPtr: UnsafeMutableRawPointer = malloc(srcDataSize)
         defer { free(rawPtr) }
-        
-        
+
         guard let context = CGContext(data: rawPtr, width: w, height: h, bitsPerComponent: bitsPerComponent, bytesPerRow: srcBytesPerPixel * w, space: colorSpace, bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue) else {
             throw GLTFError("Failed to make textures")
         }
         context.draw(image, in: rect)
-        
+
         let ptr = rawPtr.bindMemory(to: UInt8.self, capacity: srcDataSize)
-        
+
         /// create data for each component
         let dstBytesPerPixel = bitsPerComponent / 8
         let dstDataSize = w * h * dstBytesPerPixel
-        
-        var componentsRaw:[UnsafeMutableRawPointer] = [UnsafeMutableRawPointer]()
+
+        var componentsRaw: [UnsafeMutableRawPointer] = [UnsafeMutableRawPointer]()
         var componentsPtr = [Any]()
-        
+
         for _ in 0..<componentsPerPixel {
             let componentRawPtr: UnsafeMutableRawPointer = malloc(dstDataSize)
             let componentPtr = componentRawPtr.bindMemory(to: UInt8.self, capacity: dstDataSize)
             componentsRaw.append(componentRawPtr)
             componentsPtr.append(componentPtr)
         }
-        
+
         var srcPos = 0
         var dstPos = 0
         for _ in 0..<(w * h) {
@@ -170,12 +167,12 @@ extension OSImage {
             dstPos += dstBytesPerPixel
         }
         let dstColorSpace = CGColorSpaceCreateDeviceGray()
-        
+
         var images = [OSImage]()
-        
+
         for i in 0..<componentsPerPixel {
             let componentPtr = componentsPtr[i] as! UnsafeMutablePointer<UInt8>
-            
+
             let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue)
             guard let imageData = CFDataCreate(nil, componentPtr, dstDataSize) else {
                 throw GLTFError("Failed to create Data")
@@ -208,12 +205,11 @@ extension OSImage {
         }
         componentsRaw.removeAll()
         componentsPtr.removeAll()
-        
+
         return images
     }
-    
-}
 
+}
 
 extension MTLPixelFormat {
     public func hasAlpha() -> Bool {
@@ -241,4 +237,3 @@ class MetalDevice {
         return MTLCreateSystemDefaultDevice()
     }()
 }
-

@@ -9,25 +9,24 @@
 
 import Foundation
 
-
 /// A texture and its sampler.
 @objcMembers
-open class GLTFTexture : NSObject, Codable {
+open class GLTFTexture: NSObject, Codable {
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The user-defined name of this object.
-    public var name:String?
+    public var name: String?
 
     /// The index of the sampler used by this texture. When undefined, a sampler with repeat wrapping and auto filtering should be used.
-    public var sampler:Int?
+    public var sampler: Int?
 
     /// The index of the image used by this texture.
-    public var source:Int?
-    
+    public var source: Int?
+
     private enum CodingKeys: String, CodingKey {
         case extensions
         case extras
@@ -37,10 +36,10 @@ open class GLTFTexture : NSObject, Codable {
     }
 
     public override init() { }
-    
+
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        extensions = try? container.decode([String: GLTF_3D4MCompressedTextureExtension].self, forKey: .extensions)        
+        extensions = try? container.decode([String: GLTF_3D4MCompressedTextureExtension].self, forKey: .extensions)
         extras = try? container.decode([String: Any].self, forKey: .extras)
         name = try? container.decode(String.self, forKey: .name)
         sampler = try? container.decode(Int.self, forKey: .sampler)
@@ -57,7 +56,6 @@ open class GLTFTexture : NSObject, Codable {
     }
 }
 
-
 extension KeyedEncodingContainerProtocol {
     mutating func encode(_ value: [String: GLTF_3D4MCompressedTextureExtension]?, forKey key: Key) throws {
         if value != nil {
@@ -66,4 +64,3 @@ extension KeyedEncodingContainerProtocol {
         }
     }
 }
-

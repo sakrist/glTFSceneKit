@@ -9,24 +9,23 @@
 
 import Foundation
 
-
 /// The normal map texture.
 @objcMembers
-open class GLTFMaterialNormalTextureInfo : NSObject, Codable {
+open class GLTFMaterialNormalTextureInfo: NSObject, Codable {
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The index of the texture.
-    public var index:Int?
+    public var index: Int?
 
     /// The scalar multiplier applied to each normal vector of the normal texture.
-    public var scale:Double
+    public var scale: Double
 
     /// The set index of texture's TEXCOORD attribute used for texture coordinate mapping.
-    public var texCoord:Int
+    public var texCoord: Int
 
     private enum CodingKeys: String, CodingKey {
         case extensions
@@ -40,7 +39,7 @@ open class GLTFMaterialNormalTextureInfo : NSObject, Codable {
         scale = 1
         texCoord = 0
     }
-    
+
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         extensions = try? container.decode([String: Any].self, forKey: .extensions)

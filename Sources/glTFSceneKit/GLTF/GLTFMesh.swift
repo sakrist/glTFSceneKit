@@ -9,24 +9,23 @@
 
 import Foundation
 
-
 /// A set of primitives to be rendered.  A node can contain one mesh.  A node's transform places the mesh in the scene.
 @objcMembers
-open class GLTFMesh : NSObject, Codable {
+open class GLTFMesh: NSObject, Codable {
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The user-defined name of this object.
-    public var name:String?
+    public var name: String?
 
     /// An array of primitives, each defining geometry to be rendered with a material.
-    public var primitives:[GLTFMeshPrimitive]
+    public var primitives: [GLTFMeshPrimitive]
 
     /// Array of weights to be applied to the Morph Targets.
-    public var weights:[Double]?
+    public var weights: [Double]?
 
     private enum CodingKeys: String, CodingKey {
         case extensions
@@ -39,7 +38,7 @@ open class GLTFMesh : NSObject, Codable {
     public override init() {
         primitives = [GLTFMeshPrimitive]()
     }
-    
+
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         extensions = try? container.decode([String: Any].self, forKey: .extensions)

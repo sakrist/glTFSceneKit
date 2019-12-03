@@ -9,27 +9,26 @@
 
 import Foundation
 
-
 /// Reference to a texture.
 @objcMembers
-open class GLTFTextureInfo : NSObject, Codable {
+open class GLTFTextureInfo: NSObject, Codable {
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The index of the texture.
-    public var index:Int
+    public var index: Int
 
     /// The set index of texture's TEXCOORD attribute used for texture coordinate mapping.
-    public var texCoord:Int
+    public var texCoord: Int
 
-    public init(index i:Int) {
+    public init(index i: Int) {
         index = i
         texCoord = 0
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case extensions
         case extras

@@ -35,33 +35,32 @@ import Foundation
 
 }
 
-
 /// A view into a buffer generally representing a subset of the buffer.
 @objcMembers
-open class GLTFBufferView : NSObject, Codable {
+open class GLTFBufferView: NSObject, Codable {
     /// The index of the buffer.
-    public var buffer:Int
+    public var buffer: Int
 
     /// The length of the bufferView in bytes.
-    public var byteLength:Int
+    public var byteLength: Int
 
     /// The offset into the buffer in bytes.
-    public var byteOffset:Int
+    public var byteOffset: Int
 
     /// The stride, in bytes.
-    public var byteStride:Int?
+    public var byteStride: Int?
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The user-defined name of this object.
-    public var name:String?
+    public var name: String?
 
     /// The target that the GPU buffer should be bound to.
-    public var target:GLTFBufferViewTarget?
+    public var target: GLTFBufferViewTarget?
 
     private enum CodingKeys: String, CodingKey {
         case buffer
@@ -74,12 +73,12 @@ open class GLTFBufferView : NSObject, Codable {
         case target
     }
 
-    public init(buffer b:Int, byteLength bl:Int, byteOffset bo:Int) {
+    public init(buffer b: Int, byteLength bl: Int, byteOffset bo: Int) {
         buffer = b
         byteLength = bl
         byteOffset = bo
-    } 
-    
+    }
+
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         buffer = try container.decode(Int.self, forKey: .buffer)

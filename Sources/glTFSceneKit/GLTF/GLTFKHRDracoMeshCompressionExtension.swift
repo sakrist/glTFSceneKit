@@ -9,26 +9,25 @@
 
 import Foundation
 
-
 /// Class template
 @objcMembers
-open class GLTFKHRDracoMeshCompressionExtension : NSObject, Codable {
+open class GLTFKHRDracoMeshCompressionExtension: NSObject, Codable {
     /// A dictionary object, where each key corresponds to an attribute and its unique attribute id stored in the compressed geometry.
-    public var attributes:[String: Int]
+    public var attributes: [String: Int]
 
     /// The index of the bufferView.
-    public var bufferView:Int
+    public var bufferView: Int
 
     private enum CodingKeys: String, CodingKey {
         case attributes
         case bufferView
     }
 
-    public init(attributes a:[String: Int], bufferView bv:Int) {
+    public init(attributes a: [String: Int], bufferView bv: Int) {
         attributes = a
         bufferView = bv
     }
-    
+
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         attributes = try container.decode([String: Int].self, forKey: .attributes)

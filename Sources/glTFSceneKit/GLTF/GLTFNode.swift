@@ -9,45 +9,44 @@
 
 import Foundation
 
-
 /// A node in the node hierarchy.  When the node contains `skin`, all `mesh.primitives` must contain `JOINTS_0` and `WEIGHTS_0` attributes.  A node can have either a `matrix` or any combination of `translation`/`rotation`/`scale` (TRS) properties. TRS properties are converted to matrices and postmultiplied in the `T * R * S` order to compose the transformation matrix; first the scale is applied to the vertices, then the rotation, and then the translation. If none are provided, the transform is the identity. When a node is targeted for animation (referenced by an animation.channel.target), only TRS properties may be present; `matrix` will not be present.
 @objcMembers
-open class GLTFNode : NSObject, Codable {
+open class GLTFNode: NSObject, Codable {
     /// The index of the camera referenced by this node.
-    public var camera:Int?
+    public var camera: Int?
 
     /// The indices of this node's children.
-    public var children:[Int]?
+    public var children: [Int]?
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// A floating-point 4x4 transformation matrix stored in column-major order.
-    public var matrix:[Double]
+    public var matrix: [Double]
 
     /// The index of the mesh in this node.
-    public var mesh:Int?
+    public var mesh: Int?
 
     /// The user-defined name of this object.
-    public var name:String?
+    public var name: String?
 
     /// The node's unit quaternion rotation in the order (x, y, z, w), where w is the scalar.
-    public var rotation:[Double]
+    public var rotation: [Double]
 
     /// The node's non-uniform scale, given as the scaling factors along the x, y, and z axes.
-    public var scale:[Double]
+    public var scale: [Double]
 
     /// The index of the skin referenced by this node.
-    public var skin:Int?
+    public var skin: Int?
 
     /// The node's translation along the x, y, and z axes.
-    public var translation:[Double]
+    public var translation: [Double]
 
     /// The weights of the instantiated Morph Target. Number of elements must match number of Morph Targets of used mesh.
-    public var weights:[Double]?
+    public var weights: [Double]?
 
     private enum CodingKeys: String, CodingKey {
         case camera
@@ -63,7 +62,7 @@ open class GLTFNode : NSObject, Codable {
         case translation
         case weights
     }
-    
+
     public override init() {
         matrix = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
         rotation = [0, 0, 0, 1]

@@ -9,25 +9,24 @@
 
 import Foundation
 
-
 /// A buffer points to binary geometry, animation, or skins.
 @objcMembers
-open class GLTFBuffer : NSObject, Codable {
+open class GLTFBuffer: NSObject, Codable {
     /// The length of the buffer in bytes.
-    public var byteLength:Int
+    public var byteLength: Int
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The user-defined name of this object.
-    public var name:String?
+    public var name: String?
 
     /// The uri of the buffer.
-    public var uri:String?
-    
+    public var uri: String?
+
     private enum CodingKeys: String, CodingKey {
         case byteLength
         case extensions
@@ -35,7 +34,7 @@ open class GLTFBuffer : NSObject, Codable {
         case name
         case uri
     }
-    
+
     public override init() {
         byteLength = 0
     }

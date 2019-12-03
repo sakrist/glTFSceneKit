@@ -15,11 +15,11 @@ extension GLTFConverter {
             for animation in animations {
                 for channel in animation.channels {
                     let sampler = animation.samplers[channel.sampler]
-                    try constructAnimation(sampler: sampler, target:channel.target)
+                    try constructAnimation(sampler: sampler, target: channel.target)
                 }
             }
         }
-        
+
         for node in self.cache_nodes! {
             let group = node?.value(forUndefinedKey: "group") as? CAAnimationGroup
             if group != nil && self.animationDuration != 0 {
@@ -27,9 +27,9 @@ extension GLTFConverter {
             }
         }
     }
-    
-    func constructAnimation(sampler:GLTFAnimationSampler, target:GLTFAnimationChannelTarget ) throws {
-        
+
+    func constructAnimation(sampler: GLTFAnimationSampler, target: GLTFAnimationChannelTarget ) throws {
+
 //        let targetIndex = target.node!
 //        guard let node:SCNNode = self.cache_nodes?[targetIndex] else {
 //            throw GLTFError("constructAnimation: Can't find target node with \(targetIndex), sampler:\(sampler) target:\(target)")
@@ -118,50 +118,50 @@ extension GLTFConverter {
 //        group.repeatCount = .infinity
 //        node.addAnimation(group, forKey: target.path.rawValue)
     }
-    
-    func loadSkin(_ skin:Int, _ scnNode:SCNNode) {
+
+    func loadSkin(_ skin: Int, _ scnNode: SCNNode) {
         // TODO: implement
     }
-    
-    func dataAsArray(_ data:Data, _ componentType:GLTFAccessorComponentType, _ type:GLTFAccessorType) -> [Any] {
+
+    func dataAsArray(_ data: Data, _ componentType: GLTFAccessorComponentType, _ type: GLTFAccessorType) -> [Any] {
         var values = [Any]()
         switch componentType {
         case .BYTE:
             values = data.array() as [Int8]
-            break
+
         case .UNSIGNED_BYTE:
             values = data.array() as [UInt8]
-            break
+
         case .SHORT:
             values = data.array() as [Int16]
-            break
+
         case .UNSIGNED_SHORT:
             values = data.array() as [UInt16]
-            break
+
         case .UNSIGNED_INT:
             values = data.array() as [UInt32]
-            break
-        case .FLOAT: 
+
+        case .FLOAT:
             do {
                 switch type {
                 case .SCALAR:
                     values = data.array() as [Float]
-                    break
+
                 case .VEC2:
                     values = data.array() as [SCNVector2]
-                    break
+
                 case .VEC3:
                     values = data.array() as [GLKVector3]
                     for i in 0..<values.count {
                         values[i] = SCNVector3FromGLKVector3(values[i] as! GLKVector3)
                     }
-                    break
+
                 case .VEC4:
                     values = data.array() as [GLKVector4]
                     for i in 0..<values.count {
                         values[i] = SCNVector4FromGLKVector4(values[i] as! GLKVector4)
                     }
-                    break
+
                 case .MAT2:
                     break
                 case .MAT3:
@@ -171,16 +171,15 @@ extension GLTFConverter {
                     for i in 0..<values.count {
                         values[i] = SCNMatrix4FromGLKMatrix4(values[i] as! GLKMatrix4)
                     }
-                    break
+
                 }
             }
-            break
+
         }
         return values
     }
-    
-}
 
+}
 
 extension GLTFAnimationChannelTargetPath {
     fileprivate func scn() -> String {
@@ -196,5 +195,3 @@ extension GLTFAnimationChannelTargetPath {
         }
     }
 }
-
-

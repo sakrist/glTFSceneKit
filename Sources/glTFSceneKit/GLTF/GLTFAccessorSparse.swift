@@ -9,24 +9,23 @@
 
 import Foundation
 
-
 /// Sparse storage of attributes that deviate from their initialization value.
 @objcMembers
-open class GLTFAccessorSparse : NSObject, Codable {
+open class GLTFAccessorSparse: NSObject, Codable {
     /// Number of entries stored in the sparse array.
-    public var count:Int
+    public var count: Int
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// Indices of those attributes that deviate from their initialization value.
-    public var indices:GLTFAccessorSparseIndices
+    public var indices: GLTFAccessorSparseIndices
 
     /// Array of size `accessor.sparse.count` times number of components storing the displaced accessor attributes pointed by `accessor.sparse.indices`.
-    public var values:GLTFAccessorSparseValues
+    public var values: GLTFAccessorSparseValues
 
     private enum CodingKeys: String, CodingKey {
         case count

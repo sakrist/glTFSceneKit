@@ -17,19 +17,17 @@ let compressedTextureExtensionKey = "3D4M_compressed_texture"
 let meshExtensionKey = "3D4M_mesh"
 let supportedExtensions = [dracoExtensionKey, compressedTextureExtensionKey, meshExtensionKey]
 
-
-struct ConvertionProgressMask : OptionSet {
+struct ConvertionProgressMask: OptionSet {
     let rawValue: Int
-    
+
     static let nodes  = ConvertionProgressMask(rawValue: 1 << 1)
     static let textures = ConvertionProgressMask(rawValue: 1 << 2)
     static let animations  = ConvertionProgressMask(rawValue: 1 << 3)
-    
+
     static func all() -> ConvertionProgressMask {
         return [.nodes, .textures, .animations]
     }
 }
-
 
 @objc public protocol SceneLoadingDelegate {
     @objc optional func scene(_ didLoadScene: SCNScene? )
@@ -39,13 +37,13 @@ struct ConvertionProgressMask : OptionSet {
 }
 
 extension GLTF {
-        
+
     struct Keys {
         static var resource_loader = "resource_loader"
         static var load_canceled = "load_canceled"
     }
-    
-    public var loader:GLTFResourceLoader {
+
+    public var loader: GLTFResourceLoader {
         get {
             var loader_ = objc_getAssociatedObject(self, &Keys.resource_loader) as? GLTFResourceLoader
             if loader_ != nil {
@@ -57,34 +55,34 @@ extension GLTF {
         }
         set { objc_setAssociatedObject(self, &Keys.resource_loader, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
-    
+
     /// Status set to true if `cancel` been call.
-    @objc open private(set) var isCancelled:Bool {
+    @objc open private(set) var isCancelled: Bool {
         get { return (objc_getAssociatedObject(self, &Keys.load_canceled) as? Bool) ?? false }
         set { objc_setAssociatedObject(self, &Keys.load_canceled, newValue, .OBJC_ASSOCIATION_ASSIGN) }
     }
-    
+
     internal func cancel() {
         self.isCancelled = true
         self.loader.cancelAll()
     }
-    
+
     internal func clearCache() {
         if self.buffers != nil {
             for buffer in self.buffers! {
                 buffer.data = nil
             }
         }
-        
+
         if self.images != nil {
             for image in self.images! {
                 image.image = nil
             }
         }
     }
-    
+
     // convert attributes name to SceneKit semantic
-    internal static func sourceSemantic(name:String) -> SCNGeometrySource.Semantic {
+    internal static func sourceSemantic(name: String) -> SCNGeometrySource.Semantic {
         switch name {
         case "POSITION":
             return .vertex
@@ -104,11 +102,11 @@ extension GLTF {
             return .vertex
         }
     }
-    
-    internal static func requestData(glTF: GLTF, bufferView:GLTFBufferView) throws -> Data? {
+
+    internal static func requestData(glTF: GLTF, bufferView: GLTFBufferView) throws -> Data? {
         if let buffer = glTF.buffers?[bufferView.buffer] {
-            
-            if let data = try glTF.loader.load(gltf:glTF, resource: buffer) {
+
+            if let data = try glTF.loader.load(gltf: glTF, resource: buffer) {
                 return data
             }
         } else {
@@ -116,8 +114,8 @@ extension GLTF {
         }
         return nil
     }
-    
-    internal static func requestData(glTF: GLTF, bufferView:Int) throws -> (GLTFBufferView, Data)? {
+
+    internal static func requestData(glTF: GLTF, bufferView: Int) throws -> (GLTFBufferView, Data)? {
         if let bufferView = glTF.bufferViews?[bufferView] {
             if let data = try requestData(glTF: glTF, bufferView: bufferView) {
                 return (bufferView, data)
@@ -127,24 +125,24 @@ extension GLTF {
         }
         return nil
     }
-    
+
 }
 
 extension GLTFBuffer {
-    
+
     static var data_associate_key = "data_associate_key"
-    
-    public var data:Data? {
+
+    public var data: Data? {
         get { return objc_getAssociatedObject(self, &GLTFBuffer.data_associate_key) as? Data }
         set { objc_setAssociatedObject(self, &GLTFBuffer.data_associate_key, newValue, .OBJC_ASSOCIATION_RETAIN) }
     }
 }
 
 extension GLTFImage {
-    
+
     static var image_associate_key = "image_associate_key"
-    
-    public var image:OSImage? {
+
+    public var image: OSImage? {
         get { return objc_getAssociatedObject(self, &GLTFImage.image_associate_key) as? OSImage }
         set { objc_setAssociatedObject(self, &GLTFImage.image_associate_key, newValue, .OBJC_ASSOCIATION_RETAIN) }
     }

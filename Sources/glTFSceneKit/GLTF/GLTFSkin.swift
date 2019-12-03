@@ -9,27 +9,26 @@
 
 import Foundation
 
-
 /// Joints and matrices defining a skin.
 @objcMembers
-open class GLTFSkin : NSObject, Codable {
+open class GLTFSkin: NSObject, Codable {
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The index of the accessor containing the floating-point 4x4 inverse-bind matrices.  The default is that each matrix is a 4x4 identity matrix, which implies that inverse-bind matrices were pre-applied.
-    public var inverseBindMatrices:Int?
+    public var inverseBindMatrices: Int?
 
     /// Indices of skeleton nodes, used as joints in this skin.
-    public var joints:[Int]
+    public var joints: [Int]
 
     /// The user-defined name of this object.
-    public var name:String?
+    public var name: String?
 
     /// The index of the node used as a skeleton root. When undefined, joints transforms resolve to scene root.
-    public var skeleton:Int?
+    public var skeleton: Int?
 
     private enum CodingKeys: String, CodingKey {
         case extensions

@@ -9,27 +9,26 @@
 
 import Foundation
 
-
 /// Metadata about the glTF asset.
 @objcMembers
-open class GLTFAsset : NSObject, Codable {
+open class GLTFAsset: NSObject, Codable {
     /// A copyright message suitable for display to credit the content creator.
-    public var copyright:String?
+    public var copyright: String?
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// Tool that generated this glTF model.  Useful for debugging.
-    public var generator:String?
+    public var generator: String?
 
     /// The minimum glTF version that this asset targets.
-    public var minVersion:String?
+    public var minVersion: String?
 
     /// The glTF version that this asset targets.
-    public var version:String
+    public var version: String
 
     private enum CodingKeys: String, CodingKey {
         case copyright
@@ -39,8 +38,8 @@ open class GLTFAsset : NSObject, Codable {
         case minVersion
         case version
     }
-    
-    public init(version v:String) {
+
+    public init(version v: String) {
         version = v
     }
 
