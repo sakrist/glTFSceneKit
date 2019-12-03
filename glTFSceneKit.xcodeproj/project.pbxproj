@@ -56,8 +56,6 @@
 		D287556E2077CB1B009B7FA9 /* GLTF+CompressedTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */; };
 		D287E3F5209602EB00EBCFD1 /* TextureStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287E3F4209602EB00EBCFD1 /* TextureStorageManager.swift */; };
 		D287E3F6209602EB00EBCFD1 /* TextureStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287E3F4209602EB00EBCFD1 /* TextureStorageManager.swift */; };
-		D2A67C0320ADB92F007523AF /* libdraco.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2A67C0220ADB92F007523AF /* libdraco.a */; };
-		D2A67C0520ADB93E007523AF /* libdraco_ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2A67C0420ADB93E007523AF /* libdraco_ios.a */; };
 		D2AC651E205D578B0091D5E0 /* GLTF_3D4MCompressedTextureExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AC651D205D578A0091D5E0 /* GLTF_3D4MCompressedTextureExtension.swift */; };
 		D2AFCFC0208F1DE00048A9DA /* GLTF+Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AFCFBF208F1DE00048A9DA /* GLTF+Animation.swift */; };
 		D2AFCFC1208F1DE00048A9DA /* GLTF+Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2AFCFBF208F1DE00048A9DA /* GLTF+Animation.swift */; };
@@ -104,7 +102,6 @@
 		D2B06503214FE0CC00309D6F /* GLTFTextureInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* GLTFTextureInfo.swift */; };
 		D2B06504214FE0CC00309D6F /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_39 /* Helper.swift */; };
 		D2B06509214FE0CC00309D6F /* glTFSceneKit-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = D2A67C0B20ADB9D0007523AF /* glTFSceneKit-Bridging-Header.h */; };
-		D2B0651F214FEC7200309D6F /* libdraco_tvos.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D2B0651E214FEC7200309D6F /* libdraco_tvos.a */; };
 		OBJ_58 /* gltf_scenekitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_42 /* gltf_scenekitTests.swift */; };
 		OBJ_60 /* glTFSceneKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "gltf_scenekit::gltf_scenekit::Product" /* glTFSceneKit.framework */; };
 		OBJ_67 /* GLTF+SceneKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* GLTF+SceneKit.swift */; };
@@ -239,7 +236,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				D2A67C0520ADB93E007523AF /* libdraco_ios.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -247,7 +243,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				D2B0651F214FEC7200309D6F /* libdraco_tvos.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -263,7 +258,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				D2A67C0320ADB92F007523AF /* libdraco.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -748,7 +742,6 @@
 		D2750D112077B7AC00F6198D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				BITCODE_GENERATION_MODE = bitcode;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
@@ -793,7 +786,6 @@
 		D2750D122077B7AC00F6198D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Manual;
@@ -1081,7 +1073,6 @@
 		OBJ_64 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
@@ -1116,7 +1107,6 @@
 		OBJ_65 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
