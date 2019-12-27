@@ -211,6 +211,7 @@ extension OSImage {
 
 }
 
+@available(OSX 10.12, iOS 10.0, *)
 extension MTLPixelFormat {
     public func hasAlpha() -> Bool {
         switch self {
@@ -226,12 +227,14 @@ extension MTLPixelFormat {
     }
 }
 
+@available(OSX 10.12, iOS 10.0, *)
 extension SCNMaterial {
     public func hasAlpha() -> Bool {
         return (diffuse.contents as? MTLTexture)?.pixelFormat.hasAlpha() ?? false
     }
 }
 
+@available(OSX 10.12, iOS 10.0, *)
 class MetalDevice {
     static var device = {
         return MTLCreateSystemDefaultDevice()

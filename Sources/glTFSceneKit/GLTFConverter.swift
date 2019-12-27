@@ -8,6 +8,7 @@
 import SceneKit
 import os
 
+@available(OSX 10.12, iOS 10.0, *)
 public class GLTFConverter: TextureLoaderDelegate {
 
     /// Status will be true if `cancel` was call.

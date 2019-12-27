@@ -8,6 +8,7 @@
 import Foundation
 import SceneKit
 
+@available(OSX 10.12, iOS 10.0, *)
 extension GLTFConverter {
 
     func parseAnimations() throws {

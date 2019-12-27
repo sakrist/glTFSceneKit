@@ -53,6 +53,7 @@ class TextureAssociator {
     }
 }
 
+@available(OSX 10.12, iOS 10.0, *)
 class TextureStorageManager {
 
     static let manager = TextureStorageManager()
