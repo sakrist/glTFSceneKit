@@ -149,30 +149,29 @@ import Foundation
     }
 }
 
-
 /// Texture sampler properties for filtering and wrapping modes.
 @objcMembers
-open class GLTFSampler : NSObject, Codable {
+open class GLTFSampler: NSObject, Codable {
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// Magnification filter.
-    public var magFilter:GLTFSamplerMagFilter?
+    public var magFilter: GLTFSamplerMagFilter?
 
     /// Minification filter.
-    public var minFilter:GLTFSamplerMinFilter?
+    public var minFilter: GLTFSamplerMinFilter?
 
     /// The user-defined name of this object.
-    public var name:String?
+    public var name: String?
 
     /// s wrapping mode.
-    public var wrapS:GLTFSamplerWrapS
+    public var wrapS: GLTFSamplerWrapS
 
     /// t wrapping mode.
-    public var wrapT:GLTFSamplerWrapT
+    public var wrapT: GLTFSamplerWrapT
 
     private enum CodingKeys: String, CodingKey {
         case extensions
@@ -184,11 +183,11 @@ open class GLTFSampler : NSObject, Codable {
         case wrapT
     }
 
-    public init(wrapS s:GLTFSamplerWrapS, wrapT t:GLTFSamplerWrapT) {
+    public init(wrapS s: GLTFSamplerWrapS, wrapT t: GLTFSamplerWrapT) {
         wrapS = s
         wrapT = t
     }
-    
+
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         extensions = try? container.decode([String: Any].self, forKey: .extensions)

@@ -35,27 +35,26 @@ import Foundation
 
 }
 
-
 /// A camera's projection.  A node can reference a camera to apply a transform to place the camera in the scene.
 @objcMembers
-open class GLTFCamera : NSObject, Codable {
+open class GLTFCamera: NSObject, Codable {
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The user-defined name of this object.
-    public var name:String?
+    public var name: String?
 
     /// An orthographic camera containing properties to create an orthographic projection matrix.
-    public var orthographic:GLTFCameraOrthographic?
+    public var orthographic: GLTFCameraOrthographic?
 
     /// A perspective camera containing properties to create a perspective projection matrix.
-    public var perspective:GLTFCameraPerspective?
+    public var perspective: GLTFCameraPerspective?
 
     /// Specifies if the camera uses a perspective or orthographic projection.
-    public var type:GLTFCameraType
+    public var type: GLTFCameraType
 
     private enum CodingKeys: String, CodingKey {
         case extensions

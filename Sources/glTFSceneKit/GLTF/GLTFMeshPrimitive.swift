@@ -63,30 +63,29 @@ import Foundation
     }
 }
 
-
 /// Geometry to be rendered with the given material.
 @objcMembers
-open class GLTFMeshPrimitive : NSObject, Codable {
+open class GLTFMeshPrimitive: NSObject, Codable {
     /// A dictionary object, where each key corresponds to mesh attribute semantic and each value is the index of the accessor containing attribute's data.
-    public var attributes:[String: Int]
+    public var attributes: [String: Int]
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The index of the accessor that contains the indices.
-    public var indices:Int?
+    public var indices: Int?
 
     /// The index of the material to apply to this primitive when rendering.
-    public var material:Int?
+    public var material: Int?
 
     /// The type of primitives to render.
-    public var mode:GLTFMeshPrimitiveMode
+    public var mode: GLTFMeshPrimitiveMode
 
     /// An array of Morph Targets, each  Morph Target is a dictionary mapping attributes (only `POSITION`, `NORMAL`, and `TANGENT` supported) to their deviations in the Morph Target.
-    public var targets:[[String: Int]]?
+    public var targets: [[String: Int]]?
 
     private enum CodingKeys: String, CodingKey {
         case attributes
@@ -97,16 +96,18 @@ open class GLTFMeshPrimitive : NSObject, Codable {
         case mode
         case targets
     }
-    
-    public init(attributes a:[String: Int], mode m:GLTFMeshPrimitiveMode) {
+
+    public init(attributes a: [String: Int], mode m: GLTFMeshPrimitiveMode) {
         attributes = a
         mode = m
     }
 
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        attributes = (try? container.decode([String: Int].self, forKey: .attributes)) ?? [String: Int]() 
+        attributes = (try? container.decode([String: Int].self, forKey: .attributes)) ?? [String: Int]()
+        #if DRACO
         extensions = try? container.decode([String: GLTFKHRDracoMeshCompressionExtension].self, forKey: .extensions)
+        #endif
         extras = try? container.decode([String: Any].self, forKey: .extras)
         indices = try? container.decode(Int.self, forKey: .indices)
         material = try? container.decode(Int.self, forKey: .material)
@@ -121,16 +122,19 @@ open class GLTFMeshPrimitive : NSObject, Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(attributes, forKey: .attributes)
+        #if DRACO
         try? container.encode(extensions as? [String: GLTFKHRDracoMeshCompressionExtension], forKey: .extensions)
+        #endif
         try container.encode(extras, forKey: .extras)
         try container.encode(indices, forKey: .indices)
         try container.encode(material, forKey: .material)
         try container.encode(mode, forKey: .mode)
         try container.encode(targets, forKey: .targets)
     }
-    
+
 }
 
+#if DRACO
 extension KeyedEncodingContainerProtocol {
     mutating func encode(_ value: [String: GLTFKHRDracoMeshCompressionExtension]?, forKey key: Key) throws {
         if value != nil {
@@ -139,4 +143,4 @@ extension KeyedEncodingContainerProtocol {
         }
     }
 }
-
+#endif

@@ -45,21 +45,20 @@ import Foundation
 
 }
 
-
 /// The index of the node and TRS property that an animation channel targets.
 @objcMembers
-open class GLTFAnimationChannelTarget : NSObject, Codable {
+open class GLTFAnimationChannelTarget: NSObject, Codable {
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The index of the node to target.
-    public var node:Int?
+    public var node: Int?
 
     /// The name of the node's TRS property to modify, or the "weights" of the Morph Targets it instantiates. For the "translation" property, the values that are provided by the sampler are the translation along the x, y, and z axes. For the "rotation" property, the values are a quaternion in the order (x, y, z, w), where w is the scalar. For the "scale" property, the values are the scaling factors along the x, y, and z axes.
-    public var path:GLTFAnimationChannelTargetPath
+    public var path: GLTFAnimationChannelTargetPath
 
     private enum CodingKeys: String, CodingKey {
         case extensions

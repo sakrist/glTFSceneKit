@@ -9,21 +9,20 @@
 
 import Foundation
 
-
 /// The root nodes of a scene.
 @objcMembers
-open class GLTFScene : NSObject, Codable {
+open class GLTFScene: NSObject, Codable {
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The user-defined name of this object.
-    public var name:String?
+    public var name: String?
 
     /// The indices of each root node.
-    public var nodes:[Int]?
+    public var nodes: [Int]?
 
     private enum CodingKeys: String, CodingKey {
         case extensions
@@ -31,7 +30,7 @@ open class GLTFScene : NSObject, Codable {
         case name
         case nodes
     }
-    
+
     public override init() {}
 
     required public init(from decoder: Decoder) throws {

@@ -9,30 +9,29 @@
 
 import Foundation
 
-
 /// A set of parameter values that are used to define the metallic-roughness material model from Physically-Based Rendering (PBR) methodology.
 @objcMembers
-open class GLTFMaterialPBRMetallicRoughness : NSObject, Codable {
+open class GLTFMaterialPBRMetallicRoughness: NSObject, Codable {
     /// The material's base color factor.
-    public var baseColorFactor:[Double]
+    public var baseColorFactor: [Double]
 
     /// Reference to a texture.
-    public var baseColorTexture:GLTFTextureInfo?
+    public var baseColorTexture: GLTFTextureInfo?
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The metalness of the material.
-    public var metallicFactor:Double
+    public var metallicFactor: Double
 
     /// Reference to a texture.
-    public var metallicRoughnessTexture:GLTFTextureInfo?
+    public var metallicRoughnessTexture: GLTFTextureInfo?
 
     /// The roughness of the material.
-    public var roughnessFactor:Double
+    public var roughnessFactor: Double
 
     private enum CodingKeys: String, CodingKey {
         case baseColorFactor
@@ -49,7 +48,7 @@ open class GLTFMaterialPBRMetallicRoughness : NSObject, Codable {
         metallicFactor = 1
         roughnessFactor = 1
     }
-    
+
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         do {

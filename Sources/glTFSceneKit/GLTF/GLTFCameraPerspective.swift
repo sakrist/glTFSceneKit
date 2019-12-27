@@ -9,27 +9,26 @@
 
 import Foundation
 
-
 /// A perspective camera containing properties to create a perspective projection matrix.
 @objcMembers
-open class GLTFCameraPerspective : NSObject, Codable {
+open class GLTFCameraPerspective: NSObject, Codable {
     /// The floating-point aspect ratio of the field of view.
-    public var aspectRatio:Double?
+    public var aspectRatio: Double?
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The floating-point vertical field of view in radians.
-    public var yfov:Double
+    public var yfov: Double
 
     /// The floating-point distance to the far clipping plane.
-    public var zfar:Double?
+    public var zfar: Double?
 
     /// The floating-point distance to the near clipping plane.
-    public var znear:Double
+    public var znear: Double
 
     private enum CodingKeys: String, CodingKey {
         case aspectRatio

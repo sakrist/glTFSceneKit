@@ -344,23 +344,22 @@ public enum GLTF_3D4MCompressedTextureExtensionTarget: Int, RawRepresentable, Co
     }
 }
 
-
 /// Class template
-open class GLTF_3D4MCompressedTextureExtension : Codable {
+open class GLTF_3D4MCompressedTextureExtension: Codable {
     /// Compression type.
-    public var compression:GLTF_3D4MCompressedTextureExtensionCompression
+    public var compression: GLTF_3D4MCompressedTextureExtensionCompression
 
     /// Texture width size in pixels.
-    public var width:Int
+    public var width: Int
 
     /// Texture height size in pixels.
-    public var height:Int
+    public var height: Int
 
     /// Texture index of bufferView used for each level of texture. First source representing level 0. Each next is divide by 2 of previous texture size. For example 0 level is 1024, next is 512 and next 256 ans so on.
-    public var sources:[Int]
+    public var sources: [Int]
 
     /// Texture 2D target.
-    public var target:GLTF_3D4MCompressedTextureExtensionTarget
+    public var target: GLTF_3D4MCompressedTextureExtensionTarget
 
     private enum CodingKeys: String, CodingKey {
         case compression
@@ -370,18 +369,18 @@ open class GLTF_3D4MCompressedTextureExtension : Codable {
         case width
     }
 
-    public init(compression c:GLTF_3D4MCompressedTextureExtensionCompression, 
-                width w:Int,
-                height h:Int,
-                sources s:[Int],
-                target t:GLTF_3D4MCompressedTextureExtensionTarget) {
-        compression = c 
+    public init(compression c: GLTF_3D4MCompressedTextureExtensionCompression,
+                width w: Int,
+                height h: Int,
+                sources s: [Int],
+                target t: GLTF_3D4MCompressedTextureExtensionTarget) {
+        compression = c
         width = w
         height = h
         sources = s
         target = t
-    } 
-    
+    }
+
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         compression = try container.decode(GLTF_3D4MCompressedTextureExtensionCompression.self, forKey: .compression)

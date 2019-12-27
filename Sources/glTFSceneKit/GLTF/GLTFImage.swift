@@ -35,28 +35,27 @@ import Foundation
 
 }
 
-
 /// Image data used to create a texture. Image can be referenced by URI or `bufferView` index. `mimeType` is required in the latter case.
 @objcMembers
-open class GLTFImage : NSObject, Codable {
+open class GLTFImage: NSObject, Codable {
     /// The index of the bufferView that contains the image. Use this instead of the image's uri property.
-    public var bufferView:Int?
+    public var bufferView: Int?
 
     /// Dictionary object with extension-specific objects.
-    public var extensions:[String: Any]?
+    public var extensions: [String: Any]?
 
     /// Application-specific data.
-    public var extras:[String: Any]?
+    public var extras: [String: Any]?
 
     /// The image's MIME type.
-    public var mimeType:GLTFImageMimeType?
+    public var mimeType: GLTFImageMimeType?
 
     /// The user-defined name of this object.
-    public var name:String?
+    public var name: String?
 
     /// The uri of the image.
-    public var uri:String?
-    
+    public var uri: String?
+
     private enum CodingKeys: String, CodingKey {
         case bufferView
         case extensions
@@ -67,7 +66,7 @@ open class GLTFImage : NSObject, Codable {
     }
 
     public override init() { }
-    
+
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         bufferView = try? container.decode(Int.self, forKey: .bufferView)
