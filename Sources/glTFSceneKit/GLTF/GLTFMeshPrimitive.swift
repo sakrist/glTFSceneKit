@@ -134,6 +134,7 @@ open class GLTFMeshPrimitive: NSObject, Codable {
 
 }
 
+#if DRACO
 extension KeyedEncodingContainerProtocol {
     mutating func encode(_ value: [String: GLTFKHRDracoMeshCompressionExtension]?, forKey key: Key) throws {
         if value != nil {
@@ -142,3 +143,4 @@ extension KeyedEncodingContainerProtocol {
         }
     }
 }
+#endif

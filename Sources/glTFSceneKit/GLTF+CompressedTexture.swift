@@ -13,6 +13,8 @@ enum CTLevel: Int {
     case last
     case all
 }
+
+@available(OSX 10.12, iOS 10.0, *)
 extension GLTF {
 
     func loadCompressedTexture(descriptor: GLTF_3D4MCompressedTextureExtension, loadLevel: CTLevel, completionHandler: @escaping (Any?, Error?) -> Void ) {

@@ -10,11 +10,6 @@
 		49A51D192345E8BB002B5D24 /* GLTFConverter+Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A51D182345E8BB002B5D24 /* GLTFConverter+Geometry.swift */; };
 		49A51D1A2345E8BB002B5D24 /* GLTFConverter+Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A51D182345E8BB002B5D24 /* GLTFConverter+Geometry.swift */; };
 		49A51D1B2345E8BB002B5D24 /* GLTFConverter+Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A51D182345E8BB002B5D24 /* GLTFConverter+Geometry.swift */; };
-		49A51D1C2345E8BB002B5D24 /* GLTFConverter+Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A51D182345E8BB002B5D24 /* GLTFConverter+Geometry.swift */; };
-		49A51D23234601B7002B5D24 /* GLTFConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A51D22234601B7002B5D24 /* GLTFConverter.swift */; };
-		49A51D24234601B7002B5D24 /* GLTFConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A51D22234601B7002B5D24 /* GLTFConverter.swift */; };
-		49A51D25234601B7002B5D24 /* GLTFConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A51D22234601B7002B5D24 /* GLTFConverter.swift */; };
-		49A51D26234601B7002B5D24 /* GLTFConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A51D22234601B7002B5D24 /* GLTFConverter.swift */; };
 		D2157142204035E3009E9D16 /* JSONCodingKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = D215713A20402611009E9D16 /* JSONCodingKeys.swift */; };
 		D256CD0620B2B9F1002E841E /* glTFSceneKit-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = D2A67C0B20ADB9D0007523AF /* glTFSceneKit-Bridging-Header.h */; };
 		D256CD0720B2B9F2002E841E /* glTFSceneKit-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = D2A67C0B20ADB9D0007523AF /* glTFSceneKit-Bridging-Header.h */; };
@@ -41,7 +36,6 @@
 		D2750D012077B7AC00F6198D /* GLTFMaterialOcclusionTextureInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_29 /* GLTFMaterialOcclusionTextureInfo.swift */; };
 		D2750D022077B7AC00F6198D /* GLTFMaterialPBRMetallicRoughness.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* GLTFMaterialPBRMetallicRoughness.swift */; };
 		D2750D032077B7AC00F6198D /* GLTFMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_31 /* GLTFMesh.swift */; };
-		D2750D042077B7AC00F6198D /* GLTFKHRDracoMeshCompressionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27BDF82203F0BEF0036F3A7 /* GLTFKHRDracoMeshCompressionExtension.swift */; };
 		D2750D052077B7AC00F6198D /* GLTFMeshPrimitive.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_32 /* GLTFMeshPrimitive.swift */; };
 		D2750D062077B7AC00F6198D /* GLTFNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_33 /* GLTFNode.swift */; };
 		D2750D072077B7AC00F6198D /* JSONCodingKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = D215713A20402611009E9D16 /* JSONCodingKeys.swift */; };
@@ -51,7 +45,6 @@
 		D2750D0B2077B7AC00F6198D /* GLTFTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_37 /* GLTFTexture.swift */; };
 		D2750D0C2077B7AC00F6198D /* GLTFTextureInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* GLTFTextureInfo.swift */; };
 		D2750D0D2077B7AC00F6198D /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_39 /* Helper.swift */; };
-		D27BDF83203F0BEF0036F3A7 /* GLTFKHRDracoMeshCompressionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27BDF82203F0BEF0036F3A7 /* GLTFKHRDracoMeshCompressionExtension.swift */; };
 		D287556D2077CB16009B7FA9 /* GLTF+CompressedTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */; };
 		D287556E2077CB1B009B7FA9 /* GLTF+CompressedTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */; };
 		D287E3F5209602EB00EBCFD1 /* TextureStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287E3F4209602EB00EBCFD1 /* TextureStorageManager.swift */; };
@@ -89,7 +82,6 @@
 		D2B064F5214FE0CC00309D6F /* GLTFMaterialOcclusionTextureInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_29 /* GLTFMaterialOcclusionTextureInfo.swift */; };
 		D2B064F6214FE0CC00309D6F /* GLTFMaterialPBRMetallicRoughness.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* GLTFMaterialPBRMetallicRoughness.swift */; };
 		D2B064F7214FE0CC00309D6F /* GLTFMesh.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_31 /* GLTFMesh.swift */; };
-		D2B064F8214FE0CC00309D6F /* GLTFKHRDracoMeshCompressionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27BDF82203F0BEF0036F3A7 /* GLTFKHRDracoMeshCompressionExtension.swift */; };
 		D2B064F9214FE0CC00309D6F /* GLTFMeshPrimitive.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_32 /* GLTFMeshPrimitive.swift */; };
 		D2B064FA214FE0CC00309D6F /* GLTFNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_33 /* GLTFNode.swift */; };
 		D2B064FB214FE0CC00309D6F /* GLTF+CompressedTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */; };
@@ -102,6 +94,9 @@
 		D2B06503214FE0CC00309D6F /* GLTFTextureInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_38 /* GLTFTextureInfo.swift */; };
 		D2B06504214FE0CC00309D6F /* Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_39 /* Helper.swift */; };
 		D2B06509214FE0CC00309D6F /* glTFSceneKit-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = D2A67C0B20ADB9D0007523AF /* glTFSceneKit-Bridging-Header.h */; };
+		D2C6215623B4F77E00EA739E /* GLTFConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A51D22234601B7002B5D24 /* GLTFConverter.swift */; };
+		D2C6215723B4F77F00EA739E /* GLTFConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A51D22234601B7002B5D24 /* GLTFConverter.swift */; };
+		D2C6215823B4F78000EA739E /* GLTFConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49A51D22234601B7002B5D24 /* GLTFConverter.swift */; };
 		OBJ_58 /* gltf_scenekitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_42 /* gltf_scenekitTests.swift */; };
 		OBJ_60 /* glTFSceneKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "gltf_scenekit::gltf_scenekit::Product" /* glTFSceneKit.framework */; };
 		OBJ_67 /* GLTF+SceneKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* GLTF+SceneKit.swift */; };
@@ -185,16 +180,12 @@
 		D27BDF82203F0BEF0036F3A7 /* GLTFKHRDracoMeshCompressionExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GLTFKHRDracoMeshCompressionExtension.swift; sourceTree = "<group>"; };
 		D287556B2077CABB009B7FA9 /* GLTF+CompressedTexture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GLTF+CompressedTexture.swift"; sourceTree = "<group>"; };
 		D287E3F4209602EB00EBCFD1 /* TextureStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextureStorageManager.swift; sourceTree = "<group>"; };
-		D2A67BFF20ADB91B007523AF /* Draco.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Draco.swift; path = Draco/Draco/Draco.swift; sourceTree = "<group>"; };
-		D2A67C0220ADB92F007523AF /* libdraco.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdraco.a; path = Draco/libdraco.a; sourceTree = "<group>"; };
-		D2A67C0420ADB93E007523AF /* libdraco_ios.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdraco_ios.a; path = Draco/libdraco_ios.a; sourceTree = "<group>"; };
 		D2A67C0B20ADB9D0007523AF /* glTFSceneKit-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "glTFSceneKit-Bridging-Header.h"; sourceTree = "<group>"; };
 		D2AC651D205D578A0091D5E0 /* GLTF_3D4MCompressedTextureExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GLTF_3D4MCompressedTextureExtension.swift; sourceTree = "<group>"; };
 		D2AFCFBF208F1DE00048A9DA /* GLTF+Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GLTF+Animation.swift"; sourceTree = "<group>"; };
 		D2AFCFC2208F2A010048A9DA /* GLTF+Material.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GLTF+Material.swift"; sourceTree = "<group>"; };
 		D2AFCFD1208F6F010048A9DA /* GLTFResourceLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFResourceLoader.swift; sourceTree = "<group>"; };
 		D2B0650D214FE0CC00309D6F /* glTFSceneKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = glTFSceneKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		D2B0651E214FEC7200309D6F /* libdraco_tvos.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdraco_tvos.a; path = Draco/libdraco_tvos.a; sourceTree = "<group>"; };
 		OBJ_11 /* GLTF.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTF.swift; sourceTree = "<group>"; };
 		OBJ_12 /* GLTFAccessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFAccessor.swift; sourceTree = "<group>"; };
 		OBJ_13 /* GLTFAccessorSparse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GLTFAccessorSparse.swift; sourceTree = "<group>"; };
@@ -267,9 +258,6 @@
 		D27BDF7B203DCE6E0036F3A7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				D2B0651E214FEC7200309D6F /* libdraco_tvos.a */,
-				D2A67C0420ADB93E007523AF /* libdraco_ios.a */,
-				D2A67C0220ADB92F007523AF /* libdraco.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -351,7 +339,6 @@
 			children = (
 				OBJ_6 /* Package.swift */,
 				D2A67C0B20ADB9D0007523AF /* glTFSceneKit-Bridging-Header.h */,
-				D2A67BFF20ADB91B007523AF /* Draco.swift */,
 				OBJ_7 /* Sources */,
 				OBJ_40 /* Tests */,
 				OBJ_43 /* Dependencies */,
@@ -501,6 +488,7 @@
 				LastUpgradeCheck = 1020;
 				TargetAttributes = {
 					D2750CEA2077B7AC00F6198D = {
+						LastSwiftMigration = 1130;
 						ProvisioningStyle = Manual;
 					};
 					D2B064DA214FE0CC00309D6F = {
@@ -601,7 +589,6 @@
 				D2750CFB2077B7AC00F6198D /* GLTFCamera.swift in Sources */,
 				D2AFCFD3208F6F010048A9DA /* GLTFResourceLoader.swift in Sources */,
 				D2750CFC2077B7AC00F6198D /* GLTFCameraOrthographic.swift in Sources */,
-				49A51D24234601B7002B5D24 /* GLTFConverter.swift in Sources */,
 				D2750CFD2077B7AC00F6198D /* GLTFCameraPerspective.swift in Sources */,
 				D2750CFE2077B7AC00F6198D /* GLTFImage.swift in Sources */,
 				D2750CFF2077B7AC00F6198D /* GLTFMaterial.swift in Sources */,
@@ -609,7 +596,7 @@
 				D2750D012077B7AC00F6198D /* GLTFMaterialOcclusionTextureInfo.swift in Sources */,
 				D2750D022077B7AC00F6198D /* GLTFMaterialPBRMetallicRoughness.swift in Sources */,
 				D2750D032077B7AC00F6198D /* GLTFMesh.swift in Sources */,
-				D2750D042077B7AC00F6198D /* GLTFKHRDracoMeshCompressionExtension.swift in Sources */,
+				D2C6215723B4F77F00EA739E /* GLTFConverter.swift in Sources */,
 				D2750D052077B7AC00F6198D /* GLTFMeshPrimitive.swift in Sources */,
 				D2750D062077B7AC00F6198D /* GLTFNode.swift in Sources */,
 				D287556E2077CB1B009B7FA9 /* GLTF+CompressedTexture.swift in Sources */,
@@ -648,7 +635,6 @@
 				D2B064EE214FE0CC00309D6F /* GLTFCamera.swift in Sources */,
 				D2B064EF214FE0CC00309D6F /* GLTFResourceLoader.swift in Sources */,
 				D2B064F0214FE0CC00309D6F /* GLTFCameraOrthographic.swift in Sources */,
-				49A51D25234601B7002B5D24 /* GLTFConverter.swift in Sources */,
 				D2B064F1214FE0CC00309D6F /* GLTFCameraPerspective.swift in Sources */,
 				D2B064F2214FE0CC00309D6F /* GLTFImage.swift in Sources */,
 				D2B064F3214FE0CC00309D6F /* GLTFMaterial.swift in Sources */,
@@ -656,7 +642,7 @@
 				D2B064F5214FE0CC00309D6F /* GLTFMaterialOcclusionTextureInfo.swift in Sources */,
 				D2B064F6214FE0CC00309D6F /* GLTFMaterialPBRMetallicRoughness.swift in Sources */,
 				D2B064F7214FE0CC00309D6F /* GLTFMesh.swift in Sources */,
-				D2B064F8214FE0CC00309D6F /* GLTFKHRDracoMeshCompressionExtension.swift in Sources */,
+				D2C6215823B4F78000EA739E /* GLTFConverter.swift in Sources */,
 				D2B064F9214FE0CC00309D6F /* GLTFMeshPrimitive.swift in Sources */,
 				D2B064FA214FE0CC00309D6F /* GLTFNode.swift in Sources */,
 				D2B064FB214FE0CC00309D6F /* GLTF+CompressedTexture.swift in Sources */,
@@ -675,8 +661,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 0;
 			files = (
-				49A51D26234601B7002B5D24 /* GLTFConverter.swift in Sources */,
-				49A51D1C2345E8BB002B5D24 /* GLTFConverter+Geometry.swift in Sources */,
 				OBJ_58 /* gltf_scenekitTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -705,7 +689,6 @@
 				OBJ_80 /* GLTFCamera.swift in Sources */,
 				D2AFCFD2208F6F010048A9DA /* GLTFResourceLoader.swift in Sources */,
 				OBJ_81 /* GLTFCameraOrthographic.swift in Sources */,
-				49A51D23234601B7002B5D24 /* GLTFConverter.swift in Sources */,
 				OBJ_82 /* GLTFCameraPerspective.swift in Sources */,
 				OBJ_83 /* GLTFImage.swift in Sources */,
 				OBJ_84 /* GLTFMaterial.swift in Sources */,
@@ -713,7 +696,7 @@
 				OBJ_86 /* GLTFMaterialOcclusionTextureInfo.swift in Sources */,
 				OBJ_87 /* GLTFMaterialPBRMetallicRoughness.swift in Sources */,
 				OBJ_88 /* GLTFMesh.swift in Sources */,
-				D27BDF83203F0BEF0036F3A7 /* GLTFKHRDracoMeshCompressionExtension.swift in Sources */,
+				D2C6215623B4F77E00EA739E /* GLTFConverter.swift in Sources */,
 				OBJ_89 /* GLTFMeshPrimitive.swift in Sources */,
 				OBJ_90 /* GLTFNode.swift in Sources */,
 				D287556D2077CB16009B7FA9 /* GLTF+CompressedTexture.swift in Sources */,
@@ -749,19 +732,9 @@
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Draco",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Draco",
-				);
 				INFOPLIST_FILE = glTFSceneKit.xcodeproj/gltf_scenekit_ios_Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
-				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/Draco";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -776,7 +749,7 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "glTFSceneKit-Bridging-Header.h";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TARGET_NAME = glTFSceneKit;
 				VALID_ARCHS = arm64;
@@ -792,19 +765,9 @@
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Draco",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Draco",
-				);
 				INFOPLIST_FILE = glTFSceneKit.xcodeproj/gltf_scenekit_ios_Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
-				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/Draco";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -819,7 +782,7 @@
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_OBJC_BRIDGING_HEADER = "glTFSceneKit-Bridging-Header.h";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TARGET_NAME = glTFSceneKit;
 				VALID_ARCHS = arm64;
@@ -835,19 +798,9 @@
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Draco",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Draco",
-				);
 				INFOPLIST_FILE = glTFSceneKit.xcodeproj/glTFSceneKit_tvos.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
-				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/Draco";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -879,19 +832,9 @@
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_TESTABILITY = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Draco",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Draco",
-				);
 				INFOPLIST_FILE = glTFSceneKit.xcodeproj/glTFSceneKit_tvos.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
-				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/Draco";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -1016,27 +959,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/.build/checkouts/**",
-				);
 				INFOPLIST_FILE = glTFSceneKit.xcodeproj/gltf_scenekitTests_Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/.build/checkouts/**";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-lc++",
-					"-ldraco",
-				);
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_NAME = glTFSceneKitTests;
 				SWIFT_OBJC_BRIDGING_HEADER = "glTFSceneKit-Bridging-Header.h";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGET_NAME = gltf_scenekitTests;
 			};
 			name = Debug;
@@ -1045,27 +973,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/.build/checkouts/**",
-				);
 				INFOPLIST_FILE = glTFSceneKit.xcodeproj/gltf_scenekitTests_Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @loader_path/Frameworks";
-				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/.build/checkouts/**";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-lc++",
-					"-ldraco",
-				);
 				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_NAME = glTFSceneKitTests;
 				SWIFT_OBJC_BRIDGING_HEADER = "glTFSceneKit-Bridging-Header.h";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGET_NAME = gltf_scenekitTests;
 			};
 			name = Release;
@@ -1082,8 +995,7 @@
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = glTFSceneKit.xcodeproj/gltf_scenekit_Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/Draco";
+				LIBRARY_SEARCH_PATHS = "";
 				MACH_O_TYPE = mh_dylib;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (
@@ -1116,8 +1028,7 @@
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = glTFSceneKit.xcodeproj/gltf_scenekit_Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
-				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/Draco";
+				LIBRARY_SEARCH_PATHS = "";
 				MACH_O_TYPE = mh_dylib;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				OTHER_LDFLAGS = (

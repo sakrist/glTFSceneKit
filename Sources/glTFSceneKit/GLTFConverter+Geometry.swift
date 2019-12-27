@@ -24,6 +24,7 @@ extension GLTFMeshPrimitiveMode {
     }
 }
 
+@available(OSX 10.12, iOS 10.0, *)
 extension GLTFAccessor {
     public func components() -> Int {
         switch type {
@@ -131,6 +132,7 @@ fileprivate extension GLTF {
     }
 }
 
+@available(OSX 10.12, iOS 10.0, *)
 extension GLTFConverter {
 
     /// convert glTF mesh into SCNGeometry

@@ -10,6 +10,7 @@ import Foundation
 import SceneKit
 import os
 
+@available(OSX 10.12, iOS 10.0, *)
 let log_scenekit = OSLog(subsystem: "org.glTFSceneKit", category: "scene")
 
 let compressedTextureExtensionKey = "3D4M_compressed_texture"
@@ -40,6 +41,7 @@ struct ConvertionProgressMask: OptionSet {
     @objc optional func scene(_ scene: SCNScene?, didCreate material: SCNMaterial, for node: SCNNode)
 }
 
+@available(OSX 10.12, iOS 10.0, *)
 extension GLTF {
 
     struct Keys {

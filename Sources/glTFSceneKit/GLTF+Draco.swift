@@ -9,7 +9,7 @@ import Foundation
 import SceneKit
 
 // https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Khronos/KHR_draco_mesh_compression/README.md
-
+#if DRACO
 extension GLTF {
 
     func convertDracoMesh(_ dracoMesh: GLTFKHRDracoMeshCompressionExtension, triangleStrip: Bool = true) throws -> (SCNGeometryElement?, [SCNGeometrySource]?) {
@@ -103,3 +103,4 @@ extension GLTF {
         return (nil, nil)
     }
 }
+#endif

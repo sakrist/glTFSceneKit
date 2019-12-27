@@ -32,13 +32,9 @@
 
 
 #### Extensions 
- - [X] KHR_draco_mesh_compression - Draco (supported draft version, need to fix when indices is short)
+ - [ ] KHR_draco_mesh_compression - Draco (supported draft version, need rework. temporary disabled)
  - [X] 3D4M_compressed_texture - [Draft of unofficial extension.](https://github.com/sakrist/glTF/tree/extensions/compressed_texture/extensions/2.0/Vendor/3D4M_compressed_texture)  
  
-## Dependecies
- 
-  - [DracoSwiftPackage](https://github.com/3D4Medical/DracoSwiftPackage) - custom Draco package for decode   
-
 
 Example:
 ```swift
@@ -47,5 +43,12 @@ import glTFSceneKit
 let directory = "..." // path to folder where is gltf file located
 let decoder = JSONDecoder()
 let glTF = try? decoder.decode(GLTF.self, from: jsonData)
-let scene = glTF?.convert(view:sceneView, directoryPath:directory)
+if let converter = GLTFConverter(glTF: glTF) {
+    let scene = converter.convert(to: view.scene!, geometryCompletionHandler: { 
+    // Geometries are loaded and textures are may still in loading process.
+    }) { (error) in
+       // Fully converted to SceneKit
+       // TODO: handle error.
+    }
+}
 ```
